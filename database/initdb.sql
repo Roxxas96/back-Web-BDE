@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    surname VARCHAR(50) NOT NULL,
-    pseudo VARCHAR(50) NOT NULL,
+    name VARCHAR(50),
+    surname VARCHAR(50),
+    pseudo VARCHAR(50),
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(200) NOT NULL,
     isadmin BOOLEAN NOT NULL DEFAULT false
