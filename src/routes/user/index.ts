@@ -56,6 +56,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       throw fastify.httpErrors.badRequest("User password is too small");
     }
 
+    //Hash password
     let hashedPassword;
     try {
       hashedPassword = await bcrypt.hash(userInfo.password, 10);
@@ -64,6 +65,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       throw fastify.httpErrors.internalServerError("Password hash failed");
     }
 
+    //Create user in DB
     try {
       await fastify.prisma.users.create({
         data: {
@@ -108,6 +110,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       );
     }
 
+    //Hash password
     let hashedPassword;
     if (userInfo.password) {
       if (userInfo.password.length < 8) {
@@ -121,6 +124,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       }
     }
 
+    //Update user in DB
     try {
       await fastify.prisma.users.update({
         where: { id: parseInt(request.params.id) },

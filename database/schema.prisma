@@ -24,6 +24,6 @@ model users {
 model sessions {
   id          Int    @id @default(autoincrement())
   userid      Int
-  jwt         String
+  jwt         String @unique
   usersession users? @relation(fields: [userid], references: [id])
 }
