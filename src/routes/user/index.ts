@@ -62,19 +62,9 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     "/:id",
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
-      try {
-        await fastify.prisma.client.users.delete({
-          where: { id: parseInt(request.params.id) },
-        });
-      } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("User not found");
-          }
-        }
-        fastify.log.error(err);
-        throw fastify.httpErrors.internalServerError("Database fetch Error");
-      }
+
+      await fastify.prisma.user.deleteUser(request.params.id);
+
       return reply.status(200).send("User deleted");
     }
   );

@@ -82,6 +82,22 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
 
+      deleteUser: async function (userId: string) {
+        try {
+          await fastify.prisma.client.users.delete({
+            where: { id: parseInt(userId) },
+          });
+        } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Record to delete does not exist")) {
+              throw fastify.httpErrors.notFound("User not found");
+            }
+          }
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError("Database fetch Error");
+        }
+      },
+
       getUser: async function (userId: string) {
         let user;
         try {
@@ -189,6 +205,7 @@ declare module "fastify" {
       user: {
         updateUser: (userId: string, userInfo: userInfo) => Promise<void>;
         createUser: (userInfo: userInfo) => Promise<void>;
+        deleteUser: (userId: string) => Promise<void>;
         getUser: (userId: string) => Promise<users>;
         getUsers: () => Promise<users[]>;
         getUserByEMail: (email: string) => Promise<users>;
