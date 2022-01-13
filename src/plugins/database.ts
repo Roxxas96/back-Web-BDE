@@ -19,12 +19,15 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
   const client = new PrismaClient();
 
   //Try Database connection
-  try {
-    await client.$connect();
-    fastify.log.info("Database connected");
-  } catch (err) {
-    fastify.log.error(err);
-  }
+  const connectionInterval = setInterval(async () => {
+    try {
+      await client.$connect();
+      fastify.log.info("Database connected");
+      clearInterval(connectionInterval);
+    } catch (err) {
+      fastify.log.error(err);
+    }
+  }, 5000);
 
   //Disconnect Database on process exit
   fastify.addHook("onClose", async (fastify) => {
