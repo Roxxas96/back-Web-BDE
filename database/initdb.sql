@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     pseudo VARCHAR(50),
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(200) NOT NULL,
-    isadmin BOOLEAN NOT NULL DEFAULT false
+    privilege INTEGER DEFAULT 0
 )
 
 CREATE TABLE IF NOT EXISTS sessions (

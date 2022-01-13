@@ -12,7 +12,7 @@ export interface AuthenticationPluginOptions {
 // to export the decorators to the outer scope
 export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
   const auth = {
-    authorize: async (headers: IncomingHttpHeaders) => {
+    authenticate: async (headers: IncomingHttpHeaders) => {
       //Check for empty headers
       if (!headers.authorization) {
         throw fastify.httpErrors.unauthorized("No token provided");
@@ -44,6 +44,19 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
 
       return payload.id;
     },
+    authorize: async (userId: string, requiredPrivilege: 1 | 2) => {
+      const user = await fastify.prisma.user.getUser(userId);
+
+      //Check if no user found
+      if (!user) {
+        throw fastify.httpErrors.forbidden("User not found");
+      }
+
+      //Check if have enought privilege
+      if (user.privilege < requiredPrivilege) {
+        throw fastify.httpErrors.forbidden("Not enought privilege");
+      }
+    },
   };
 
   fastify.decorate("auth", auth);
@@ -53,7 +66,8 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
 declare module "fastify" {
   export interface FastifyInstance {
     auth: {
-      authorize: (headers: IncomingHttpHeaders) => Promise<number>;
+      authenticate: (headers: IncomingHttpHeaders) => Promise<number>;
+      authorize: (userId: string, requiredPrivilege: 1 | 2) => Promise<void>;
     };
   }
 }

@@ -4,7 +4,7 @@ import { createUser, getUser, getUsers, modifyUser } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Reply: users[] }>("/", async function (request, reply) {
-    await fastify.auth.authorize(request.headers);
+    await fastify.auth.authenticate(request.headers);
 
     const users = await getUsers(fastify);
 
@@ -14,7 +14,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{ Params: { id: string }; Reply: users }>(
     "/:id",
     async function (request, reply) {
-      await fastify.auth.authorize(request.headers);
+      await fastify.auth.authenticate(request.headers);
 
       const user = await getUser(fastify, request.params.id);
 
@@ -51,7 +51,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   }>("/", async function (request, reply) {
     const userInfo = request.body;
 
-    const userId = await fastify.auth.authorize(request.headers);
+    const userId = await fastify.auth.authenticate(request.headers);
 
     await modifyUser(fastify, userId.toString(), userInfo);
 
@@ -61,7 +61,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
     async function (request, reply) {
-      await fastify.auth.authorize(request.headers);
+      await fastify.auth.authenticate(request.headers);
       try {
         await fastify.prisma.client.users.delete({
           where: { id: parseInt(request.params.id) },
