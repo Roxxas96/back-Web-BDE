@@ -14,3 +14,13 @@ CREATE TABLE IF NOT EXISTS "Sessions" (
     jwt VARCHAR(255) NOT NULL UNIQUE,
     CONSTRAINT "userSession" FOREIGN KEY ("userId") REFERENCES "Users" ("id")
 );
+
+CREATE TABLE IF NOT EXISTS "Challenges" (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) DEFAULT 'Unnamed challenge',
+    description TEXT,
+    reward INTEGER DEFAULT 0 CHECK (reward >= 0),
+    "creationDate" DATE DEFAULT NOW(),
+    "creatorId" INTEGER NOT NULL,
+    CONSTRAINT "challengeCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
+)

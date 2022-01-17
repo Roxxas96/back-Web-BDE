@@ -1,5 +1,6 @@
-import { PrismaClient, Sessions, Users } from "@prisma/client";
+import { Challenges, PrismaClient, Sessions, Users } from "@prisma/client";
 import fp from "fastify-plugin";
+import ChallengeInfo from "../models/ChallengeInfo";
 import UserInfo from "../models/UserInfo";
 
 export interface DatabasePluginOptions {
@@ -207,6 +208,70 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return session;
       },
     },
+    challenge: {
+      getChallenges: async function () {
+        let challenges;
+        try {
+          challenges = await client.challenges.findMany();
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Challenges"
+          );
+        }
+        return challenges;
+      },
+      getChallenge: async function (challengeId: number) {
+        let challenge;
+        try {
+          challenge = await client.challenges.findUnique({
+            where: { id: challengeId },
+          });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Challenges"
+          );
+        }
+        return challenge;
+      },
+      createChallenge: async function (challengeInfo: ChallengeInfo) {
+        try {
+          await client.challenges.create({ data: challengeInfo });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Challenges"
+          );
+        }
+      },
+      updateChallenge: async function (
+        challengeInfo: ChallengeInfo,
+        challengeId: number
+      ) {
+        try {
+          await client.challenges.update({
+            where: { id: challengeId },
+            data: challengeInfo,
+          });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Update Error on Table Challenges"
+          );
+        }
+      },
+      deleteChallenge: async function (challengeId: number) {
+        try {
+          await client.challenges.delete({ where: { id: challengeId } });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Delete Error on Table Challenges"
+          );
+        }
+      },
+    },
   };
 
   fastify.decorate("prisma", prisma);
@@ -231,6 +296,16 @@ declare module "fastify" {
         getSession: (sessionId: number) => Promise<Sessions>;
         getSessions: () => Promise<Sessions[]>;
         getSessionByJWT: (token: string) => Promise<Sessions>;
+      };
+      challenge: {
+        updateChallenge: (
+          challengeInfo: ChallengeInfo,
+          challengeId: number
+        ) => Promise<void>;
+        deleteChallenge: (challengeId: number) => Promise<void>;
+        createChallenge: (challengeInfo: ChallengeInfo) => Promise<void>;
+        getChallenge: (challengeId: number) => Promise<Challenges>;
+        getChallenges: () => Promise<Challenges[]>;
       };
     };
   }
