@@ -3,7 +3,7 @@ import { hashPassword } from "../../utils/bcrypt";
 
 export async function modifyUser(
   fastify: FastifyInstance,
-  userId: string,
+  userId: number,
   userInfo: {
     email: string;
     password: string;
@@ -80,7 +80,7 @@ export async function createUser(
   });
 }
 
-export async function getUser(fastify: FastifyInstance, userId: string) {
+export async function getUser(fastify: FastifyInstance, userId: number) {
   const user = await fastify.prisma.user.getUser(userId);
 
   if (!user) {

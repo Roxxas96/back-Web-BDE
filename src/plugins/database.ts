@@ -1,12 +1,12 @@
-import { PrismaClient, sessions, users } from "@prisma/client";
+import { PrismaClient, Sessions, Users } from "@prisma/client";
 import fp from "fastify-plugin";
 
 interface userInfo {
   email: string;
   password: string;
-  name: string;
-  surname: string;
-  pseudo: string;
+  name?: string;
+  surname?: string;
+  pseudo?: string;
 }
 
 export interface DatabasePluginOptions {
@@ -43,10 +43,10 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
     client: client,
     //User queries
     user: {
-      updateUser: async function (userId: string, userInfo: userInfo) {
+      updateUser: async function (userId: number, userInfo: userInfo) {
         try {
           await client.users.update({
-            where: { id: parseInt(userId) },
+            where: { id: userId },
             data: userInfo,
           });
         } catch (err) {
@@ -59,7 +59,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             }
           }
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database update Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Update Error on Table Users"
+          );
         }
       },
 
@@ -78,14 +80,16 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             }
           }
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database create Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Users"
+          );
         }
       },
 
-      deleteUser: async function (userId: string) {
+      deleteUser: async function (userId: number) {
         try {
           await fastify.prisma.client.users.delete({
-            where: { id: parseInt(userId) },
+            where: { id: userId },
           });
         } catch (err) {
           if (err instanceof Error) {
@@ -94,32 +98,38 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             }
           }
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Users"
+          );
         }
       },
 
-      getUser: async function (userId: string) {
+      getUser: async function (userId: number) {
         let user;
         try {
           user = await client.users.findUnique({
-            where: { id: parseInt(userId) },
+            where: { id: userId },
           });
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Users"
+          );
         }
         return user;
       },
 
       getUsers: async function () {
-        let users;
+        let Users;
         try {
-          users = await client.users.findMany();
+          Users = await client.users.findMany();
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Users"
+          );
         }
-        return users;
+        return Users;
       },
 
       getUserByEMail: async function (email: string) {
@@ -128,7 +138,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           user = await client.users.findUnique({ where: { email: email } });
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Users"
+          );
         }
         return user;
       },
@@ -140,43 +152,51 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           await client.sessions.delete({ where: { jwt: token } });
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database delete Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Delete Error on Table Sessions"
+          );
         }
       },
 
-      createSession: async function (token: string, userId: string) {
+      createSession: async function (token: string, userId: number) {
         try {
           await client.sessions.create({
-            data: { jwt: token, userid: parseInt(userId) },
+            data: { jwt: token, userId: userId },
           });
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database create Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Sessions"
+          );
         }
       },
 
-      getSession: async function (sessionId: string) {
+      getSession: async function (sessionId: number) {
         let session;
         try {
           session = await client.sessions.findUnique({
-            where: { id: parseInt(sessionId) },
+            where: { id: sessionId },
           });
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Sessions"
+          );
         }
         return session;
       },
 
       getSessions: async function () {
-        let sessions;
+        let Sessions;
         try {
-          sessions = await client.sessions.findMany();
+          Sessions = await client.sessions.findMany();
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Sessions"
+          );
         }
-        return sessions;
+        return Sessions;
       },
 
       getSessionByJWT: async function (token: string) {
@@ -187,7 +207,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           });
         } catch (err) {
           fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError("Database fetch Error");
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Sessions"
+          );
         }
         return session;
       },
@@ -203,19 +225,19 @@ declare module "fastify" {
     prisma: {
       client: PrismaClient;
       user: {
-        updateUser: (userId: string, userInfo: userInfo) => Promise<void>;
+        updateUser: (userId: number, userInfo: userInfo) => Promise<void>;
         createUser: (userInfo: userInfo) => Promise<void>;
-        deleteUser: (userId: string) => Promise<void>;
-        getUser: (userId: string) => Promise<users>;
-        getUsers: () => Promise<users[]>;
-        getUserByEMail: (email: string) => Promise<users>;
+        deleteUser: (userId: number) => Promise<void>;
+        getUser: (userId: number) => Promise<Users>;
+        getUsers: () => Promise<Users[]>;
+        getUserByEMail: (email: string) => Promise<Users>;
       };
       session: {
         deleteSession: (token: string) => Promise<void>;
-        createSession: (token: string, userId: string) => Promise<void>;
-        getSession: (sessionId: string) => Promise<sessions>;
-        getSessions: () => Promise<sessions[]>;
-        getSessionByJWT: (token: string) => Promise<sessions>;
+        createSession: (token: string, userId: number) => Promise<void>;
+        getSession: (sessionId: number) => Promise<Sessions>;
+        getSessions: () => Promise<Sessions[]>;
+        getSessionByJWT: (token: string) => Promise<Sessions>;
       };
     };
   }

@@ -10,20 +10,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
+model Users {
   id       Int        @id @default(autoincrement())
-  name     String
-  surname  String
-  pseudo   String
+  name     String?
+  surname  String?
+  pseudo   String @default("Anonym user")
   email    String     @unique
   password String
   privilege  Int    @default(0)
-  sessions sessions[]
+  sessions Sessions[]
+  challenges Challenges[]
 }
 
-model sessions {
+model Sessions {
   id          Int    @id @default(autoincrement())
-  userid      Int
+  userId      Int
   jwt         String @unique
-  usersession users? @relation(fields: [userid], references: [id])
+  userSession Users @relation(fields: [userId], references: [id])
+}
+
+model Challenges {
+  id Int @id @default(autoincrement())
+  name String?
+  description String?
+  reward Int @default(0)
+  creationDate DateTime?
+  creatorId Int
+  challengeCreator Users @relation(fields: [creatorId], references: [id])
 }

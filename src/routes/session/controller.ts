@@ -54,12 +54,12 @@ export async function createSession(
   const hashedToken = hashJWT(token);
 
   //Create session in DB
-  await fastify.prisma.session.createSession(hashedToken, user.id.toString());
+  await fastify.prisma.session.createSession(hashedToken, user.id);
 
   return token;
 }
 
-export async function getSession(fastify: FastifyInstance, sessionId: string) {
+export async function getSession(fastify: FastifyInstance, sessionId: number) {
   const session = await fastify.prisma.session.getSession(sessionId);
 
   //Check if session not found

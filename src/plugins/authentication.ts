@@ -38,13 +38,13 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
       const session = await fastify.prisma.session.getSessionByJWT(hashedToken);
 
       //Check if session is empty or userId doesn't match
-      if (!session || session.userid !== payload.id) {
+      if (!session || session.userId !== payload.id) {
         throw fastify.httpErrors.unauthorized("Token Invalid");
       }
 
       return payload.id;
     },
-    authorize: async (userId: string, requiredPrivilege: 1 | 2) => {
+    authorize: async (userId: number, requiredPrivilege: 1 | 2) => {
       const user = await fastify.prisma.user.getUser(userId);
 
       //Check if no user found

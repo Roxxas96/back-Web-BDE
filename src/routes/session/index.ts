@@ -1,4 +1,4 @@
-import { sessions } from "@prisma/client";
+import { Sessions } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import {
   createSession,
@@ -11,7 +11,7 @@ const sessionRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: sessions[] }>("/", async function (request, reply) {
+  fastify.get<{ Reply: Sessions[] }>("/", async function (request, reply) {
     await fastify.auth.authenticate(request.headers);
 
     const sessions = await getSessions(fastify);
@@ -19,12 +19,13 @@ const sessionRoute: FastifyPluginAsync = async (
     return reply.status(200).send(sessions);
   });
 
-  fastify.get<{ Params: { id: string }; Reply: sessions }>(
+  fastify.get<{ Params: { id: string }; Reply: Sessions }>(
     "/:id",
     async function (request, reply) {
+      console.log(typeof request.params.id);
       await fastify.auth.authenticate(request.headers);
 
-      const session = await getSession(fastify, request.params.id);
+      const session = await getSession(fastify, parseInt(request.params.id));
 
       return reply.status(200).send(session);
     }
