@@ -67,7 +67,7 @@ declare module "fastify" {
   export interface FastifyInstance {
     auth: {
       authenticate: (headers: IncomingHttpHeaders) => Promise<number>;
-      authorize: (userId: string, requiredPrivilege: 1 | 2) => Promise<void>;
+      authorize: (userId: number, requiredPrivilege: 1 | 2) => Promise<void>;
     };
   }
 }

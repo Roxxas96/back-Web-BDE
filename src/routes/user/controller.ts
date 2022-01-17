@@ -1,16 +1,11 @@
 import { FastifyInstance } from "fastify";
+import UserInfo from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 
 export async function modifyUser(
   fastify: FastifyInstance,
   userId: number,
-  userInfo: {
-    email: string;
-    password: string;
-    name: string;
-    surname: string;
-    pseudo: string;
-  }
+  userInfo: UserInfo
 ) {
   //Check if mail match synthax
   if (userInfo.email && !/\@.*umontpellier\.fr/g.test(userInfo.email)) {
@@ -44,13 +39,7 @@ export async function modifyUser(
 
 export async function createUser(
   fastify: FastifyInstance,
-  userInfo: {
-    email: string;
-    password: string;
-    name: string;
-    surname: string;
-    pseudo: string;
-  }
+  userInfo: UserInfo
 ) {
   //Check if mail match synthax
   if (!/\@.*umontpellier\.fr/g.test(userInfo.email)) {

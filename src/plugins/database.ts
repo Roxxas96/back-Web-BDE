@@ -1,13 +1,6 @@
 import { PrismaClient, Sessions, Users } from "@prisma/client";
 import fp from "fastify-plugin";
-
-interface userInfo {
-  email: string;
-  password: string;
-  name?: string;
-  surname?: string;
-  pseudo?: string;
-}
+import UserInfo from "../models/UserInfo";
 
 export interface DatabasePluginOptions {
   // Specify Support plugin options here
@@ -43,7 +36,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
     client: client,
     //User queries
     user: {
-      updateUser: async function (userId: number, userInfo: userInfo) {
+      updateUser: async function (userId: number, userInfo: UserInfo) {
         try {
           await client.users.update({
             where: { id: userId },
@@ -65,7 +58,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
 
-      createUser: async function (userInfo: userInfo) {
+      createUser: async function (userInfo: UserInfo) {
         try {
           await client.users.create({
             data: userInfo,
@@ -225,8 +218,8 @@ declare module "fastify" {
     prisma: {
       client: PrismaClient;
       user: {
-        updateUser: (userId: number, userInfo: userInfo) => Promise<void>;
-        createUser: (userInfo: userInfo) => Promise<void>;
+        updateUser: (userId: number, userInfo: UserInfo) => Promise<void>;
+        createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
         getUser: (userId: number) => Promise<Users>;
         getUsers: () => Promise<Users[]>;

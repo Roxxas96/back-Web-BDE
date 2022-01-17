@@ -1,5 +1,6 @@
 import { Users } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
+import UserInfo from "../../models/UserInfo";
 import { createUser, getUser, getUsers, modifyUser } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -23,13 +24,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   );
 
   fastify.put<{
-    Body: {
-      email: string;
-      password: string;
-      name: string;
-      surname: string;
-      pseudo: string;
-    };
+    Body: UserInfo;
     Reply: string;
   }>("/", async function (request, reply) {
     let userInfo = request.body;
@@ -40,13 +35,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   });
 
   fastify.patch<{
-    Body: {
-      email: string;
-      password: string;
-      name: string;
-      surname: string;
-      pseudo: string;
-    };
+    Body: UserInfo;
     Reply: string;
   }>("/", async function (request, reply) {
     const userInfo = request.body;
