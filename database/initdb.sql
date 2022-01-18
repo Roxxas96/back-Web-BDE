@@ -24,3 +24,14 @@ CREATE TABLE IF NOT EXISTS "Challenges" (
     "creatorId" INTEGER NOT NULL,
     CONSTRAINT "challengeCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
 )
+
+CREATE TABLE If NOT EXISTS "Accomplishments" (
+    id SERIAL PRIMARY KEY,
+    "userId" INTEGER NOT NULL,
+    "challengeId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    proof TEXT DEFAULT '',
+    validation INTEGER DEFAULT 0,
+    CONSTRAINT "accomplishmentCreator" FOREIGN KEY ("userId") REFERENCES "Users" ("id"),
+    CONSTRAINT "accomplishmentChallenge" FOREIGN KEY ("challengeId") REFERENCES "Challenges" ("id")
+)

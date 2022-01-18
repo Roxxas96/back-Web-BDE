@@ -20,6 +20,7 @@ model Users {
   privilege  Int    @default(0)
   sessions Sessions[]
   challenges Challenges[]
+  accomplishment Accomplishment[]
 }
 
 model Sessions {
@@ -37,4 +38,16 @@ model Challenges {
   createdAt DateTime @default(now())
   creatorId Int
   challengeCreator Users @relation(fields: [creatorId], references: [id])
+  accomplishements Accomplishment[]
+}
+
+model Accomplishment {
+  id Int @id @default(autoincrement())
+  userId Int
+  challengeId Int
+  createdAt DateTime @default(now())
+  proof String @default("")
+  validation Int @default(0)
+  accomplishmentCreator Users @relation(fields: [userId], references: [id])
+  accomplishmentChallenge Challenges @relation(fields: [challengeId], references: [id])
 }
