@@ -12,7 +12,9 @@ const sessionRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{ Reply: Sessions[] }>("/", async function (request, reply) {
-    await fastify.auth.authenticate(request.headers);
+    const userId = await fastify.auth.authenticate(request.headers);
+
+    await fastify.auth.authorize(userId, 2);
 
     const sessions = await getSessions(fastify);
 
@@ -22,8 +24,9 @@ const sessionRoute: FastifyPluginAsync = async (
   fastify.get<{ Params: { id: string }; Reply: Sessions }>(
     "/:id",
     async function (request, reply) {
-      console.log(typeof request.params.id);
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 2);
 
       const session = await getSession(fastify, parseInt(request.params.id));
 

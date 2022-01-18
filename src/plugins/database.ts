@@ -1,7 +1,7 @@
 import { Challenges, PrismaClient, Sessions, Users } from "@prisma/client";
 import fp from "fastify-plugin";
 import { ChallengeInfo } from "../models/ChallengeInfo";
-import UserInfo from "../models/UserInfo";
+import { UserInfo } from "../models/UserInfo";
 
 export interface DatabasePluginOptions {
   // Specify Support plugin options here

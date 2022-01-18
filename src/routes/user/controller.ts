@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import UserInfo from "../../models/UserInfo";
+import { UserInfo } from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 
 export async function modifyUser(
@@ -79,11 +79,15 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
 export async function getUsers(fastify: FastifyInstance) {
   const users = await fastify.prisma.user.getUsers();
 
-  console.log(typeof users[0].id);
-
   if (!users || !users.length) {
     throw fastify.httpErrors.notFound("No users in DB");
   }
 
-  return users;
+  return users.map((val) => {
+    return { name: val.name };
+  });
+}
+
+export async function deleteUser(fastify: FastifyInstance, userId: number) {
+  await fastify.prisma.user.deleteUser(userId);
 }

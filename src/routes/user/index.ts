@@ -1,16 +1,25 @@
 import { Users } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
-import UserInfo from "../../models/UserInfo";
-import { createUser, getUser, getUsers, modifyUser } from "./controller";
+import { UserInfo, UserInfoMinimal } from "../../models/UserInfo";
+import {
+  createUser,
+  deleteUser,
+  getUser,
+  getUsers,
+  modifyUser,
+} from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get<{ Reply: Users[] }>("/", async function (request, reply) {
-    await fastify.auth.authenticate(request.headers);
+  fastify.get<{ Reply: UserInfoMinimal[] }>(
+    "/",
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
 
-    const users = await getUsers(fastify);
+      const users = await getUsers(fastify);
 
-    return reply.status(200).send(users);
-  });
+      return reply.status(200).send(users);
+    }
+  );
 
   fastify.get<{ Params: { id: string }; Reply: Users }>(
     "/:id",
@@ -44,19 +53,18 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
     await modifyUser(fastify, userId, userInfo);
 
-    return reply.status(201).send("User updated");
+    return reply.status(200).send("User updated");
   });
 
-  fastify.delete<{ Params: { id: string }; Reply: string }>(
-    "/:id",
-    async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+  fastify.delete<{ Reply: string }>("/", async function (request, reply) {
+    const userId = await fastify.auth.authenticate(request.headers);
 
-      await fastify.prisma.user.deleteUser(parseInt(request.params.id));
+    await fastify.auth.authorize(userId, 2);
 
-      return reply.status(200).send("User deleted");
-    }
-  );
+    await deleteUser(fastify, userId);
+
+    return reply.status(200).send("User deleted");
+  });
 };
 
 export default userRoute;

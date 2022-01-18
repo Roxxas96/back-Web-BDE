@@ -13,13 +13,16 @@ const challengeRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: ChallengeInfoMinimal[] }>("/", async function (request, reply) {
-    await fastify.auth.authenticate(request.headers);
+  fastify.get<{ Reply: ChallengeInfoMinimal[] }>(
+    "/",
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
 
-    const challenges = await getChallenges(fastify);
+      const challenges = await getChallenges(fastify);
 
-    return reply.status(200).send(challenges);
-  });
+      return reply.status(200).send(challenges);
+    }
+  );
   fastify.get<{ Params: { id: string }; Reply: Challenges }>(
     "/:id",
     async function (request, reply) {
@@ -73,7 +76,7 @@ const challengeRoute: FastifyPluginAsync = async (
       creatorId: userId,
     });
 
-    return reply.status(201).send("Challenge updated");
+    return reply.status(200).send("Challenge updated");
   });
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
