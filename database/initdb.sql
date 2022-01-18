@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS "Challenges" (
     name VARCHAR(50) DEFAULT 'Unnamed challenge',
     description TEXT,
     reward INTEGER DEFAULT 0 CHECK (reward >= 0),
-    "creationDate" DATE DEFAULT NOW(),
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "creatorId" INTEGER NOT NULL,
     CONSTRAINT "challengeCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
 )

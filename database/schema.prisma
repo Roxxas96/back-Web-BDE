@@ -34,7 +34,7 @@ model Challenges {
   name String?
   description String?
   reward Int @default(0)
-  creationDate DateTime?
+  createdAt DateTime @default(now())
   creatorId Int
   challengeCreator Users @relation(fields: [creatorId], references: [id])
 }

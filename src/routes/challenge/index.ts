@@ -1,6 +1,5 @@
 import { Challenges } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
-import ChallengeInfo from "../../models/ChallengeInfo";
 import {
   createChallenge,
   deleteChallenge,
@@ -33,38 +32,48 @@ const challengeRoute: FastifyPluginAsync = async (
       return reply.status(200).send(challenge);
     }
   );
-  fastify.put<{ Body: ChallengeInfo; Reply: string }>(
-    "/",
-    async function (request, reply) {
-      const challengeInfo = request.body;
+  fastify.put<{
+    Body: {
+      name?: string;
+      description?: string;
+      reward?: number;
+    };
+    Reply: string;
+  }>("/", async function (request, reply) {
+    const challengeInfo = request.body;
 
-      const userId = await fastify.auth.authenticate(request.headers);
+    const userId = await fastify.auth.authenticate(request.headers);
 
-      await fastify.auth.authorize(userId, 1);
+    await fastify.auth.authorize(userId, 1);
 
-      await createChallenge(fastify, challengeInfo);
+    await createChallenge(fastify, { ...challengeInfo, creatorId: userId });
 
-      return reply.status(201).send("Challenge created");
-    }
-  );
-  fastify.patch<{ Body: ChallengeInfo; Params: { id: string }; Reply: string }>(
-    "/:id",
-    async function (request, reply) {
-      const challengeInfo = request.body;
+    return reply.status(201).send("Challenge created");
+  });
+  fastify.patch<{
+    Body: {
+      name?: string;
+      description?: string;
+      reward?: number;
+    };
+    Params: { id: string };
+    Reply: string;
+  }>("/:id", async function (request, reply) {
+    console.log(typeof request.body.reward);
 
-      const userId = await fastify.auth.authenticate(request.headers);
+    const challengeInfo = request.body;
 
-      await fastify.auth.authorize(userId, 1);
+    const userId = await fastify.auth.authenticate(request.headers);
 
-      await updateChallenge(
-        fastify,
-        parseInt(request.params.id),
-        challengeInfo
-      );
+    await fastify.auth.authorize(userId, 1);
 
-      return reply.status(201).send("Challenge updated");
-    }
-  );
+    await updateChallenge(fastify, parseInt(request.params.id), {
+      ...challengeInfo,
+      creatorId: userId,
+    });
+
+    return reply.status(201).send("Challenge updated");
+  });
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
     async function (request, reply) {
@@ -73,6 +82,8 @@ const challengeRoute: FastifyPluginAsync = async (
       await fastify.auth.authorize(userId, 1);
 
       await deleteChallenge(fastify, parseInt(request.params.id));
+
+      return reply.status(200).send("Challenge deleted");
     }
   );
 };

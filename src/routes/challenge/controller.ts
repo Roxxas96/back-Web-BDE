@@ -1,3 +1,4 @@
+import { Challenges } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import ChallengeInfo from "../../models/ChallengeInfo";
 
@@ -34,16 +35,26 @@ export async function getChallenge(
     throw fastify.httpErrors.notFound("Challenge not found");
   }
 
-  return challenge;
+  return convertTime(challenge);
 }
 
 export async function getChallenges(fastify: FastifyInstance) {
   const challenges = await fastify.prisma.challenge.getChallenges();
 
   //Check if challenge DB empty
-  if (!challenges) {
+  if (!challenges || !challenges.length) {
     throw fastify.httpErrors.notFound("No Challenge in DB");
   }
 
-  return challenges;
+  return await challenges.map((val) => {
+    //Handle Timezone (registered dates are UTC+00)
+    return convertTime(val);
+  });
+}
+
+function convertTime(challenge: Challenges) {
+  challenge.createdAt.setMinutes(
+    challenge.createdAt.getMinutes() - challenge.createdAt.getTimezoneOffset()
+  );
+  return challenge;
 }
