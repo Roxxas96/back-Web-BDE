@@ -37,10 +37,7 @@ export async function modifyUser(
   });
 }
 
-export async function createUser(
-  fastify: FastifyInstance,
-  userInfo: UserInfo
-) {
+export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
   //Check if mail match synthax
   if (!/\@.*umontpellier\.fr/g.test(userInfo.email)) {
     throw fastify.httpErrors.badRequest(
@@ -84,7 +81,7 @@ export async function getUsers(fastify: FastifyInstance) {
 
   console.log(typeof users[0].id);
 
-  if (!users) {
+  if (!users || !users.length) {
     throw fastify.httpErrors.notFound("No users in DB");
   }
 
