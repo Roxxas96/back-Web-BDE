@@ -255,6 +255,11 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             data: challengeInfo,
           });
         } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Record to update not found")) {
+              throw fastify.httpErrors.notFound("Challenge not found");
+            }
+          }
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Update Error on Table Challenges"
@@ -265,6 +270,11 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         try {
           await client.challenges.delete({ where: { id: challengeId } });
         } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Record to delete does not exist")) {
+              throw fastify.httpErrors.notFound("Challenge not found");
+            }
+          }
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Delete Error on Table Challenges"
