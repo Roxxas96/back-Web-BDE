@@ -6,6 +6,10 @@ export async function createChallenge(
   fastify: FastifyInstance,
   challengeInfo: ChallengeInfo
 ) {
+  if (challengeInfo.reward && challengeInfo.reward < 0) {
+    throw fastify.httpErrors.badRequest("Reward must pe positive");
+  }
+
   await fastify.prisma.challenge.createChallenge(challengeInfo);
 }
 
@@ -14,6 +18,10 @@ export async function updateChallenge(
   challengeId: number,
   challengeInfo: ChallengeInfo
 ) {
+  if (challengeInfo.reward && challengeInfo.reward < 0) {
+    throw fastify.httpErrors.badRequest("Reward must pe positive");
+  }
+
   await fastify.prisma.challenge.updateChallenge(challengeInfo, challengeId);
 }
 

@@ -52,6 +52,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
               throw fastify.httpErrors.notFound("User not found");
             }
           }
+
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Update Error on Table Users"
@@ -73,6 +74,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
               throw fastify.httpErrors.badRequest("Missing argument");
             }
           }
+
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Create Error on Table Users"
@@ -91,6 +93,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
               throw fastify.httpErrors.notFound("User not found");
             }
           }
+
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Fetch Error on Table Users"
@@ -239,6 +242,16 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         try {
           await client.challenges.create({ data: challengeInfo });
         } catch (err) {
+          if (err instanceof Error) {
+            if (
+              err.message.includes(
+                'violates check constraint \\"Challenges_reward_check\\"'
+              )
+            ) {
+              throw fastify.httpErrors.badRequest("Reward must be positive");
+            }
+          }
+
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Create Error on Table Challenges"
@@ -259,7 +272,15 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             if (err.message.includes("Record to update not found")) {
               throw fastify.httpErrors.notFound("Challenge not found");
             }
+            if (
+              err.message.includes(
+                'violates check constraint \\"Challenges_reward_check\\"'
+              )
+            ) {
+              throw fastify.httpErrors.badRequest("Reward must be positive");
+            }
           }
+
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Update Error on Table Challenges"
@@ -275,6 +296,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
               throw fastify.httpErrors.notFound("Challenge not found");
             }
           }
+
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Delete Error on Table Challenges"
