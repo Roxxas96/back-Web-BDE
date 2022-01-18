@@ -1,5 +1,6 @@
 import { Challenges } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
+import { ChallengeInfoMinimal } from "../../models/ChallengeInfo";
 import {
   createChallenge,
   deleteChallenge,
@@ -12,7 +13,7 @@ const challengeRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Challenges[] }>("/", async function (request, reply) {
+  fastify.get<{ Reply: ChallengeInfoMinimal[] }>("/", async function (request, reply) {
     await fastify.auth.authenticate(request.headers);
 
     const challenges = await getChallenges(fastify);

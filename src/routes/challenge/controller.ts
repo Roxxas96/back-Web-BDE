@@ -1,6 +1,9 @@
 import { Challenges } from "@prisma/client";
 import { FastifyInstance } from "fastify";
-import ChallengeInfo from "../../models/ChallengeInfo";
+import {
+  ChallengeInfo,
+  ChallengeInfoMinimal,
+} from "../../models/ChallengeInfo";
 
 export async function createChallenge(
   fastify: FastifyInstance,
@@ -54,12 +57,16 @@ export async function getChallenges(fastify: FastifyInstance) {
     throw fastify.httpErrors.notFound("No Challenge in DB");
   }
 
-  return await challenges.map((val) => {
-    //Handle Timezone (registered dates are UTC+00)
-    return convertTime(val);
+  //We only return name and reward, other values are not needed
+  return challenges.map<ChallengeInfoMinimal>((val) => {
+    return {
+      name: val.name,
+      reward: val.reward,
+    };
   });
 }
 
+//Convert UTC time depending on user's timezone
 function convertTime(challenge: Challenges) {
   challenge.createdAt.setMinutes(
     challenge.createdAt.getMinutes() - challenge.createdAt.getTimezoneOffset()
