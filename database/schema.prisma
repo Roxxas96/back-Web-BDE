@@ -12,8 +12,8 @@ datasource db {
 
 model Users {
   id       Int        @id @default(autoincrement())
-  name     String?
-  surname  String?
+  name     String @default("")
+  surname  String @default("")
   pseudo   String @default("Anonym user")
   email    String     @unique
   password String
@@ -31,8 +31,8 @@ model Sessions {
 
 model Challenges {
   id Int @id @default(autoincrement())
-  name String?
-  description String?
+  name String @default("Unnamed challenge")
+  description String @default("")
   reward Int @default(0)
   createdAt DateTime @default(now())
   creatorId Int
