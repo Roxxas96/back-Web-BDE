@@ -19,6 +19,7 @@ export interface DatabasePluginOptions {
 export default fp<DatabasePluginOptions>(async (fastify, opts) => {
   const client = new PrismaClient();
 
+  //TODO : Retry connection doesn't work
   //Try Database connection
   const connectionInterval = setInterval(async () => {
     try {
