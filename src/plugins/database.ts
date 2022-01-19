@@ -56,7 +56,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         } catch (err) {
           if (err instanceof Error) {
             if (err.message.includes("Unique constraint failed")) {
-              throw fastify.httpErrors.conflict("User email already exists");
+              throw fastify.httpErrors.conflict("User already exists");
             }
             if (err.message.includes("Record to update not found")) {
               throw fastify.httpErrors.notFound("User not found");

@@ -38,7 +38,7 @@ CREATE TABLE If NOT EXISTS "Accomplishments" (
 
 CREATE TABLE IF NOT EXISTS "Goodies" (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(50),
+    name VARCHAR(50) DEFAULT "Unnamed goodies",
     description TEXT DEFAULT '',
     price INTEGER DEFAULT 0 CHECK (price >= 0),
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
