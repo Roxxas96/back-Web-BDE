@@ -18,9 +18,11 @@ model Users {
   email    String     @unique
   password String
   privilege  Int    @default(0)
+  wallet Int @default(0)
   sessions Sessions[]
   challenges Challenges[]
   accomplishment Accomplishments[]
+  goodies Goodies[]
 }
 
 model Sessions {
@@ -50,4 +52,14 @@ model Accomplishments {
   validation Int?
   accomplishmentCreator Users @relation(fields: [userId], references: [id])
   accomplishmentChallenge Challenges @relation(fields: [challengeId], references: [id])
+}
+
+model Goodies {
+  id Int @id @default(autoincrement())
+  name String @default("Unnamed Goodies")
+  description String @default("")
+  price Int @default(0)
+  createdAt DateTime @default(now())
+  creatorId Int
+  goodiesCreator Users @relation(fields: [creatorId], references: [id])
 }
