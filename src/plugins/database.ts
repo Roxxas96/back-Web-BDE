@@ -1,5 +1,12 @@
-import { Challenges, PrismaClient, Sessions, Users } from "@prisma/client";
+import {
+  Accomplishments,
+  Challenges,
+  PrismaClient,
+  Sessions,
+  Users,
+} from "@prisma/client";
 import fp from "fastify-plugin";
+import { AccomplishmentInfo } from "../models/AccomplishmentInfo";
 import { ChallengeInfo } from "../models/ChallengeInfo";
 import { UserInfo } from "../models/UserInfo";
 
@@ -74,6 +81,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
               throw fastify.httpErrors.badRequest("Missing argument");
             }
           }
+          //TODO : Handle Password > 7 check
 
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
@@ -304,6 +312,86 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
     },
+    accomplishment: {
+      getAccomplishments: async function () {
+        let accomplishments;
+        try {
+          accomplishments = await client.accomplishments.findMany();
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Accomplishments"
+          );
+        }
+        return accomplishments;
+      },
+      getAccomplishment: async function (accomplishmentId: number) {
+        let accomplishment;
+        try {
+          accomplishment = await client.accomplishments.findUnique({
+            where: { id: accomplishmentId },
+          });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Accomplishments"
+          );
+        }
+        return accomplishment;
+      },
+      createAccomplishment: async function (
+        accomplishmentInfo: AccomplishmentInfo
+      ) {
+        try {
+          await client.accomplishments.create({ data: accomplishmentInfo });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Accomplishments"
+          );
+        }
+      },
+      updateAccomplishment: async function (
+        accomplishmentInfo: AccomplishmentInfo,
+        accomplishmentId: number
+      ) {
+        try {
+          await client.accomplishments.update({
+            where: { id: accomplishmentId },
+            data: accomplishmentInfo,
+          });
+        } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Record to update not found")) {
+              throw fastify.httpErrors.notFound("Accomplishment not found");
+            }
+          }
+
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Update Error on Table Accomplishments"
+          );
+        }
+      },
+      deleteAccomplishment: async function (accomplishmentId: number) {
+        try {
+          await client.accomplishments.delete({
+            where: { id: accomplishmentId },
+          });
+        } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Record to delete does not exist")) {
+              throw fastify.httpErrors.notFound("Accomplishment not found");
+            }
+          }
+
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Delete Error on Table Accomplishments"
+          );
+        }
+      },
+    },
   };
 
   fastify.decorate("prisma", prisma);
@@ -338,6 +426,20 @@ declare module "fastify" {
         createChallenge: (challengeInfo: ChallengeInfo) => Promise<void>;
         getChallenge: (challengeId: number) => Promise<Challenges>;
         getChallenges: () => Promise<Challenges[]>;
+      };
+      accomplishment: {
+        updateAccomplishment: (
+          accomplishmentInfo: AccomplishmentInfo,
+          accomplishmentId: number
+        ) => Promise<void>;
+        deleteAccomplishment: (accomplishmentId: number) => Promise<void>;
+        createAccomplishment: (
+          accomplishmentInfo: AccomplishmentInfo
+        ) => Promise<void>;
+        getAccomplishment: (
+          accomplishmentId: number
+        ) => Promise<Accomplishments>;
+        getAccomplishments: () => Promise<Accomplishments[]>;
       };
     };
   }
