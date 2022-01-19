@@ -45,6 +45,10 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
       return payload.id;
     },
     authorize: async (userId: number, requiredPrivilege: 1 | 2) => {
+      if (requiredPrivilege < 1 || requiredPrivilege > 2) {
+        fastify.httpErrors.internalServerError("Privilege error");
+      }
+
       const user = await fastify.prisma.user.getUser(userId);
 
       //Check if no user found

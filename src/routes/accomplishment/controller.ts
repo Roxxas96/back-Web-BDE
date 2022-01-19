@@ -51,3 +51,18 @@ export async function deleteAccomplishment(
 ) {
   await fastify.prisma.accomplishment.deleteAccomplishment(accomplishmentId);
 }
+
+export async function validateAccomplishment(
+  fastify: FastifyInstance,
+  state: 1 | -1,
+  accomplishmentId: number
+) {
+  if (state < -1 || state > 1) {
+    throw fastify.httpErrors.badRequest("Invalid validation state");
+  }
+
+  await fastify.prisma.accomplishment.validateAccomplishment(
+    accomplishmentId,
+    state
+  );
+}

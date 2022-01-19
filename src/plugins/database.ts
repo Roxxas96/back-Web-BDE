@@ -392,6 +392,22 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           );
         }
       },
+      validateAccomplishment: async function (
+        accomplishmentId: number,
+        state: 1 | -1
+      ) {
+        try {
+          client.accomplishments.update({
+            where: { id: accomplishmentId },
+            data: { validation: state },
+          });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Update Error on Table Accomplishments"
+          );
+        }
+      },
     },
   };
 
@@ -441,6 +457,10 @@ declare module "fastify" {
           accomplishmentId: number
         ) => Promise<Accomplishments>;
         getAccomplishments: () => Promise<Accomplishments[]>;
+        validateAccomplishment: (
+          accomplishmentId: number,
+          state: 1 | -1
+        ) => Promise<void>;
       };
     };
   }
