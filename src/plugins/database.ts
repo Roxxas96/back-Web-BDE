@@ -383,6 +383,15 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             if (err.message.includes("Record to update not found")) {
               throw fastify.httpErrors.notFound("Accomplishment not found");
             }
+            if (
+              err.message.includes(
+                "Accomplishment has allready a validation state"
+              )
+            ) {
+              throw fastify.httpErrors.badRequest(
+                "Accomplishment was allready validated"
+              );
+            }
           }
 
           fastify.log.error(err);

@@ -30,6 +30,7 @@ CREATE TABLE If NOT EXISTS "Accomplishments" (
     id SERIAL PRIMARY KEY,
     "userId" INTEGER NOT NULL,
     "challengeId" INTEGER NOT NULL,
+    proof TEXT DEFAULT '',
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     validation INTEGER CHECK (validation = 1 OR validation = -1),
     CONSTRAINT "accomplishmentCreator" FOREIGN KEY ("userId") REFERENCES "Users" ("id"),
@@ -61,21 +62,28 @@ INSERT INTO "Users" (pseudo, email, password, privilege) VALUES (
     2
 );
 
-CREATE FUNCTION update_wallet_on_accomplishment()
-   RETURNS TRIGGER 
-AS $$
-BEGIN
-	IF NEW.validation = 1 THEN
-   		UPDATE "Users" SET wallet = wallet + NEW.reward WHERE id = NEW."userId";
-   	END IF;
-   
-    RETURN NEW;
-END;
+CREATE OR REPLACE FUNCTION on_validation_update()
+  RETURNS TRIGGER 
+  LANGUAGE PLPGSQL
+  AS
 $$
-LANGUAGE PLPGSQL;
+DECLARE
+	gain INTEGER;
+BEGIN
+    IF OLD.validation = 1 OR OLD.validation = -1 THEN
+        RAISE EXCEPTION 'Accomplishment has allready a validation state';
+    END IF;
+	IF NEW.validation = 1 THEN
+        SELECT reward INTO gain FROM "Challenges" WHERE id = NEW."challengeId";
+		UPDATE "Users" SET wallet = wallet + gain WHERE id = NEW."userId";
+	END IF;
 
-CREATE TRIGGER update_wallet_on_accomplishment
-	BEFORE UPDATE
-	ON "Accomplishments"
-	for each ROW
-	EXECUTE PROCEDURE update_wallet_on_accomplishment();
+	RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER increase_wallet
+    BEFORE UPDATE
+    ON "Accomplishments"
+    FOR EACH ROW
+    EXECUTE PROCEDURE on_validation_update();
