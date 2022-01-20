@@ -11,6 +11,10 @@ export async function modifyUser(
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
+  if (!userInfo) {
+    throw fastify.httpErrors.badRequest("No user info provided");
+  }
+
   if (!userInfo.email) {
     throw fastify.httpErrors.badRequest("No email provided");
   }
@@ -49,6 +53,10 @@ export async function modifyUser(
 }
 
 export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
+  if (!userInfo) {
+    throw fastify.httpErrors.badRequest("No user info provided");
+  }
+
   if (!userInfo.email) {
     throw fastify.httpErrors.badRequest("No email provided");
   }

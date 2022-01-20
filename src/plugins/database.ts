@@ -418,7 +418,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Fetch Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Goodies"
+          );
         }
         return goodies;
       },
@@ -428,7 +430,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           goodies = await client.goodies.findMany();
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Fetch Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Goodies"
+          );
         }
         return goodies;
       },
@@ -442,7 +446,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Create Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Goodies"
+          );
         }
       },
       updateGoodies: async function (
@@ -456,7 +462,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Update Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Update Error on Table Goodies"
+          );
         }
       },
       deleteGoodies: async function (goodiesId: number) {
@@ -464,7 +472,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           await client.goodies.delete({ where: { id: goodiesId } });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Delete Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Delete Error on Table Goodies"
+          );
         }
       },
     },

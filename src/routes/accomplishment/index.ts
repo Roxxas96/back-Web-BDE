@@ -10,8 +10,6 @@ import {
   validateAccomplishment,
 } from "./controller";
 
-//TODO : Rework of routes, some are not logic
-
 const accomplishmentRoute: FastifyPluginAsync = async (
   fastify,
   opts

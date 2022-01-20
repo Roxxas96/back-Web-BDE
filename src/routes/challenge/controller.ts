@@ -10,6 +10,10 @@ export async function createChallenge(
   challengeInfo: ChallengeInfo,
   creatorId: number
 ) {
+  if (!challengeInfo) {
+    throw fastify.httpErrors.badRequest("No challenge info provided");
+  }
+
   if (challengeInfo.reward && challengeInfo.reward < 0) {
     throw fastify.httpErrors.badRequest("Reward must pe positive");
   }
@@ -26,6 +30,10 @@ export async function updateChallenge(
   challengeId: number,
   challengeInfo: ChallengeInfo
 ) {
+  if (!challengeInfo) {
+    throw fastify.httpErrors.badRequest("No challenge info provided");
+  }
+
   if (challengeInfo.reward && challengeInfo.reward < 0) {
     throw fastify.httpErrors.badRequest("Reward must pe positive");
   }

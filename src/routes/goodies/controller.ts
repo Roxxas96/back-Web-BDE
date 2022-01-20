@@ -36,7 +36,11 @@ export async function createGoodies(
   goodiesInfo: GoodiesInfo,
   creatorId: number
 ) {
-  if (goodiesInfo.price && goodiesInfo.price < 0) {
+  if (!goodiesInfo) {
+    throw fastify.httpErrors.badRequest("No goodies info provided");
+  }
+
+  if (goodiesInfo && goodiesInfo.price && goodiesInfo.price < 0) {
     throw fastify.httpErrors.badRequest("Price must be positive");
   }
 
@@ -52,6 +56,10 @@ export async function updateGoodies(
   goodiesInfo: GoodiesInfo,
   goodiesId: number
 ) {
+  if (!goodiesInfo) {
+    throw fastify.httpErrors.badRequest("No goodies info provided");
+  }
+
   if (goodiesInfo.price && goodiesInfo.price < 0) {
     throw fastify.httpErrors.badRequest("Price must be positive");
   }
