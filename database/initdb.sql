@@ -31,7 +31,6 @@ CREATE TABLE If NOT EXISTS "Accomplishments" (
     "userId" INTEGER NOT NULL,
     "challengeId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    proof TEXT DEFAULT '',
     validation INTEGER CHECK (validation = 1 OR validation = -1),
     CONSTRAINT "accomplishmentCreator" FOREIGN KEY ("userId") REFERENCES "Users" ("id"),
     CONSTRAINT "accomplishmentChallenge" FOREIGN KEY ("challengeId") REFERENCES "Challenges" ("id")
