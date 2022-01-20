@@ -60,3 +60,22 @@ INSERT INTO "Users" (pseudo, email, password, privilege) VALUES (
     '$2b$10$HtOLm9x.vZEPe672Kan3pueDmH5LaBpPV2kOiEWtE4xdA3pRfNP/e',
     2
 );
+
+CREATE FUNCTION update_wallet_on_accomplishment()
+   RETURNS TRIGGER 
+AS $$
+BEGIN
+	IF NEW.validation = 1 THEN
+   		UPDATE "Users" SET wallet = wallet + NEW.reward WHERE id = NEW."userId";
+   	END IF;
+   
+    RETURN NEW;
+END;
+$$
+LANGUAGE PLPGSQL;
+
+CREATE TRIGGER update_wallet_on_accomplishment
+	BEFORE UPDATE
+	ON "Accomplishments"
+	for each ROW
+	EXECUTE PROCEDURE update_wallet_on_accomplishment();
