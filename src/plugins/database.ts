@@ -432,10 +432,13 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
         return goodies;
       },
-      createGoodies: async function (goodiesInfo: GoodiesInfo) {
+      createGoodies: async function (
+        goodiesInfo: GoodiesInfo,
+        creatorId: number
+      ) {
         try {
           await client.goodies.create({
-            data: goodiesInfo,
+            data: { ...goodiesInfo, creatorId: creatorId },
           });
         } catch (err) {
           fastify.log.error(err);
@@ -523,7 +526,10 @@ declare module "fastify" {
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
         getManyGoodies: () => Promise<Goodies[]>;
-        createGoodies: (goodiesInfo: GoodiesInfo) => Promise<void>;
+        createGoodies: (
+          goodiesInfo: GoodiesInfo,
+          creatorId: number
+        ) => Promise<void>;
         updateGoodies: (
           goodiesInfo: GoodiesInfo,
           goodiesId: number

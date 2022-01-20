@@ -1,6 +1,6 @@
 import { Goodies } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
-import { GoodiesInfo } from "../../models/GoodiesInfo";
+import { GoodiesInfo, GoodiesInfoMinimal } from "../../models/GoodiesInfo";
 import {
   createGoodies,
   deleteGoodies,
@@ -13,13 +13,16 @@ const goodiesRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Goodies[] }>("/", async function (request, reply) {
-    await fastify.auth.authenticate(request.headers);
+  fastify.get<{ Reply: GoodiesInfoMinimal[] }>(
+    "/",
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
 
-    const goodies = await getManyGoodies(fastify);
+      const goodies = await getManyGoodies(fastify);
 
-    return reply.status(200).send(goodies);
-  });
+      return reply.status(200).send(goodies);
+    }
+  );
 
   fastify.get<{ Params: { id: string }; Reply: Goodies }>(
     "/:id",
@@ -41,7 +44,7 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await createGoodies(fastify, goodiesInfo);
+      await createGoodies(fastify, goodiesInfo, userId);
 
       return reply.status(201).send("Goodies created");
     }
