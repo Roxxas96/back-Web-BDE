@@ -84,7 +84,7 @@ export async function getUsers(fastify: FastifyInstance) {
   }
 
   return users.map((val) => {
-    return { name: val.name };
+    return { pseudo: val.pseudo };
   });
 }
 
