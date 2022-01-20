@@ -249,9 +249,14 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
         return challenge;
       },
-      createChallenge: async function (challengeInfo: ChallengeInfo) {
+      createChallenge: async function (
+        challengeInfo: ChallengeInfo,
+        creatorId: number
+      ) {
         try {
-          await client.challenges.create({ data: challengeInfo });
+          await client.challenges.create({
+            data: { ...challengeInfo, creatorId: creatorId },
+          });
         } catch (err) {
           if (err instanceof Error) {
             if (
@@ -498,7 +503,10 @@ declare module "fastify" {
           challengeId: number
         ) => Promise<void>;
         deleteChallenge: (challengeId: number) => Promise<void>;
-        createChallenge: (challengeInfo: ChallengeInfo) => Promise<void>;
+        createChallenge: (
+          challengeInfo: ChallengeInfo,
+          creatorId: number
+        ) => Promise<void>;
         getChallenge: (challengeId: number) => Promise<Challenges>;
         getChallenges: () => Promise<Challenges[]>;
       };
