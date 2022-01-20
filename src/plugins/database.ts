@@ -521,6 +521,16 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
             data: { userId: userId, goodiesId: goodiesId },
           });
         } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Not enought money in wallet")) {
+              throw fastify.httpErrors.badRequest(
+                "Not enought money in wallet"
+              );
+            }
+            if (err.message.includes("Limit reached")) {
+              throw fastify.httpErrors.badRequest("Purchase limit reached");
+            }
+          }
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Create Error on Table Purchases"

@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS "Goodies" (
     description TEXT DEFAULT '',
     image TEXT DEFAULT '',
     price INTEGER DEFAULT 0 CHECK (price >= 0),
+    "buyLimit" INTEGER DEFAULT 1 CHECK ("buyLimit" >= 0),
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "creatorId" INTEGER NOT NULL,
     CONSTRAINT "goodiesCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
@@ -75,6 +76,7 @@ BEGIN
     END IF;
 	IF NEW.validation = 1 THEN
         SELECT reward INTO gain FROM "Challenges" WHERE id = NEW."challengeId";
+
 		UPDATE "Users" SET wallet = wallet + gain WHERE id = NEW."userId";
 	END IF;
 
@@ -82,8 +84,43 @@ BEGIN
 END;
 $$;
 
-CREATE TRIGGER increase_wallet
+CREATE OR REPLACE TRIGGER increase_wallet
     BEFORE UPDATE
     ON "Accomplishments"
     FOR EACH ROW
     EXECUTE PROCEDURE on_validation_update();
+
+CREATE OR REPLACE FUNCTION on_purchase()
+  RETURNS TRIGGER 
+  LANGUAGE PLPGSQL
+  AS
+$$
+DECLARE
+	cost INTEGER;
+    bank INTEGER;
+    bought_count INTEGER;
+    bought_limit INTEGER;
+BEGIN
+    SELECT price, "buyLimit" INTO cost, bought_limit FROM "Goodies" WHERE id = NEW."goodiesId";
+    SELECT wallet INTO bank FROM "Users" WHERE id = NEW."userId";
+    SELECT count(id) INTO bought_count FROM "Purchases" WHERE "userId" = NEW."userId";
+
+    IF bought_count >= bought_limit THEN
+        RAISE EXCEPTION 'Limit reached';
+    END IF;
+
+    IF cost > bank THEN
+        RAISE EXCEPTION 'Not enought money in wallet';
+    END IF;
+
+    UPDATE "Users" SET wallet = wallet - cost WHERE id = NEW."userId";
+
+	RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER increase_wallet
+    BEFORE INSERT
+    ON "Purchases"
+    FOR EACH ROW
+    EXECUTE PROCEDURE on_purchase();
