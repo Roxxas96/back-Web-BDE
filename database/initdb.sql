@@ -31,6 +31,7 @@ CREATE TABLE If NOT EXISTS "Accomplishments" (
     "userId" INTEGER NOT NULL,
     "challengeId" INTEGER NOT NULL,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    proof TEXT DEFAULT '',
     validation INTEGER CHECK (validation = 1 OR validation = -1),
     CONSTRAINT "accomplishmentCreator" FOREIGN KEY ("userId") REFERENCES "Users" ("id"),
     CONSTRAINT "accomplishmentChallenge" FOREIGN KEY ("challengeId") REFERENCES "Challenges" ("id")
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS "Goodies" (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) DEFAULT "Unnamed goodies",
     description TEXT DEFAULT '',
+    image TEXT DEFAULT '',
     price INTEGER DEFAULT 0 CHECK (price >= 0),
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     "creatorId" INTEGER NOT NULL,

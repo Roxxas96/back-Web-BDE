@@ -348,10 +348,18 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return accomplishment;
       },
       createAccomplishment: async function (
-        accomplishmentInfo: AccomplishmentInfo
+        accomplishmentInfo: AccomplishmentInfo,
+        userId: number,
+        challengeId: number
       ) {
         try {
-          await client.accomplishments.create({ data: accomplishmentInfo });
+          await client.accomplishments.create({
+            data: {
+              ...accomplishmentInfo,
+              userId: userId,
+              challengeId: challengeId,
+            },
+          });
         } catch (err) {
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
@@ -360,13 +368,14 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
       updateAccomplishment: async function (
-        accomplishmentInfo: AccomplishmentInfo,
-        accomplishmentId: number
+        accomplishmentId: number,
+        validation?: 1 | -1,
+        accomplishmentInfo?: AccomplishmentInfo
       ) {
         try {
           await client.accomplishments.update({
             where: { id: accomplishmentId },
-            data: accomplishmentInfo,
+            data: { ...accomplishmentInfo, validation: validation },
           });
         } catch (err) {
           if (err instanceof Error) {
@@ -396,22 +405,6 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Delete Error on Table Accomplishments"
-          );
-        }
-      },
-      validateAccomplishment: async function (
-        accomplishmentId: number,
-        state: 1 | -1
-      ) {
-        try {
-          client.accomplishments.update({
-            where: { id: accomplishmentId },
-            data: { validation: state },
-          });
-        } catch (err) {
-          fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError(
-            "Database Update Error on Table Accomplishments"
           );
         }
       },
@@ -512,21 +505,20 @@ declare module "fastify" {
       };
       accomplishment: {
         updateAccomplishment: (
-          accomplishmentInfo: AccomplishmentInfo,
-          accomplishmentId: number
+          accomplishmentId: number,
+          accomplishmentInfo?: AccomplishmentInfo,
+          validation?: 1 | -1
         ) => Promise<void>;
         deleteAccomplishment: (accomplishmentId: number) => Promise<void>;
         createAccomplishment: (
-          accomplishmentInfo: AccomplishmentInfo
+          accomplishmentInfo: AccomplishmentInfo,
+          userId: number,
+          challengeId: number
         ) => Promise<void>;
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishments>;
         getAccomplishments: () => Promise<Accomplishments[]>;
-        validateAccomplishment: (
-          accomplishmentId: number,
-          state: 1 | -1
-        ) => Promise<void>;
       };
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
