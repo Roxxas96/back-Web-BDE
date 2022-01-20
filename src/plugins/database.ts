@@ -600,7 +600,7 @@ declare module "fastify" {
       purchase: {
         getPurchase: (purchaseId: number) => Promise<Purchases>;
         getManyPurchase: () => Promise<Purchases[]>;
-        createPurchase: () => Promise<void>;
+        createPurchase: (userId: number, goodiesId: number) => Promise<void>;
         deletePurchase: (purchaseId: number) => Promise<void>;
       };
     };
