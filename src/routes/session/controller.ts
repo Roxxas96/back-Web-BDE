@@ -32,6 +32,14 @@ export async function createSession(
   fastify: FastifyInstance,
   userInfo: { email: string; password: string }
 ) {
+  if (!userInfo.email) {
+    throw fastify.httpErrors.badRequest("No email provided");
+  }
+
+  if (!userInfo.password) {
+    throw fastify.httpErrors.badRequest("No password provided");
+  }
+
   //Fetch user
   const user = await fastify.prisma.user.getUserByEMail(userInfo.email);
   if (!user) {
@@ -60,6 +68,10 @@ export async function createSession(
 }
 
 export async function getSession(fastify: FastifyInstance, sessionId: number) {
+  if (!sessionId) {
+    throw fastify.httpErrors.badRequest("Invalid session id");
+  }
+
   const session = await fastify.prisma.session.getSession(sessionId);
 
   //Check if session not found
@@ -71,7 +83,7 @@ export async function getSession(fastify: FastifyInstance, sessionId: number) {
 }
 
 export async function getSessions(fastify: FastifyInstance) {
-  const sessions = await fastify.prisma.session.getSessions();
+  const sessions = await fastify.prisma.session.getManySession();
 
   //Check if session DB empty
   if (!sessions) {

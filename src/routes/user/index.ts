@@ -56,15 +56,18 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     return reply.status(200).send("User updated");
   });
 
-  fastify.delete<{ Reply: string }>("/", async function (request, reply) {
-    const userId = await fastify.auth.authenticate(request.headers);
+  fastify.delete<{ Params: { id: string }; Reply: string }>(
+    "/:id",
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
 
-    await fastify.auth.authorize(userId, 2);
+      await fastify.auth.authorize(userId, 2);
 
-    await deleteUser(fastify, userId);
+      await deleteUser(fastify, parseInt(request.params.id));
 
-    return reply.status(200).send("User deleted");
-  });
+      return reply.status(200).send("User deleted");
+    }
+  );
 };
 
 export default userRoute;

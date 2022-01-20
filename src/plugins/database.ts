@@ -127,7 +127,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return user;
       },
 
-      getUsers: async function () {
+      getManyUser: async function () {
         let Users;
         try {
           Users = await client.users.findMany();
@@ -194,7 +194,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return session;
       },
 
-      getSessions: async function () {
+      getManySession: async function () {
         let Sessions;
         try {
           Sessions = await client.sessions.findMany();
@@ -223,7 +223,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     challenge: {
-      getChallenges: async function () {
+      getManyChallenge: async function () {
         let challenges;
         try {
           challenges = await client.challenges.findMany();
@@ -249,9 +249,14 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
         return challenge;
       },
-      createChallenge: async function (challengeInfo: ChallengeInfo) {
+      createChallenge: async function (
+        challengeInfo: ChallengeInfo,
+        creatorId: number
+      ) {
         try {
-          await client.challenges.create({ data: challengeInfo });
+          await client.challenges.create({
+            data: { ...challengeInfo, creatorId: creatorId },
+          });
         } catch (err) {
           if (err instanceof Error) {
             if (
@@ -316,7 +321,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     accomplishment: {
-      getAccomplishments: async function () {
+      getManyAccomplishment: async function () {
         let accomplishments;
         try {
           accomplishments = await client.accomplishments.findMany();
@@ -343,10 +348,18 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return accomplishment;
       },
       createAccomplishment: async function (
-        accomplishmentInfo: AccomplishmentInfo
+        accomplishmentInfo: AccomplishmentInfo,
+        userId: number,
+        challengeId: number
       ) {
         try {
-          await client.accomplishments.create({ data: accomplishmentInfo });
+          await client.accomplishments.create({
+            data: {
+              ...accomplishmentInfo,
+              userId: userId,
+              challengeId: challengeId,
+            },
+          });
         } catch (err) {
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
@@ -355,13 +368,14 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
       updateAccomplishment: async function (
-        accomplishmentInfo: AccomplishmentInfo,
-        accomplishmentId: number
+        accomplishmentId: number,
+        validation?: 1 | -1,
+        accomplishmentInfo?: AccomplishmentInfo
       ) {
         try {
           await client.accomplishments.update({
             where: { id: accomplishmentId },
-            data: accomplishmentInfo,
+            data: { ...accomplishmentInfo, validation: validation },
           });
         } catch (err) {
           if (err instanceof Error) {
@@ -394,22 +408,6 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           );
         }
       },
-      validateAccomplishment: async function (
-        accomplishmentId: number,
-        state: 1 | -1
-      ) {
-        try {
-          client.accomplishments.update({
-            where: { id: accomplishmentId },
-            data: { validation: state },
-          });
-        } catch (err) {
-          fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError(
-            "Database Update Error on Table Accomplishments"
-          );
-        }
-      },
     },
     goodies: {
       getGoodies: async function (goodiesId: number) {
@@ -420,7 +418,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Fetch Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Goodies"
+          );
         }
         return goodies;
       },
@@ -430,18 +430,25 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           goodies = await client.goodies.findMany();
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Fetch Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Goodies"
+          );
         }
         return goodies;
       },
-      createGoodies: async function (goodiesInfo: GoodiesInfo) {
+      createGoodies: async function (
+        goodiesInfo: GoodiesInfo,
+        creatorId: number
+      ) {
         try {
           await client.goodies.create({
-            data: goodiesInfo,
+            data: { ...goodiesInfo, creatorId: creatorId },
           });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Create Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Goodies"
+          );
         }
       },
       updateGoodies: async function (
@@ -455,7 +462,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Update Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Update Error on Table Goodies"
+          );
         }
       },
       deleteGoodies: async function (goodiesId: number) {
@@ -463,7 +472,9 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           await client.goodies.delete({ where: { id: goodiesId } });
         } catch (err) {
           fastify.log.error(err);
-          throw "Database Delete Error on Table Goodies";
+          throw fastify.httpErrors.internalServerError(
+            "Database Delete Error on Table Goodies"
+          );
         }
       },
     },
@@ -482,14 +493,14 @@ declare module "fastify" {
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
         getUser: (userId: number) => Promise<Users>;
-        getUsers: () => Promise<Users[]>;
+        getManyUser: () => Promise<Users[]>;
         getUserByEMail: (email: string) => Promise<Users>;
       };
       session: {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId: number) => Promise<Sessions>;
-        getSessions: () => Promise<Sessions[]>;
+        getManySession: () => Promise<Sessions[]>;
         getSessionByJWT: (token: string) => Promise<Sessions>;
       };
       challenge: {
@@ -498,32 +509,37 @@ declare module "fastify" {
           challengeId: number
         ) => Promise<void>;
         deleteChallenge: (challengeId: number) => Promise<void>;
-        createChallenge: (challengeInfo: ChallengeInfo) => Promise<void>;
+        createChallenge: (
+          challengeInfo: ChallengeInfo,
+          creatorId: number
+        ) => Promise<void>;
         getChallenge: (challengeId: number) => Promise<Challenges>;
-        getChallenges: () => Promise<Challenges[]>;
+        getManyChallenge: () => Promise<Challenges[]>;
       };
       accomplishment: {
         updateAccomplishment: (
-          accomplishmentInfo: AccomplishmentInfo,
-          accomplishmentId: number
+          accomplishmentId: number,
+          accomplishmentInfo?: AccomplishmentInfo,
+          validation?: 1 | -1
         ) => Promise<void>;
         deleteAccomplishment: (accomplishmentId: number) => Promise<void>;
         createAccomplishment: (
-          accomplishmentInfo: AccomplishmentInfo
+          accomplishmentInfo: AccomplishmentInfo,
+          userId: number,
+          challengeId: number
         ) => Promise<void>;
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishments>;
-        getAccomplishments: () => Promise<Accomplishments[]>;
-        validateAccomplishment: (
-          accomplishmentId: number,
-          state: 1 | -1
-        ) => Promise<void>;
+        getManyAccomplishment: () => Promise<Accomplishments[]>;
       };
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
         getManyGoodies: () => Promise<Goodies[]>;
-        createGoodies: (goodiesInfo: GoodiesInfo) => Promise<void>;
+        createGoodies: (
+          goodiesInfo: GoodiesInfo,
+          creatorId: number
+        ) => Promise<void>;
         updateGoodies: (
           goodiesInfo: GoodiesInfo,
           goodiesId: number

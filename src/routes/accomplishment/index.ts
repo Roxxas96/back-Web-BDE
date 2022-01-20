@@ -10,8 +10,6 @@ import {
   validateAccomplishment,
 } from "./controller";
 
-//TODO : Rework of routes, some are not logic
-
 const accomplishmentRoute: FastifyPluginAsync = async (
   fastify,
   opts
@@ -42,18 +40,23 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       return reply.status(200).send(accomplishment);
     }
   );
-  fastify.put<{ Body: AccomplishmentInfo; Reply: string }>(
-    "/",
-    async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+  fastify.put<{
+    Body: { accomplishmentInfo: AccomplishmentInfo; challengeId: number };
+    Reply: string;
+  }>("/", async function (request, reply) {
+    const userId = await fastify.auth.authenticate(request.headers);
 
-      const accomplishmentInfo = request.body;
+    const accomplishmentInfo = request.body.accomplishmentInfo;
 
-      await createAccomplishment(fastify, accomplishmentInfo);
+    await createAccomplishment(
+      fastify,
+      accomplishmentInfo,
+      userId,
+      request.body.challengeId
+    );
 
-      return reply.status(201).send("Accomplishment created");
-    }
-  );
+    return reply.status(201).send("Accomplishment created");
+  });
   fastify.patch<{
     Params: { id: string };
     Body: AccomplishmentInfo;

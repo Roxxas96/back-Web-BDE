@@ -7,6 +7,18 @@ export async function modifyUser(
   userId: number,
   userInfo: UserInfo
 ) {
+  if (!userId) {
+    throw fastify.httpErrors.badRequest("Invalid user id");
+  }
+
+  if (!userInfo) {
+    throw fastify.httpErrors.badRequest("No user info provided");
+  }
+
+  if (!userInfo.email) {
+    throw fastify.httpErrors.badRequest("No email provided");
+  }
+
   //Check if mail match synthax
   if (userInfo.email && !/\@.*umontpellier\.fr/g.test(userInfo.email)) {
     throw fastify.httpErrors.badRequest(
@@ -14,14 +26,17 @@ export async function modifyUser(
     );
   }
 
-  //Hash password
-  let hashedPassword;
-  if (userInfo.password) {
-    if (userInfo.password.length < 8) {
-      throw fastify.httpErrors.badRequest("User password is too small");
-    }
-    hashedPassword = await hashPassword(userInfo.password);
+  if (!userInfo.password) {
+    throw fastify.httpErrors.badRequest("No password provided");
   }
+
+  if (userInfo.password.length < 8) {
+    throw fastify.httpErrors.badRequest("User password is too small");
+  }
+
+  //Hash password
+  const hashedPassword = await hashPassword(userInfo.password);
+
   if (!hashedPassword) {
     fastify.log.error("Error : hashed password empty on modify user");
     throw fastify.httpErrors.internalServerError("Password hash Error");
@@ -38,21 +53,34 @@ export async function modifyUser(
 }
 
 export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
+  if (!userInfo) {
+    throw fastify.httpErrors.badRequest("No user info provided");
+  }
+
+  if (!userInfo.email) {
+    throw fastify.httpErrors.badRequest("No email provided");
+  }
+
   //Check if mail match synthax
-  if (!/\@.*umontpellier\.fr/g.test(userInfo.email)) {
+  if (userInfo.email && !/\@.*umontpellier\.fr/g.test(userInfo.email)) {
     throw fastify.httpErrors.badRequest(
       "User email must be from umontpellier.fr"
     );
   }
 
-  //Check password length
+  if (!userInfo.password) {
+    throw fastify.httpErrors.badRequest("No password provided");
+  }
+
   if (userInfo.password.length < 8) {
     throw fastify.httpErrors.badRequest("User password is too small");
   }
 
   //Hash password
-  let hashedPassword: string = await hashPassword(userInfo.password);
+  const hashedPassword = await hashPassword(userInfo.password);
+
   if (!hashedPassword) {
+    fastify.log.error("Error : hashed password empty on modify user");
     throw fastify.httpErrors.internalServerError("Password hash Error");
   }
 
@@ -67,6 +95,10 @@ export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
 }
 
 export async function getUser(fastify: FastifyInstance, userId: number) {
+  if (!userId) {
+    throw fastify.httpErrors.badRequest("Invalid user id");
+  }
+
   const user = await fastify.prisma.user.getUser(userId);
 
   if (!user) {
@@ -77,17 +109,21 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
 }
 
 export async function getUsers(fastify: FastifyInstance) {
-  const users = await fastify.prisma.user.getUsers();
+  const users = await fastify.prisma.user.getManyUser();
 
   if (!users || !users.length) {
     throw fastify.httpErrors.notFound("No users in DB");
   }
 
   return users.map((val) => {
-    return { name: val.name };
+    return { pseudo: val.pseudo };
   });
 }
 
 export async function deleteUser(fastify: FastifyInstance, userId: number) {
+  if (!userId) {
+    throw fastify.httpErrors.badRequest("Invalid user id");
+  }
+
   await fastify.prisma.user.deleteUser(userId);
 }

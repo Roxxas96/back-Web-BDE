@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { GoodiesInfo } from "../../models/GoodiesInfo";
+import { GoodiesInfo, GoodiesInfoMinimal } from "../../models/GoodiesInfo";
 
 export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
   if (!goodiesId) {
@@ -22,18 +22,33 @@ export async function getManyGoodies(fastify: FastifyInstance) {
     throw fastify.httpErrors.notFound("No Goodies in DB");
   }
 
-  return goodies;
+  return goodies.map<GoodiesInfoMinimal>((val) => {
+    return {
+      name: val.name,
+      price: val.price,
+      image: val.image,
+    };
+  });
 }
 
 export async function createGoodies(
   fastify: FastifyInstance,
-  goodiesInfo: GoodiesInfo
+  goodiesInfo: GoodiesInfo,
+  creatorId: number
 ) {
-  if (goodiesInfo.price && goodiesInfo.price < 0) {
+  if (!goodiesInfo) {
+    throw fastify.httpErrors.badRequest("No goodies info provided");
+  }
+
+  if (goodiesInfo && goodiesInfo.price && goodiesInfo.price < 0) {
     throw fastify.httpErrors.badRequest("Price must be positive");
   }
 
-  await fastify.prisma.goodies.createGoodies(goodiesInfo);
+  if (!creatorId) {
+    throw fastify.httpErrors.badRequest("Invalid creator id");
+  }
+
+  await fastify.prisma.goodies.createGoodies(goodiesInfo, creatorId);
 }
 
 export async function updateGoodies(
@@ -41,6 +56,10 @@ export async function updateGoodies(
   goodiesInfo: GoodiesInfo,
   goodiesId: number
 ) {
+  if (!goodiesInfo) {
+    throw fastify.httpErrors.badRequest("No goodies info provided");
+  }
+  
   if (goodiesInfo.price && goodiesInfo.price < 0) {
     throw fastify.httpErrors.badRequest("Price must be positive");
   }

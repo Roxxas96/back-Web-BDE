@@ -7,5 +7,5 @@ export interface UserInfo {
 }
 
 export interface UserInfoMinimal {
-  name: string;
+  pseudo: string;
 }
