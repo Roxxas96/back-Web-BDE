@@ -47,6 +47,13 @@ CREATE TABLE IF NOT EXISTS "Goodies" (
     CONSTRAINT "goodiesCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
 );
 
+CREATE TABLE IF NOT EXISTS "Purchases" (
+    id SERIAL PRIMARY KEY,
+    "goodiesId" INTEGER NOT NULL,
+    "userId" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 INSERT INTO "Users" (pseudo, email, password, privilege) VALUES (
     'Admin user',
     'admin@umontpellier.fr',

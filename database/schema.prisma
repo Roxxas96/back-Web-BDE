@@ -23,6 +23,7 @@ model Users {
   challenges Challenges[]
   accomplishment Accomplishments[]
   goodies Goodies[]
+  purchases Purchases[]
 }
 
 model Sessions {
@@ -63,4 +64,14 @@ model Goodies {
   createdAt DateTime @default(now())
   creatorId Int
   goodiesCreator Users @relation(fields: [creatorId], references: [id])
+  purchases Purchases[]
+}
+
+model Purchases {
+  id Int @id @default(autoincrement())
+  goodiesId Int
+  userId Int
+  createdAt DateTime @default(now())
+  purchaseCreator Users @relation(fields: [userId], references: [id])
+  purchaseGoodies Goodies @relation(fields: [goodiesId], references: [id])
 }
