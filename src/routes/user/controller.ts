@@ -101,7 +101,7 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
 }
 
 export async function getUsers(fastify: FastifyInstance) {
-  const users = await fastify.prisma.user.getUsers();
+  const users = await fastify.prisma.user.getManyUser();
 
   if (!users || !users.length) {
     throw fastify.httpErrors.notFound("No users in DB");

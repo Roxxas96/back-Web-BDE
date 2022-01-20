@@ -67,7 +67,7 @@ export async function getChallenge(
 }
 
 export async function getChallenges(fastify: FastifyInstance) {
-  const challenges = await fastify.prisma.challenge.getChallenges();
+  const challenges = await fastify.prisma.challenge.getManyChallenge();
 
   //Check if challenge DB empty
   if (!challenges || !challenges.length) {

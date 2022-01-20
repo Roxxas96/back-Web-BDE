@@ -22,7 +22,7 @@ export async function getAccomplishment(
 
 export async function getAccomplishments(fastify: FastifyInstance) {
   const accomplishments =
-    await fastify.prisma.accomplishment.getAccomplishments();
+    await fastify.prisma.accomplishment.getManyAccomplishment();
 
   if (!accomplishments || !accomplishments.length) {
     throw fastify.httpErrors.notFound("No Accomplishments in DB");

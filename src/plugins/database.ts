@@ -127,7 +127,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return user;
       },
 
-      getUsers: async function () {
+      getManyUser: async function () {
         let Users;
         try {
           Users = await client.users.findMany();
@@ -194,7 +194,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         return session;
       },
 
-      getSessions: async function () {
+      getManySession: async function () {
         let Sessions;
         try {
           Sessions = await client.sessions.findMany();
@@ -223,7 +223,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     challenge: {
-      getChallenges: async function () {
+      getManyChallenge: async function () {
         let challenges;
         try {
           challenges = await client.challenges.findMany();
@@ -321,7 +321,7 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     accomplishment: {
-      getAccomplishments: async function () {
+      getManyAccomplishment: async function () {
         let accomplishments;
         try {
           accomplishments = await client.accomplishments.findMany();
@@ -483,14 +483,14 @@ declare module "fastify" {
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
         getUser: (userId: number) => Promise<Users>;
-        getUsers: () => Promise<Users[]>;
+        getManyUser: () => Promise<Users[]>;
         getUserByEMail: (email: string) => Promise<Users>;
       };
       session: {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId: number) => Promise<Sessions>;
-        getSessions: () => Promise<Sessions[]>;
+        getManySession: () => Promise<Sessions[]>;
         getSessionByJWT: (token: string) => Promise<Sessions>;
       };
       challenge: {
@@ -504,7 +504,7 @@ declare module "fastify" {
           creatorId: number
         ) => Promise<void>;
         getChallenge: (challengeId: number) => Promise<Challenges>;
-        getChallenges: () => Promise<Challenges[]>;
+        getManyChallenge: () => Promise<Challenges[]>;
       };
       accomplishment: {
         updateAccomplishment: (
@@ -521,7 +521,7 @@ declare module "fastify" {
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishments>;
-        getAccomplishments: () => Promise<Accomplishments[]>;
+        getManyAccomplishment: () => Promise<Accomplishments[]>;
       };
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
