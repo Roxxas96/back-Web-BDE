@@ -369,8 +369,8 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
       updateAccomplishment: async function (
         accomplishmentId: number,
-        validation?: 1 | -1,
-        accomplishmentInfo?: AccomplishmentInfo
+        accomplishmentInfo?: AccomplishmentInfo,
+        validation?: 1 | -1
       ) {
         try {
           await client.accomplishments.update({
