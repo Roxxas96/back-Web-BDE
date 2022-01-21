@@ -5,8 +5,11 @@ export interface AccomplishmentInfo {
 
 export const AccomplishmentSchema = {
   type: "object",
+  description: "Accomplishment metadata",
   required: [],
+
   properties: {
     proof: { type: "string" },
   },
+  additionalProperties: false
 };

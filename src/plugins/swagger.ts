@@ -29,8 +29,22 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
       produces: ["application/json"],
       tags: [
         { name: "user", description: "User related end-points" },
+        {
+          name: "session",
+          description: "End-points related to user connection",
+        },
         { name: "challenge", description: "Challenge related end-points" },
+        {
+          name: "accomplishment",
+          description: "End-points related to challenge accomplishment",
+        },
         { name: "goodies", description: "Goodies related end-points" },
+        {
+          name: "purchase",
+          description: "End-points related to goodies purchase",
+        },
+        { name: "admin", description: "Admin (or greater) only end-points" },
+        { name: "super admin", description: "Super admin only end-points" },
       ],
       definitions: {
         User: UserSchema,
@@ -46,7 +60,7 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
       },
     },
     uiConfig: {
-      docExpansion: "full",
+      docExpansion: "list",
       deepLinking: false,
     },
     uiHooks: {

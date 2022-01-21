@@ -14,6 +14,7 @@ export interface GoodiesInfoMinimal {
 
 export const GoodiesSchema = {
   type: "object",
+  description: "Goodies metadata",
   required: [],
   properties: {
     name: { type: "string" },
@@ -22,4 +23,5 @@ export const GoodiesSchema = {
     price: { type: "number" },
     buyLimit: { type: "number" },
   },
+  additionalProperties: false
 };

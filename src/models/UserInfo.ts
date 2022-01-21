@@ -12,6 +12,7 @@ export interface UserInfoMinimal {
 
 export const UserSchema = {
   type: "object",
+  description: "User metadata",
   required: ["email", "password"],
   properties: {
     name: { type: "string" },
@@ -20,4 +21,5 @@ export const UserSchema = {
     email: { type: "string", format: "email" },
     password: { type: "string" },
   },
+  additionalProperties: false,
 };
