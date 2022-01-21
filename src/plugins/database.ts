@@ -480,10 +480,12 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     purchase: {
-      getManyPurchase: async function () {
+      getManyPurchase: async function (userId: number) {
         let purchases;
         try {
-          purchases = await client.purchases.findMany();
+          purchases = await client.purchases.findMany({
+            where: { userId: userId },
+          });
         } catch (err) {
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
@@ -607,7 +609,7 @@ declare module "fastify" {
       };
       purchase: {
         getPurchase: (purchaseId: number) => Promise<Purchases>;
-        getManyPurchase: () => Promise<Purchases[]>;
+        getManyPurchase: (userId?: number) => Promise<Purchases[]>;
         createPurchase: (userId: number, goodiesId: number) => Promise<void>;
         deletePurchase: (purchaseId: number) => Promise<void>;
       };

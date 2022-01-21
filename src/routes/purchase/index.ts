@@ -14,9 +14,16 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify.get<{ Reply: Purchases[] }>("/", async function (request, reply) {
     const userId = await fastify.auth.authenticate(request.headers);
 
-    await fastify.auth.authorize(userId, 1);
+    let purchases;
 
-    const purchases = await getManyPurchase(fastify);
+    switch (await fastify.auth.getPrivilege(userId)) {
+      case 0:
+        purchases = await getManyPurchase(fastify, userId);
+        break;
+      default:
+        purchases = await getManyPurchase(fastify);
+        break;
+    }
 
     return reply.status(200).send(purchases);
   });
@@ -24,9 +31,13 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify.get<{ Params: { id: string }; Reply: Purchases }>(
     "/:id",
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const purchase = await getPurchase(fastify, parseInt(request.params.id));
+
+      if (purchase.userId !== userId) {
+        await fastify.auth.authorize(userId, 1);
+      }
 
       return reply.status(200).send(purchase);
     }
@@ -46,7 +57,9 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 1);
 
       await deletePurchase(fastify, parseInt(request.params.id));
 

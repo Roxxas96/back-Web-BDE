@@ -17,8 +17,11 @@ export async function getPurchase(
   return purchase;
 }
 
-export async function getManyPurchase(fastify: FastifyInstance) {
-  const purchases = await fastify.prisma.purchase.getManyPurchase();
+export async function getManyPurchase(
+  fastify: FastifyInstance,
+  userId?: number
+) {
+  const purchases = await fastify.prisma.purchase.getManyPurchase(userId);
 
   if (!purchases || !purchases.length) {
     throw fastify.httpErrors.notFound("No Purchases in DB");
