@@ -9,3 +9,15 @@ export interface UserInfo {
 export interface UserInfoMinimal {
   pseudo: string;
 }
+
+export const UserSchema = {
+  type: "object",
+  required: ["email", "password"],
+  properties: {
+    name: { type: "string" },
+    surname: { type: "string" },
+    pseudo: { type: "string" },
+    email: { type: "string", format: "email" },
+    password: { type: "string" },
+  },
+};
