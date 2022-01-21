@@ -322,16 +322,20 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     accomplishment: {
-      getManyAccomplishment: async function () {
+      getManyAccomplishment: async function (userId?: number) {
         let accomplishments;
+        console.log(userId);
         try {
-          accomplishments = await client.accomplishments.findMany();
+          accomplishments = await client.accomplishments.findMany({
+            where: { userId: userId },
+          });
         } catch (err) {
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Fetch Error on Table Accomplishments"
           );
         }
+        console.log(accomplishments);
         return accomplishments;
       },
       getAccomplishment: async function (accomplishmentId: number) {
@@ -601,7 +605,7 @@ declare module "fastify" {
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishments>;
-        getManyAccomplishment: () => Promise<Accomplishments[]>;
+        getManyAccomplishment: (userId?: number) => Promise<Accomplishments[]>;
       };
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;

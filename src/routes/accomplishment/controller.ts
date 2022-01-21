@@ -1,3 +1,4 @@
+import { Accomplishments } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
@@ -20,12 +21,15 @@ export async function getAccomplishment(
   return accomplishment;
 }
 
-export async function getAccomplishments(fastify: FastifyInstance) {
+export async function getManyAccomplishment(
+  fastify: FastifyInstance,
+  userId?: number
+) {
   const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment();
+    await fastify.prisma.accomplishment.getManyAccomplishment(userId);
 
   if (!accomplishments || !accomplishments.length) {
-    throw fastify.httpErrors.notFound("No Accomplishments in DB");
+    throw fastify.httpErrors.notFound("No Accomplishments found");
   }
 
   return accomplishments;
@@ -59,27 +63,39 @@ export async function createAccomplishment(
 export async function updateAccomplishment(
   fastify: FastifyInstance,
   accomplishmentInfo: AccomplishmentInfo,
-  accomplishmentId: number
+  accomplishment: Accomplishments
 ) {
-  if (!accomplishmentId) {
+  if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
+  if (accomplishment.validation) {
+    throw fastify.httpErrors.badRequest(
+      "Can't modify a validated accomplishment"
+    );
+  }
+
   await fastify.prisma.accomplishment.updateAccomplishment(
-    accomplishmentId,
+    accomplishment.id,
     accomplishmentInfo
   );
 }
 
 export async function deleteAccomplishment(
   fastify: FastifyInstance,
-  accomplishmentId: number
+  accomplishment: Accomplishments
 ) {
-  if (!accomplishmentId) {
+  if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
-  await fastify.prisma.accomplishment.deleteAccomplishment(accomplishmentId);
+  if (accomplishment.validation) {
+    throw fastify.httpErrors.badRequest(
+      "Can't modify a validated accomplishment"
+    );
+  }
+
+  await fastify.prisma.accomplishment.deleteAccomplishment(accomplishment.id);
 }
 
 export async function validateAccomplishment(
@@ -97,7 +113,7 @@ export async function validateAccomplishment(
 
   await fastify.prisma.accomplishment.updateAccomplishment(
     accomplishmentId,
-    {},
+    undefined,
     validation
   );
 }

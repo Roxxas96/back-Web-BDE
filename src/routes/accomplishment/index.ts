@@ -5,7 +5,7 @@ import {
   createAccomplishment,
   deleteAccomplishment,
   getAccomplishment,
-  getAccomplishments,
+  getManyAccomplishment,
   updateAccomplishment,
   validateAccomplishment,
 } from "./controller";
@@ -19,9 +19,18 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      await fastify.auth.authorize(userId, 1);
+      let accomplishments;
 
-      const accomplishments = await getAccomplishments(fastify);
+      switch (await fastify.auth.getPrivilege(userId)) {
+        //Classic user route
+        case 0:
+          accomplishments = await getManyAccomplishment(fastify, userId);
+          break;
+        //Admin route
+        default:
+          accomplishments = await getManyAccomplishment(fastify);
+          break;
+      }
 
       return reply.status(200).send(accomplishments);
     }
@@ -30,23 +39,28 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   fastify.get<{ Params: { id: string; Reply: Accomplishments } }>(
     "/:id",
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const accomplishment = await getAccomplishment(
         fastify,
         parseInt(request.params.id)
       );
 
+      //Classic users can't fetch other's accomplishments
+      if (accomplishment.userId !== userId) {
+        await fastify.auth.authorize(userId, 1);
+      }
+
       return reply.status(200).send(accomplishment);
     }
   );
   fastify.put<{
-    Body: { accomplishmentInfo: AccomplishmentInfo; challengeId: number };
+    Body: { Info: AccomplishmentInfo; challengeId: number };
     Reply: string;
   }>("/", async function (request, reply) {
     const userId = await fastify.auth.authenticate(request.headers);
 
-    const accomplishmentInfo = request.body.accomplishmentInfo;
+    const accomplishmentInfo = request.body.Info;
 
     await createAccomplishment(
       fastify,
@@ -62,15 +76,21 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     Body: AccomplishmentInfo;
     Reply: string;
   }>("/:id", async function (request, reply) {
-    await fastify.auth.authenticate(request.headers);
+    const userId = await fastify.auth.authenticate(request.headers);
 
     const accomplishmentInfo = request.body;
 
-    await updateAccomplishment(
+    const accomplishment = await getAccomplishment(
       fastify,
-      accomplishmentInfo,
       parseInt(request.params.id)
     );
+
+    //Need super admin to modify other's accomplishments
+    if (accomplishment.userId !== userId) {
+      await fastify.auth.authorize(userId, 2);
+    }
+
+    await updateAccomplishment(fastify, accomplishmentInfo, accomplishment);
 
     return reply.status(201).send("Accomplishment updated");
   });
@@ -78,9 +98,19 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
-      await deleteAccomplishment(fastify, parseInt(request.params.id));
+      const accomplishment = await getAccomplishment(
+        fastify,
+        parseInt(request.params.id)
+      );
+
+      //Need super admin to delete other's accomplishments
+      if (accomplishment.userId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
+
+      await deleteAccomplishment(fastify, accomplishment);
 
       return reply.status(200).send("Accomplishment deleted");
     }
