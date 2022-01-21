@@ -35,7 +35,10 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
       //Hash token
       const hashedToken = hashJWT(token);
 
-      const session = await fastify.prisma.session.getSessionByJWT(hashedToken);
+      const session = await fastify.prisma.session.getSession(
+        undefined,
+        hashedToken
+      );
 
       //Check if session is empty or userId doesn't match
       if (!session || session.userId !== payload.id) {

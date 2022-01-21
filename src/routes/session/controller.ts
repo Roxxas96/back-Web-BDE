@@ -41,7 +41,7 @@ export async function createSession(
   }
 
   //Fetch user
-  const user = await fastify.prisma.user.getUserByEMail(userInfo.email);
+  const user = await fastify.prisma.user.getUser(undefined, userInfo.email);
   if (!user) {
     throw fastify.httpErrors.notFound("User not found");
   }
@@ -82,7 +82,7 @@ export async function getSession(fastify: FastifyInstance, sessionId: number) {
   return session;
 }
 
-export async function getSessions(fastify: FastifyInstance) {
+export async function getManySession(fastify: FastifyInstance) {
   const sessions = await fastify.prisma.session.getManySession();
 
   //Check if session DB empty

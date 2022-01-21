@@ -113,11 +113,11 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
 
-      getUser: async function (userId: number) {
+      getUser: async function (userId?: number, email?: string) {
         let user;
         try {
           user = await client.users.findUnique({
-            where: { id: userId },
+            where: { id: userId, email: email },
           });
         } catch (err) {
           fastify.log.error(err);
@@ -139,19 +139,6 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           );
         }
         return Users;
-      },
-
-      getUserByEMail: async function (email: string) {
-        let user;
-        try {
-          user = await client.users.findUnique({ where: { email: email } });
-        } catch (err) {
-          fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError(
-            "Database Fetch Error on Table Users"
-          );
-        }
-        return user;
       },
     },
     //Session queries
@@ -180,11 +167,11 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
 
-      getSession: async function (sessionId: number) {
+      getSession: async function (sessionId?: number, jwt?: string) {
         let session;
         try {
           session = await client.sessions.findUnique({
-            where: { id: sessionId },
+            where: { id: sessionId, jwt: jwt },
           });
         } catch (err) {
           fastify.log.error(err);
@@ -566,16 +553,14 @@ declare module "fastify" {
         updateUser: (userId: number, userInfo: UserInfo) => Promise<void>;
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
-        getUser: (userId: number) => Promise<Users>;
+        getUser: (userId?: number, email?: string) => Promise<Users>;
         getManyUser: () => Promise<Users[]>;
-        getUserByEMail: (email: string) => Promise<Users>;
       };
       session: {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
-        getSession: (sessionId: number) => Promise<Sessions>;
+        getSession: (sessionId?: number, jwt?: string) => Promise<Sessions>;
         getManySession: () => Promise<Sessions[]>;
-        getSessionByJWT: (token: string) => Promise<Sessions>;
       };
       challenge: {
         updateChallenge: (
