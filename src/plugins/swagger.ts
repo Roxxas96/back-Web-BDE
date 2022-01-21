@@ -1,5 +1,8 @@
 import fp from "fastify-plugin";
 import swagger from "fastify-swagger";
+import { ChallengeSchema } from "../models/ChallengeInfo";
+import { GoodiesSchema } from "../models/GoodiesInfo";
+import { UserSchema } from "../models/UserInfo";
 
 export interface SwaggerPluginOptions {
   // Specify Support plugin options here
@@ -30,46 +33,9 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
         { name: "goodies", description: "Goodies related end-points" },
       ],
       definitions: {
-        User: {
-          type: "object",
-          required: ["id", "email", "password"],
-          properties: {
-            id: { type: "number" },
-            name: { type: "string" },
-            surname: { type: "string" },
-            pseudo: { type: "string" },
-            email: { type: "string", format: "student email" },
-            password: { type: "string", format: "password" },
-            privilege: { type: "number" },
-            wallet: { type: "number" },
-          },
-        },
-        Challenge: {
-          type: "object",
-          required: ["id", "creatorId"],
-          properties: {
-            id: { type: "number" },
-            name: { type: "string" },
-            description: { type: "string" },
-            reward: { type: "number" },
-            creatorId: { type: "number" },
-            createdAt: { type: "date" },
-          },
-        },
-        Goodies: {
-          type: "object",
-          required: ["id", "creatorId"],
-          properties: {
-            id: { type: "number" },
-            name: { type: "string" },
-            description: { type: "string" },
-            image: { type: "string" },
-            price: { type: "number" },
-            buyLimit: { type: "number" },
-            creatorId: { type: "number" },
-            createdAt: { type: "date" },
-          },
-        },
+        User: UserSchema,
+        Challenge: ChallengeSchema,
+        Goodies: GoodiesSchema,
       },
       securityDefinitions: {
         apiKey: {
