@@ -1,6 +1,9 @@
 import { Accomplishments } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
-import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
+import {
+  AccomplishmentInfo,
+  AccomplishmentSchema,
+} from "../../models/AccomplishmentInfo";
 import {
   createAccomplishment,
   deleteAccomplishment,
@@ -16,6 +19,12 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{ Reply: Accomplishments[] }>(
     "/",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Fetch info on user's accomplishments",
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
@@ -36,8 +45,22 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: string; Reply: Accomplishments } }>(
+  fastify.get<{ Params: { id: string }; Reply: Accomplishments }>(
     "/:id",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Fetch info on a specific user's accomplishment",
+        params: {
+          type: "object",
+          description: "Id of the accomplishment to fetch",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
@@ -57,46 +80,98 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   fastify.put<{
     Body: { Info: AccomplishmentInfo; challengeId: number };
     Reply: string;
-  }>("/", async function (request, reply) {
-    const userId = await fastify.auth.authenticate(request.headers);
+  }>(
+    "/",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Create an accomplishment with the provided info",
+        body: {
+          type: "object",
+          properties: {
+            info: AccomplishmentSchema,
+            challengeId: {
+              type: "number",
+              description: "Id of the challenge related to the accomplishment",
+            },
+          },
+          required: ["info", "challengeId"],
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
 
-    const accomplishmentInfo = request.body.Info;
+      const accomplishmentInfo = request.body.Info;
 
-    await createAccomplishment(
-      fastify,
-      accomplishmentInfo,
-      userId,
-      request.body.challengeId
-    );
+      await createAccomplishment(
+        fastify,
+        accomplishmentInfo,
+        userId,
+        request.body.challengeId
+      );
 
-    return reply.status(201).send("Accomplishment created");
-  });
+      return reply.status(201).send("Accomplishment created");
+    }
+  );
   fastify.patch<{
     Params: { id: string };
     Body: AccomplishmentInfo;
     Reply: string;
-  }>("/:id", async function (request, reply) {
-    const userId = await fastify.auth.authenticate(request.headers);
+  }>(
+    "/:id",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Update info related to a specific user's accomplishment",
+        params: {
+          type: "object",
+          description: "Id of the accomplishment to update",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+        body: AccomplishmentSchema,
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
 
-    const accomplishmentInfo = request.body;
+      const accomplishmentInfo = request.body;
 
-    const accomplishment = await getAccomplishment(
-      fastify,
-      parseInt(request.params.id)
-    );
+      const accomplishment = await getAccomplishment(
+        fastify,
+        parseInt(request.params.id)
+      );
 
-    //Need super admin to modify other's accomplishments
-    if (accomplishment.userId !== userId) {
-      await fastify.auth.authorize(userId, 2);
+      //Need super admin to modify other's accomplishments
+      if (accomplishment.userId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
+
+      await updateAccomplishment(fastify, accomplishmentInfo, accomplishment);
+
+      return reply.status(201).send("Accomplishment updated");
     }
-
-    await updateAccomplishment(fastify, accomplishmentInfo, accomplishment);
-
-    return reply.status(201).send("Accomplishment updated");
-  });
+  );
 
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Delete a specific user's accomplishment",
+        params: {
+          type: "object",
+          description: "Id of the accomplishment to delete",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
@@ -118,6 +193,28 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.patch<{ Params: { id: string }; Body: { state: 1 | -1 } }>(
     "/validate/:id",
+    {
+      schema: {
+        tags: ["accomplishment", "admin"],
+        description: "Validate a specific accomplishment",
+        params: {
+          type: "object",
+          description: "Id of the accomplishment to validate",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+        body: {
+          type: "object",
+          description: "Validation state, it can be Refused: -1 or Accepted: 1",
+          properties: {
+            state: { enum: [1, -1] },
+          },
+          required: ["state"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
