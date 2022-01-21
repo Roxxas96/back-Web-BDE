@@ -23,7 +23,7 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
         url: "https://swagger.io",
         description: "Find more info here",
       },
-      host: "localhost",
+      host: "localhost:3000",
       schemes: ["http"],
       consumes: ["application/json"],
       produces: ["application/json"],
@@ -54,10 +54,11 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
       securityDefinitions: {
         apiKey: {
           type: "apiKey",
-          name: "apiKey",
+          name: "Authorization",
           in: "header",
         },
       },
+      security: [{ apiKey: [] }],
     },
     uiConfig: {
       docExpansion: "list",

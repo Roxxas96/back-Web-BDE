@@ -104,7 +104,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     "/:id",
     {
       schema: {
-        tags: ["user", "admin"],
+        tags: ["user", "super admin"],
         description: "Modify info of the designed user",
         params: {
           type: "object",
@@ -134,7 +134,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     "/:id",
     {
       schema: {
-        tags: ["user", "admin"],
+        tags: ["user", "super admin"],
         description: "Delete the designed user user",
         params: {
           type: "object",
