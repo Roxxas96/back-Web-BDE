@@ -5,7 +5,7 @@ import {
   createUser,
   deleteUser,
   getUser,
-  getUsers,
+  getManyUser,
   modifyUser,
 } from "./controller";
 
@@ -15,7 +15,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const users = await getUsers(fastify);
+      const users = await getManyUser(fastify);
 
       return reply.status(200).send(users);
     }
@@ -52,6 +52,22 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     const userId = await fastify.auth.authenticate(request.headers);
 
     await modifyUser(fastify, userId, userInfo);
+
+    return reply.status(200).send("User updated");
+  });
+
+  fastify.patch<{
+    Params: {id: string}
+    Body: UserInfo;
+    Reply: string;
+  }>("/:id", async function (request, reply) {
+    const userInfo = request.body;
+
+    const userId = await fastify.auth.authenticate(request.headers);
+
+    await fastify.auth.authorize(userId, 2);
+
+    await modifyUser(fastify, parseInt(request.params.id), userInfo);
 
     return reply.status(200).send("User updated");
   });

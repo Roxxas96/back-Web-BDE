@@ -4,7 +4,7 @@ import {
   createSession,
   deleteSession,
   getSession,
-  getSessions,
+  getManySession,
 } from "./controller";
 
 const sessionRoute: FastifyPluginAsync = async (
@@ -16,7 +16,7 @@ const sessionRoute: FastifyPluginAsync = async (
 
     await fastify.auth.authorize(userId, 2);
 
-    const sessions = await getSessions(fastify);
+    const sessions = await getManySession(fastify);
 
     return reply.status(200).send(sessions);
   });

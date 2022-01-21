@@ -108,7 +108,7 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
   return user;
 }
 
-export async function getUsers(fastify: FastifyInstance) {
+export async function getManyUser(fastify: FastifyInstance) {
   const users = await fastify.prisma.user.getManyUser();
 
   if (!users || !users.length) {

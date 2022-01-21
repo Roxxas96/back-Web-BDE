@@ -12,7 +12,7 @@ export interface AuthenticationPluginOptions {
 // to export the decorators to the outer scope
 export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
   const auth = {
-    authenticate: async (headers: IncomingHttpHeaders) => {
+    authenticate: async function (headers: IncomingHttpHeaders) {
       //Check for empty headers
       if (!headers.authorization) {
         throw fastify.httpErrors.unauthorized("No token provided");
@@ -35,7 +35,10 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
       //Hash token
       const hashedToken = hashJWT(token);
 
-      const session = await fastify.prisma.session.getSessionByJWT(hashedToken);
+      const session = await fastify.prisma.session.getSession(
+        undefined,
+        hashedToken
+      );
 
       //Check if session is empty or userId doesn't match
       if (!session || session.userId !== payload.id) {
@@ -44,7 +47,7 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
 
       return payload.id;
     },
-    authorize: async (userId: number, requiredPrivilege: 1 | 2) => {
+    authorize: async function (userId: number, requiredPrivilege: 1 | 2) {
       if (requiredPrivilege < 1 || requiredPrivilege > 2) {
         fastify.httpErrors.internalServerError("Privilege error");
       }
@@ -61,6 +64,16 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
         throw fastify.httpErrors.forbidden("Not enought privilege");
       }
     },
+    getPrivilege: async function (userId: number) {
+      const user = await fastify.prisma.user.getUser(userId);
+
+      //Check if no user found
+      if (!user) {
+        throw fastify.httpErrors.forbidden("User not found");
+      }
+
+      return user.privilege;
+    },
   };
 
   fastify.decorate("auth", auth);
@@ -72,6 +85,7 @@ declare module "fastify" {
     auth: {
       authenticate: (headers: IncomingHttpHeaders) => Promise<number>;
       authorize: (userId: number, requiredPrivilege: 1 | 2) => Promise<void>;
+      getPrivilege: (userId: number) => Promise<number>;
     };
   }
 }

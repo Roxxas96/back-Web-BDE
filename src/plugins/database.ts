@@ -3,6 +3,7 @@ import {
   Challenges,
   Goodies,
   PrismaClient,
+  Purchases,
   Sessions,
   Users,
 } from "@prisma/client";
@@ -112,11 +113,11 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
 
-      getUser: async function (userId: number) {
+      getUser: async function (userId?: number, email?: string) {
         let user;
         try {
           user = await client.users.findUnique({
-            where: { id: userId },
+            where: { id: userId, email: email },
           });
         } catch (err) {
           fastify.log.error(err);
@@ -138,19 +139,6 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           );
         }
         return Users;
-      },
-
-      getUserByEMail: async function (email: string) {
-        let user;
-        try {
-          user = await client.users.findUnique({ where: { email: email } });
-        } catch (err) {
-          fastify.log.error(err);
-          throw fastify.httpErrors.internalServerError(
-            "Database Fetch Error on Table Users"
-          );
-        }
-        return user;
       },
     },
     //Session queries
@@ -179,11 +167,11 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
 
-      getSession: async function (sessionId: number) {
+      getSession: async function (sessionId?: number, jwt?: string) {
         let session;
         try {
           session = await client.sessions.findUnique({
-            where: { id: sessionId },
+            where: { id: sessionId, jwt: jwt },
           });
         } catch (err) {
           fastify.log.error(err);
@@ -321,16 +309,20 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
       },
     },
     accomplishment: {
-      getManyAccomplishment: async function () {
+      getManyAccomplishment: async function (userId?: number) {
         let accomplishments;
+        console.log(userId);
         try {
-          accomplishments = await client.accomplishments.findMany();
+          accomplishments = await client.accomplishments.findMany({
+            where: { userId: userId },
+          });
         } catch (err) {
           fastify.log.error(err);
           throw fastify.httpErrors.internalServerError(
             "Database Fetch Error on Table Accomplishments"
           );
         }
+        console.log(accomplishments);
         return accomplishments;
       },
       getAccomplishment: async function (accomplishmentId: number) {
@@ -381,6 +373,15 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
           if (err instanceof Error) {
             if (err.message.includes("Record to update not found")) {
               throw fastify.httpErrors.notFound("Accomplishment not found");
+            }
+            if (
+              err.message.includes(
+                "Accomplishment has allready a validation state"
+              )
+            ) {
+              throw fastify.httpErrors.badRequest(
+                "Accomplishment was allready validated"
+              );
             }
           }
 
@@ -478,6 +479,68 @@ export default fp<DatabasePluginOptions>(async (fastify, opts) => {
         }
       },
     },
+    purchase: {
+      getManyPurchase: async function (userId: number) {
+        let purchases;
+        try {
+          purchases = await client.purchases.findMany({
+            where: { userId: userId },
+          });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Purchases"
+          );
+        }
+        return purchases;
+      },
+      getPurchase: async function (purchaseId: number) {
+        let purchase;
+        try {
+          purchase = await client.purchases.findUnique({
+            where: { id: purchaseId },
+          });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Fetch Error on Table Purchases"
+          );
+        }
+        return purchase;
+      },
+      createPurchase: async function (userId: number, goodiesId: number) {
+        try {
+          await client.purchases.create({
+            data: { userId: userId, goodiesId: goodiesId },
+          });
+        } catch (err) {
+          if (err instanceof Error) {
+            if (err.message.includes("Not enought money in wallet")) {
+              throw fastify.httpErrors.badRequest(
+                "Not enought money in wallet"
+              );
+            }
+            if (err.message.includes("Limit reached")) {
+              throw fastify.httpErrors.badRequest("Purchase limit reached");
+            }
+          }
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Create Error on Table Purchases"
+          );
+        }
+      },
+      deletePurchase: async function (purchaseId: number) {
+        try {
+          await client.purchases.delete({ where: { id: purchaseId } });
+        } catch (err) {
+          fastify.log.error(err);
+          throw fastify.httpErrors.internalServerError(
+            "Database Delete Error on Table Purchases"
+          );
+        }
+      },
+    },
   };
 
   fastify.decorate("prisma", prisma);
@@ -492,16 +555,14 @@ declare module "fastify" {
         updateUser: (userId: number, userInfo: UserInfo) => Promise<void>;
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
-        getUser: (userId: number) => Promise<Users>;
+        getUser: (userId?: number, email?: string) => Promise<Users>;
         getManyUser: () => Promise<Users[]>;
-        getUserByEMail: (email: string) => Promise<Users>;
       };
       session: {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
-        getSession: (sessionId: number) => Promise<Sessions>;
+        getSession: (sessionId?: number, jwt?: string) => Promise<Sessions>;
         getManySession: () => Promise<Sessions[]>;
-        getSessionByJWT: (token: string) => Promise<Sessions>;
       };
       challenge: {
         updateChallenge: (
@@ -531,7 +592,7 @@ declare module "fastify" {
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishments>;
-        getManyAccomplishment: () => Promise<Accomplishments[]>;
+        getManyAccomplishment: (userId?: number) => Promise<Accomplishments[]>;
       };
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
@@ -545,6 +606,12 @@ declare module "fastify" {
           goodiesId: number
         ) => Promise<void>;
         deleteGoodies: (goodiesId: number) => Promise<void>;
+      };
+      purchase: {
+        getPurchase: (purchaseId: number) => Promise<Purchases>;
+        getManyPurchase: (userId?: number) => Promise<Purchases[]>;
+        createPurchase: (userId: number, goodiesId: number) => Promise<void>;
+        deletePurchase: (purchaseId: number) => Promise<void>;
       };
     };
   }
