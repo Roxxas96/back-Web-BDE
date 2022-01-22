@@ -1,4 +1,4 @@
-import { Accomplishments } from "@prisma/client";
+import { Accomplishment } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
@@ -29,7 +29,7 @@ export async function getManyAccomplishment(
     await fastify.prisma.accomplishment.getManyAccomplishment(userId);
 
   if (!accomplishments || !accomplishments.length) {
-    throw fastify.httpErrors.notFound("No Accomplishments found");
+    throw fastify.httpErrors.notFound("No Accomplishment found");
   }
 
   return accomplishments;
@@ -63,7 +63,7 @@ export async function createAccomplishment(
 export async function updateAccomplishment(
   fastify: FastifyInstance,
   accomplishmentInfo: AccomplishmentInfo,
-  accomplishment: Accomplishments
+  accomplishment: Accomplishment
 ) {
   if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
@@ -83,7 +83,7 @@ export async function updateAccomplishment(
 
 export async function deleteAccomplishment(
   fastify: FastifyInstance,
-  accomplishment: Accomplishments
+  accomplishment: Accomplishment
 ) {
   if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");

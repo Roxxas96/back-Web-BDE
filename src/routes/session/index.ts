@@ -1,4 +1,4 @@
-import { Sessions } from "@prisma/client";
+import { Session } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import {
   createSession,
@@ -11,7 +11,7 @@ const sessionRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Sessions[] }>(
+  fastify.get<{ Reply: Session[] }>(
     "/",
     {
       schema: {
@@ -30,7 +30,7 @@ const sessionRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Sessions }>(
+  fastify.get<{ Params: { id: number }; Reply: Session }>(
     "/:id",
     {
       schema: {

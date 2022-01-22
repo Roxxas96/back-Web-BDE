@@ -87,7 +87,7 @@ export async function getManySession(fastify: FastifyInstance) {
 
   //Check if session DB empty
   if (!sessions) {
-    throw fastify.httpErrors.notFound("No Sessions in DB");
+    throw fastify.httpErrors.notFound("No Session in DB");
   }
 
   return sessions;

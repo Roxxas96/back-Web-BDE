@@ -1,4 +1,4 @@
-import { Purchases } from "@prisma/client";
+import { Purchase } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import {
   createPurchase,
@@ -11,7 +11,7 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Purchases[] }>(
+  fastify.get<{ Reply: Purchase[] }>(
     "/",
     {
       schema: {
@@ -37,7 +37,7 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Purchases }>(
+  fastify.get<{ Params: { id: number }; Reply: Purchase }>(
     "/:id",
     {
       schema: {

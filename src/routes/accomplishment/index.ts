@@ -1,4 +1,4 @@
-import { Accomplishments } from "@prisma/client";
+import { Accomplishment } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import {
   AccomplishmentInfo,
@@ -17,7 +17,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Accomplishments[] }>(
+  fastify.get<{ Reply: Accomplishment[] }>(
     "/",
     {
       schema: {
@@ -45,7 +45,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Accomplishments }>(
+  fastify.get<{ Params: { id: number }; Reply: Accomplishment }>(
     "/:id",
     {
       schema: {

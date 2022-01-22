@@ -8,32 +8,32 @@ export function accomplishmentQueries(
 ) {
   return {
     getManyAccomplishment: async function (userId?: number) {
-      let accomplishments;
+      let accomplishment;
       console.log(userId);
       try {
-        accomplishments = await client.accomplishments.findMany({
+        accomplishment = await client.accomplishment.findMany({
           where: { userId: userId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Accomplishments"
+          "Database Fetch Error on Table Accomplishment"
         );
       }
-      console.log(accomplishments);
-      return accomplishments;
+      console.log(accomplishment);
+      return accomplishment;
     },
 
     getAccomplishment: async function (accomplishmentId: number) {
       let accomplishment;
       try {
-        accomplishment = await client.accomplishments.findUnique({
+        accomplishment = await client.accomplishment.findUnique({
           where: { id: accomplishmentId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Accomplishments"
+          "Database Fetch Error on Table Accomplishment"
         );
       }
       return accomplishment;
@@ -45,7 +45,7 @@ export function accomplishmentQueries(
       challengeId: number
     ) {
       try {
-        await client.accomplishments.create({
+        await client.accomplishment.create({
           data: {
             ...accomplishmentInfo,
             userId: userId,
@@ -64,7 +64,7 @@ export function accomplishmentQueries(
         }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Accomplishments"
+          "Database Create Error on Table Accomplishment"
         );
       }
     },
@@ -75,7 +75,7 @@ export function accomplishmentQueries(
       validation?: 1 | -1
     ) {
       try {
-        await client.accomplishments.update({
+        await client.accomplishment.update({
           where: { id: accomplishmentId },
           data: { ...accomplishmentInfo, validation: validation },
         });
@@ -97,14 +97,14 @@ export function accomplishmentQueries(
 
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table Accomplishments"
+          "Database Update Error on Table Accomplishment"
         );
       }
     },
 
     deleteAccomplishment: async function (accomplishmentId: number) {
       try {
-        await client.accomplishments.delete({
+        await client.accomplishment.delete({
           where: { id: accomplishmentId },
         });
       } catch (err) {
@@ -116,7 +116,7 @@ export function accomplishmentQueries(
 
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Accomplishments"
+          "Database Delete Error on Table Accomplishment"
         );
       }
     },

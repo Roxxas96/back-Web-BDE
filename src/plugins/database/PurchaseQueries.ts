@@ -7,30 +7,30 @@ export function purchaseQueries(
 ) {
   return {
     getManyPurchase: async function (userId: number) {
-      let purchases;
+      let purchase;
       try {
-        purchases = await client.purchases.findMany({
+        purchase = await client.purchase.findMany({
           where: { userId: userId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Purchases"
+          "Database Fetch Error on Table Purchase"
         );
       }
-      return purchases;
+      return purchase;
     },
 
     getPurchase: async function (purchaseId: number) {
       let purchase;
       try {
-        purchase = await client.purchases.findUnique({
+        purchase = await client.purchase.findUnique({
           where: { id: purchaseId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Purchases"
+          "Database Fetch Error on Table Purchase"
         );
       }
       return purchase;
@@ -38,7 +38,7 @@ export function purchaseQueries(
 
     createPurchase: async function (userId: number, goodiesId: number) {
       try {
-        await client.purchases.create({
+        await client.purchase.create({
           data: { userId: userId, goodiesId: goodiesId },
         });
       } catch (err) {
@@ -52,14 +52,14 @@ export function purchaseQueries(
         }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Purchases"
+          "Database Create Error on Table Purchase"
         );
       }
     },
 
     deletePurchase: async function (purchaseId: number) {
       try {
-        await client.purchases.delete({ where: { id: purchaseId } });
+        await client.purchase.delete({ where: { id: purchaseId } });
       } catch (err) {
         if (err instanceof Error) {
           if (err.message.includes("Record to delete does not exist")) {
@@ -68,7 +68,7 @@ export function purchaseQueries(
         }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Purchases"
+          "Database Delete Error on Table Purchase"
         );
       }
     },

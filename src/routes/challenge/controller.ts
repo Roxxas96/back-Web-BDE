@@ -1,4 +1,4 @@
-import { Challenges } from "@prisma/client";
+import { Challenge } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import {
   ChallengeInfo,
@@ -74,7 +74,7 @@ export async function getChallenge(
   return convertTime(challenge);
 }
 
-export async function getChallenges(fastify: FastifyInstance) {
+export async function getManyChallenge(fastify: FastifyInstance) {
   const challenges = await fastify.prisma.challenge.getManyChallenge();
 
   //Check if challenge DB empty
@@ -92,7 +92,7 @@ export async function getChallenges(fastify: FastifyInstance) {
 }
 
 //Convert UTC time depending on user's timezone
-function convertTime(challenge: Challenges) {
+function convertTime(challenge: Challenge) {
   challenge.createdAt.setMinutes(
     challenge.createdAt.getMinutes() - challenge.createdAt.getTimezoneOffset()
   );

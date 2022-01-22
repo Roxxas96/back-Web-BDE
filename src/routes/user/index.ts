@@ -1,4 +1,4 @@
-import { Users } from "@prisma/client";
+import { User } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import { UserInfo, UserInfoMinimal, UserSchema } from "../../models/UserInfo";
 import {
@@ -27,7 +27,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Users }>(
+  fastify.get<{ Params: { id: number }; Reply: User }>(
     "/:id",
     {
       schema: {

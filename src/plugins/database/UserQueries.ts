@@ -6,7 +6,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     updateUser: async function (userId: number, userInfo: UserInfo) {
       try {
-        await client.users.update({
+        await client.user.update({
           where: { id: userId },
           data: userInfo,
         });
@@ -22,14 +22,14 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
 
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table Users"
+          "Database Update Error on Table User"
         );
       }
     },
 
     createUser: async function (userInfo: UserInfo) {
       try {
-        await client.users.create({
+        await client.user.create({
           data: userInfo,
         });
       } catch (err) {
@@ -44,14 +44,14 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
 
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Users"
+          "Database Create Error on Table User"
         );
       }
     },
 
     deleteUser: async function (userId: number) {
       try {
-        await fastify.prisma.client.users.delete({
+        await fastify.prisma.client.user.delete({
           where: { id: userId },
         });
       } catch (err) {
@@ -63,7 +63,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
 
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Users"
+          "Database Fetch Error on Table User"
         );
       }
     },
@@ -71,29 +71,29 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     getUser: async function (userId?: number, email?: string) {
       let user;
       try {
-        user = await client.users.findUnique({
+        user = await client.user.findUnique({
           where: { id: userId, email: email },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Users"
+          "Database Fetch Error on Table User"
         );
       }
       return user;
     },
 
     getManyUser: async function () {
-      let Users;
+      let User;
       try {
-        Users = await client.users.findMany();
+        User = await client.user.findMany();
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Users"
+          "Database Fetch Error on Table User"
         );
       }
-      return Users;
+      return User;
     },
   };
 }

@@ -1,4 +1,4 @@
-import { Challenges } from "@prisma/client";
+import { Challenge } from "@prisma/client";
 import { FastifyPluginAsync } from "fastify";
 import {
   ChallengeInfo,
@@ -9,7 +9,7 @@ import {
   createChallenge,
   deleteChallenge,
   getChallenge,
-  getChallenges,
+  getManyChallenge,
   updateChallenge,
 } from "./controller";
 
@@ -22,18 +22,18 @@ const challengeRoute: FastifyPluginAsync = async (
     {
       schema: {
         tags: ["challenge"],
-        description: "Fetch Minimal info on all Challenges",
+        description: "Fetch Minimal info on all Challenge",
       },
     },
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const challenges = await getChallenges(fastify);
+      const challenges = await getManyChallenge(fastify);
 
       return reply.status(200).send(challenges);
     }
   );
-  fastify.get<{ Params: { id: number }; Reply: Challenges }>(
+  fastify.get<{ Params: { id: number }; Reply: Challenge }>(
     "/:id",
     {
       schema: {
@@ -52,10 +52,7 @@ const challengeRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const challenge = await getChallenge(
-        fastify,
-        request.params.id
-      );
+      const challenge = await getChallenge(fastify, request.params.id);
 
       return reply.status(200).send(challenge);
     }
@@ -114,11 +111,7 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await updateChallenge(
-        fastify,
-        request.params.id,
-        challengeInfo
-      );
+      await updateChallenge(fastify, request.params.id, challengeInfo);
 
       return reply.status(200).send("Challenge updated");
     }

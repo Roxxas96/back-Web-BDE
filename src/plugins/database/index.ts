@@ -1,11 +1,11 @@
 import {
-  Accomplishments,
-  Challenges,
+  Accomplishment,
+  Challenge,
   Goodies,
   PrismaClient,
-  Purchases,
-  Sessions,
-  Users,
+  Purchase,
+  Session,
+  User,
 } from "@prisma/client";
 import fp from "fastify-plugin";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
@@ -77,15 +77,15 @@ declare module "fastify" {
         updateUser: (userId: number, userInfo: UserInfo) => Promise<void>;
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
-        getUser: (userId?: number, email?: string) => Promise<Users>;
-        getManyUser: () => Promise<Users[]>;
+        getUser: (userId?: number, email?: string) => Promise<User>;
+        getManyUser: () => Promise<User[]>;
       };
 
       session: {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
-        getSession: (sessionId?: number, jwt?: string) => Promise<Sessions>;
-        getManySession: () => Promise<Sessions[]>;
+        getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
+        getManySession: () => Promise<Session[]>;
       };
 
       challenge: {
@@ -98,8 +98,8 @@ declare module "fastify" {
           challengeInfo: ChallengeInfo,
           creatorId: number
         ) => Promise<void>;
-        getChallenge: (challengeId: number) => Promise<Challenges>;
-        getManyChallenge: () => Promise<Challenges[]>;
+        getChallenge: (challengeId: number) => Promise<Challenge>;
+        getManyChallenge: () => Promise<Challenge[]>;
       };
 
       accomplishment: {
@@ -116,8 +116,8 @@ declare module "fastify" {
         ) => Promise<void>;
         getAccomplishment: (
           accomplishmentId: number
-        ) => Promise<Accomplishments>;
-        getManyAccomplishment: (userId?: number) => Promise<Accomplishments[]>;
+        ) => Promise<Accomplishment>;
+        getManyAccomplishment: (userId?: number) => Promise<Accomplishment[]>;
       };
 
       goodies: {
@@ -135,8 +135,8 @@ declare module "fastify" {
       };
 
       purchase: {
-        getPurchase: (purchaseId: number) => Promise<Purchases>;
-        getManyPurchase: (userId?: number) => Promise<Purchases[]>;
+        getPurchase: (purchaseId: number) => Promise<Purchase>;
+        getManyPurchase: (userId?: number) => Promise<Purchase[]>;
         createPurchase: (userId: number, goodiesId: number) => Promise<void>;
         deletePurchase: (purchaseId: number) => Promise<void>;
       };
