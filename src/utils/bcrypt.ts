@@ -1,5 +1,6 @@
 import * as bcrypt from "bcrypt";
 
+//Compare two passwords
 export async function comparePassword(
   password: string,
   hashedPassword: string
@@ -13,6 +14,7 @@ export async function comparePassword(
   return match;
 }
 
+//Hash a password
 export async function hashPassword(password: string) {
   let hash;
   try {

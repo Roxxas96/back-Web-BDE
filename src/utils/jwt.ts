@@ -1,7 +1,8 @@
 import * as jwt from "jsonwebtoken";
 
-const defaultSecretKey: jwt.Secret = "secrettoken";
+const defaultSecretKey: string = process.env["JWT_TOKEN"] || "secrettoken";
 
+//Get payload from a JWT, payloads contains userId
 export function getPayload(token: string) {
   return new Promise<{ id: number } | undefined>((resolve, reject) => {
     jwt.verify(
@@ -17,6 +18,7 @@ export function getPayload(token: string) {
   });
 }
 
+//Create JWT from the provided payload
 export function createJWT(payload: Object) {
   return new Promise<string | undefined>((resolve, reject) => {
     jwt.sign(
