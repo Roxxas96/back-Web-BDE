@@ -37,7 +37,7 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: string }; Reply: Purchases }>(
+  fastify.get<{ Params: { id: number }; Reply: Purchases }>(
     "/:id",
     {
       schema: {
@@ -56,7 +56,7 @@ const purchaseRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const purchase = await getPurchase(fastify, parseInt(request.params.id));
+      const purchase = await getPurchase(fastify, request.params.id);
 
       if (purchase.userId !== userId) {
         await fastify.auth.authorize(userId, 1);
@@ -91,7 +91,7 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.delete<{ Params: { id: string }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: string }>(
     "/:id",
     {
       schema: {
@@ -112,7 +112,7 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deletePurchase(fastify, parseInt(request.params.id));
+      await deletePurchase(fastify, request.params.id);
 
       return reply.status(200).send("Purchase deleted");
     }

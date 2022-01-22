@@ -45,7 +45,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: string }; Reply: Accomplishments }>(
+  fastify.get<{ Params: { id: number }; Reply: Accomplishments }>(
     "/:id",
     {
       schema: {
@@ -66,7 +66,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       const accomplishment = await getAccomplishment(
         fastify,
-        parseInt(request.params.id)
+        request.params.id
       );
 
       //Classic users can't fetch other's accomplishments
@@ -115,7 +115,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
   fastify.patch<{
-    Params: { id: string };
+    Params: { id: number };
     Body: AccomplishmentInfo;
     Reply: string;
   }>(
@@ -142,7 +142,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       const accomplishment = await getAccomplishment(
         fastify,
-        parseInt(request.params.id)
+        request.params.id
       );
 
       //Need super admin to modify other's accomplishments
@@ -156,7 +156,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.delete<{ Params: { id: string }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: string }>(
     "/:id",
     {
       schema: {
@@ -177,7 +177,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       const accomplishment = await getAccomplishment(
         fastify,
-        parseInt(request.params.id)
+        request.params.id
       );
 
       //Need super admin to delete other's accomplishments
@@ -191,7 +191,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.patch<{ Params: { id: string }; Body: { state: 1 | -1 } }>(
+  fastify.patch<{ Params: { id: number }; Body: { state: 1 | -1 } }>(
     "/validate/:id",
     {
       schema: {
@@ -223,7 +223,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       await validateAccomplishment(
         fastify,
         request.body.state,
-        parseInt(request.params.id)
+        request.params.id
       );
 
       return reply.status(201).send("Accomplishment validation changed");

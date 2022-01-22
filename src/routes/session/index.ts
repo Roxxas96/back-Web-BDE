@@ -30,7 +30,7 @@ const sessionRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: string }; Reply: Sessions }>(
+  fastify.get<{ Params: { id: number }; Reply: Sessions }>(
     "/:id",
     {
       schema: {
@@ -51,7 +51,7 @@ const sessionRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 2);
 
-      const session = await getSession(fastify, parseInt(request.params.id));
+      const session = await getSession(fastify, request.params.id);
 
       return reply.status(200).send(session);
     }

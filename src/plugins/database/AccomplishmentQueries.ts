@@ -53,6 +53,15 @@ export function accomplishmentQueries(
           },
         });
       } catch (err) {
+        if (err instanceof Error) {
+          if (
+            err.message.includes(
+              "Foreign key constraint failed on the field: `accomplishmentChallenge (index)`"
+            )
+          ) {
+            throw fastify.httpErrors.badRequest("Invalid challenge id");
+          }
+        }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
           "Database Create Error on Table Accomplishments"

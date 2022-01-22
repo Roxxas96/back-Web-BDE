@@ -33,7 +33,7 @@ const challengeRoute: FastifyPluginAsync = async (
       return reply.status(200).send(challenges);
     }
   );
-  fastify.get<{ Params: { id: string }; Reply: Challenges }>(
+  fastify.get<{ Params: { id: number }; Reply: Challenges }>(
     "/:id",
     {
       schema: {
@@ -54,7 +54,7 @@ const challengeRoute: FastifyPluginAsync = async (
 
       const challenge = await getChallenge(
         fastify,
-        parseInt(request.params.id)
+        request.params.id
       );
 
       return reply.status(200).send(challenge);
@@ -86,7 +86,7 @@ const challengeRoute: FastifyPluginAsync = async (
   );
   fastify.patch<{
     Body: ChallengeInfo;
-    Params: { id: string };
+    Params: { id: number };
     Reply: string;
   }>(
     "/:id",
@@ -116,14 +116,14 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await updateChallenge(
         fastify,
-        parseInt(request.params.id),
+        request.params.id,
         challengeInfo
       );
 
       return reply.status(200).send("Challenge updated");
     }
   );
-  fastify.delete<{ Params: { id: string }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: string }>(
     "/:id",
     {
       schema: {
@@ -144,7 +144,7 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deleteChallenge(fastify, parseInt(request.params.id));
+      await deleteChallenge(fastify, request.params.id);
 
       return reply.status(200).send("Challenge deleted");
     }

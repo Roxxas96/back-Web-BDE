@@ -34,7 +34,7 @@ const goodiesRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Params: { id: string }; Reply: Goodies }>(
+  fastify.get<{ Params: { id: number }; Reply: Goodies }>(
     "/:id",
     {
       schema: {
@@ -53,7 +53,7 @@ const goodiesRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const goodies = await getGoodies(fastify, parseInt(request.params.id));
+      const goodies = await getGoodies(fastify, request.params.id);
 
       return reply.status(200).send(goodies);
     }
@@ -81,7 +81,7 @@ const goodiesRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.patch<{ Body: GoodiesInfo; Params: { id: string }; Reply: string }>(
+  fastify.patch<{ Body: GoodiesInfo; Params: { id: number }; Reply: string }>(
     "/:id",
     {
       schema: {
@@ -105,13 +105,13 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await updateGoodies(fastify, goodiesInfo, parseInt(request.params.id));
+      await updateGoodies(fastify, goodiesInfo, request.params.id);
 
       return reply.status(201).send("Goodies updated");
     }
   );
 
-  fastify.delete<{ Params: { id: string } }>(
+  fastify.delete<{ Params: { id: number } }>(
     "/:id",
     {
       schema: {
@@ -132,7 +132,7 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deleteGoodies(fastify, parseInt(request.params.id));
+      await deleteGoodies(fastify, request.params.id);
 
       return reply.status(200).send("Goodies deleted");
     }

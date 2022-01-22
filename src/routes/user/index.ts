@@ -27,7 +27,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     }
   );
 
-  fastify.get<{ Params: { id: string }; Reply: Users }>(
+  fastify.get<{ Params: { id: number }; Reply: Users }>(
     "/:id",
     {
       schema: {
@@ -46,7 +46,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const user = await getUser(fastify, parseInt(request.params.id));
+      const user = await getUser(fastify, request.params.id);
 
       return reply.status(200).send(user);
     }
@@ -97,7 +97,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   );
 
   fastify.patch<{
-    Params: { id: string };
+    Params: { id: number };
     Body: UserInfo;
     Reply: string;
   }>(
@@ -124,13 +124,13 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await fastify.auth.authorize(userId, 2);
 
-      await modifyUser(fastify, parseInt(request.params.id), userInfo);
+      await modifyUser(fastify, request.params.id, userInfo);
 
       return reply.status(200).send("User updated");
     }
   );
 
-  fastify.delete<{ Params: { id: string }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: string }>(
     "/:id",
     {
       schema: {
@@ -151,7 +151,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await fastify.auth.authorize(userId, 2);
 
-      await deleteUser(fastify, parseInt(request.params.id));
+      await deleteUser(fastify, request.params.id);
 
       return reply.status(200).send("User deleted");
     }
