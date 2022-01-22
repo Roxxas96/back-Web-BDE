@@ -1,3 +1,4 @@
+//Metadata for users
 export interface UserInfo {
   email: string;
   password: string;
@@ -6,10 +7,12 @@ export interface UserInfo {
   pseudo?: string;
 }
 
+//Privacy fiendly infos un users
 export interface UserInfoMinimal {
   pseudo: string;
 }
 
+//Schema used for requests
 export const UserSchema = {
   type: "object",
   description: "User metadata",

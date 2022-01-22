@@ -1,8 +1,9 @@
+//Metadata fot accomplishments
 export interface AccomplishmentInfo {
   proof?: string;
 }
-//TODO Rework on Ids, replace with entity (ex creatorId => creatorInfos)
 
+//Schema used for requests
 export const AccomplishmentSchema = {
   type: "object",
   description: "Accomplishment metadata",

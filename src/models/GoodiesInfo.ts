@@ -1,3 +1,4 @@
+//Metadata for goodies
 export interface GoodiesInfo {
   name?: string;
   description?: string;
@@ -6,12 +7,14 @@ export interface GoodiesInfo {
   image?: string;
 }
 
+//Minimal format of goodies info
 export interface GoodiesInfoMinimal {
   name: string;
   price: number;
   image: string;
 }
 
+//Schema used for requests
 export const GoodiesSchema = {
   type: "object",
   description: "Goodies metadata",
@@ -23,5 +26,5 @@ export const GoodiesSchema = {
     price: { type: "number" },
     buyLimit: { type: "number" },
   },
-  additionalProperties: false
+  additionalProperties: false,
 };
