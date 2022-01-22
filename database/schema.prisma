@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Users {
+model User {
   id       Int        @id @default(autoincrement())
   name     String @default("")
   surname  String @default("")
@@ -19,40 +19,40 @@ model Users {
   password String
   privilege  Int    @default(0)
   wallet Int @default(0)
-  sessions Sessions[]
-  challenges Challenges[]
-  accomplishment Accomplishments[]
+  sessions Session[]
+  challenges Challenge[]
+  accomplishment Accomplishment[]
   goodies Goodies[]
-  purchases Purchases[]
+  purchases Purchase[]
 }
 
-model Sessions {
+model Session {
   id          Int    @id @default(autoincrement())
   userId      Int
   jwt         String @unique
-  userSession Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userSession User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Challenges {
+model Challenge {
   id Int @id @default(autoincrement())
   name String @default("Unnamed challenge")
   description String @default("")
   reward Int @default(0)
   createdAt DateTime @default(now())
   creatorId Int?
-  challengeCreator Users? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
-  accomplishements Accomplishments[]
+  challengeCreator User? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  accomplishements Accomplishment[]
 }
 
-model Accomplishments {
+model Accomplishment {
   id Int @id @default(autoincrement())
   userId Int?
   challengeId Int?
   createdAt DateTime @default(now())
   proof String @default("")
   validation Int?
-  accomplishmentCreator Users? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  accomplishmentChallenge Challenges? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+  accomplishmentCreator User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  accomplishmentChallenge Challenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
 }
 
 model Goodies {
@@ -64,15 +64,15 @@ model Goodies {
   image String @default("")
   createdAt DateTime @default(now())
   creatorId Int?
-  goodiesCreator Users? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
-  purchases Purchases[]
+  goodiesCreator User? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  purchases Purchase[]
 }
 
-model Purchases {
+model Purchase {
   id Int @id @default(autoincrement())
   goodiesId Int?
   userId Int?
   createdAt DateTime @default(now())
-  purchaseCreator Users? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  purchaseCreator User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   purchaseGoodies Goodies? @relation(fields: [goodiesId], references: [id], onDelete: SetNull)
 }
