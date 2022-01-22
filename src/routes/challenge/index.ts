@@ -5,7 +5,6 @@ import {
   ChallengeInfoMinimal,
   ChallengeSchema,
 } from "../../models/ChallengeInfo";
-import { GoodiesSchema } from "../../models/GoodiesInfo";
 import {
   createChallenge,
   deleteChallenge,
@@ -103,7 +102,7 @@ const challengeRoute: FastifyPluginAsync = async (
           },
           required: ["id"],
         },
-        body: GoodiesSchema,
+        body: ChallengeSchema,
       },
     },
     async function (request, reply) {
