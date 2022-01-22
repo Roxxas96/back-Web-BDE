@@ -6,6 +6,7 @@ export function purchaseQueries(
   client: PrismaClient
 ) {
   return {
+    //Get Many purchase, by default fetch all DB, if a userId is provided just fetch purchase made by this user
     getManyPurchase: async function (userId: number) {
       let purchase;
       try {
@@ -21,6 +22,7 @@ export function purchaseQueries(
       return purchase;
     },
 
+    //Get a purchase by Id
     getPurchase: async function (purchaseId: number) {
       let purchase;
       try {
@@ -36,6 +38,7 @@ export function purchaseQueries(
       return purchase;
     },
 
+    //Create a purchase
     createPurchase: async function (userId: number, goodiesId: number) {
       try {
         await client.purchase.create({
@@ -57,6 +60,7 @@ export function purchaseQueries(
       }
     },
 
+    //Delete a purchase
     deletePurchase: async function (purchaseId: number) {
       try {
         await client.purchase.delete({ where: { id: purchaseId } });

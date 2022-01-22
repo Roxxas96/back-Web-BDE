@@ -4,6 +4,21 @@ import { GoodiesInfo } from "../../models/GoodiesInfo";
 
 export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
+    //Get all goodies in DB
+    getManyGoodies: async function () {
+      let goodies;
+      try {
+        goodies = await client.goodies.findMany();
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "Database Fetch Error on Table Goodies"
+        );
+      }
+      return goodies;
+    },
+
+    //Get a goodies by Id
     getGoodies: async function (goodiesId: number) {
       let goodies;
       try {
@@ -19,19 +34,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       return goodies;
     },
 
-    getManyGoodies: async function () {
-      let goodies;
-      try {
-        goodies = await client.goodies.findMany();
-      } catch (err) {
-        fastify.log.error(err);
-        throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Goodies"
-        );
-      }
-      return goodies;
-    },
-
+    //Create a goodies
     createGoodies: async function (
       goodiesInfo: GoodiesInfo,
       creatorId: number
@@ -48,6 +51,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       }
     },
 
+    //Update a goodies by Id
     updateGoodies: async function (
       goodiesInfo: GoodiesInfo,
       goodiesId: number
@@ -65,6 +69,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       }
     },
 
+    //Delete a goodies by Id
     deleteGoodies: async function (goodiesId: number) {
       try {
         await client.goodies.delete({ where: { id: goodiesId } });

@@ -7,6 +7,7 @@ export function accomplishmentQueries(
   client: PrismaClient
 ) {
   return {
+    //Get Many accomplishment, by default fetch all DB, if a userId is provided just fetch accomplishmend made by this user
     getManyAccomplishment: async function (userId?: number) {
       let accomplishment;
       console.log(userId);
@@ -24,6 +25,7 @@ export function accomplishmentQueries(
       return accomplishment;
     },
 
+    //Get an accomplishment by Id
     getAccomplishment: async function (accomplishmentId: number) {
       let accomplishment;
       try {
@@ -39,6 +41,7 @@ export function accomplishmentQueries(
       return accomplishment;
     },
 
+    //Create an accomplishment
     createAccomplishment: async function (
       accomplishmentInfo: AccomplishmentInfo,
       userId: number,
@@ -69,6 +72,7 @@ export function accomplishmentQueries(
       }
     },
 
+    //Update an accomplishment by Id
     updateAccomplishment: async function (
       accomplishmentId: number,
       accomplishmentInfo?: AccomplishmentInfo,
@@ -102,6 +106,7 @@ export function accomplishmentQueries(
       }
     },
 
+    //Delete an accomplishment by Id
     deleteAccomplishment: async function (accomplishmentId: number) {
       try {
         await client.accomplishment.delete({

@@ -7,6 +7,7 @@ export function challengeQueries(
   client: PrismaClient
 ) {
   return {
+    //Get all challenges in DB
     getManyChallenge: async function () {
       let challenge;
       try {
@@ -20,6 +21,7 @@ export function challengeQueries(
       return challenge;
     },
 
+    //Get a challenge by Id
     getChallenge: async function (challengeId: number) {
       let challenge;
       try {
@@ -35,6 +37,7 @@ export function challengeQueries(
       return challenge;
     },
 
+    //Create a challenge
     createChallenge: async function (
       challengeInfo: ChallengeInfo,
       creatorId: number
@@ -61,6 +64,7 @@ export function challengeQueries(
       }
     },
 
+    //Update a challenge by Id
     updateChallenge: async function (
       challengeInfo: ChallengeInfo,
       challengeId: number
@@ -91,6 +95,7 @@ export function challengeQueries(
       }
     },
 
+    //Delete a challenge by Id
     deleteChallenge: async function (challengeId: number) {
       try {
         await client.challenge.delete({ where: { id: challengeId } });
