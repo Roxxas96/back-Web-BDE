@@ -30,7 +30,7 @@ model Sessions {
   id          Int    @id @default(autoincrement())
   userId      Int
   jwt         String @unique
-  userSession Users @relation(fields: [userId], references: [id])
+  userSession Users @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Challenges {
@@ -39,20 +39,20 @@ model Challenges {
   description String @default("")
   reward Int @default(0)
   createdAt DateTime @default(now())
-  creatorId Int
-  challengeCreator Users @relation(fields: [creatorId], references: [id])
+  creatorId Int?
+  challengeCreator Users? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
   accomplishements Accomplishments[]
 }
 
 model Accomplishments {
   id Int @id @default(autoincrement())
-  userId Int
-  challengeId Int
+  userId Int?
+  challengeId Int?
   createdAt DateTime @default(now())
   proof String @default("")
   validation Int?
-  accomplishmentCreator Users @relation(fields: [userId], references: [id])
-  accomplishmentChallenge Challenges @relation(fields: [challengeId], references: [id])
+  accomplishmentCreator Users? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  accomplishmentChallenge Challenges? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
 }
 
 model Goodies {
@@ -63,16 +63,16 @@ model Goodies {
   buyLimit Int @default(1)
   image String @default("")
   createdAt DateTime @default(now())
-  creatorId Int
-  goodiesCreator Users @relation(fields: [creatorId], references: [id])
+  creatorId Int?
+  goodiesCreator Users? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
   purchases Purchases[]
 }
 
 model Purchases {
   id Int @id @default(autoincrement())
-  goodiesId Int
-  userId Int
+  goodiesId Int?
+  userId Int?
   createdAt DateTime @default(now())
-  purchaseCreator Users @relation(fields: [userId], references: [id])
-  purchaseGoodies Goodies @relation(fields: [goodiesId], references: [id])
+  purchaseCreator Users? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  purchaseGoodies Goodies? @relation(fields: [goodiesId], references: [id], onDelete: SetNull)
 }

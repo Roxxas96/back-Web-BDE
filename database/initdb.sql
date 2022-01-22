@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "Sessions" (
     id SERIAL PRIMARY KEY,
     "userId" INTEGER NOT NULL,
     jwt VARCHAR(255) NOT NULL UNIQUE,
-    CONSTRAINT "userSession" FOREIGN KEY ("userId") REFERENCES "Users" ("id")
+    CONSTRAINT "userSession" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS "Challenges" (
@@ -22,19 +22,19 @@ CREATE TABLE IF NOT EXISTS "Challenges" (
     description TEXT DEFAULT '',
     reward INTEGER DEFAULT 0 CHECK (reward >= 0),
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "creatorId" INTEGER NOT NULL,
-    CONSTRAINT "challengeCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
+    "creatorId" INTEGER,
+    CONSTRAINT "challengeCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id") ON DELETE SET NULL
 );
 
 CREATE TABLE If NOT EXISTS "Accomplishments" (
     id SERIAL PRIMARY KEY,
-    "userId" INTEGER NOT NULL,
-    "challengeId" INTEGER NOT NULL,
+    "userId" INTEGER,
+    "challengeId" INTEGER,
     proof TEXT DEFAULT '',
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     validation INTEGER CHECK (validation = 1 OR validation = -1),
-    CONSTRAINT "accomplishmentCreator" FOREIGN KEY ("userId") REFERENCES "Users" ("id"),
-    CONSTRAINT "accomplishmentChallenge" FOREIGN KEY ("challengeId") REFERENCES "Challenges" ("id")
+    CONSTRAINT "accomplishmentCreator" FOREIGN KEY ("userId") REFERENCES "Users" ("id") ON DELETE SET NULL,
+    CONSTRAINT "accomplishmentChallenge" FOREIGN KEY ("challengeId") REFERENCES "Challenges" ("id") ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS "Goodies" (
@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS "Goodies" (
     price INTEGER DEFAULT 0 CHECK (price >= 0),
     "buyLimit" INTEGER DEFAULT 1 CHECK ("buyLimit" >= 0),
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    "creatorId" INTEGER NOT NULL,
-    CONSTRAINT "goodiesCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id")
+    "creatorId" INTEGER,
+    CONSTRAINT "goodiesCreator" FOREIGN KEY ("creatorId") REFERENCES "Users" ("id") ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS "Purchases" (
