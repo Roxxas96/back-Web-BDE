@@ -78,7 +78,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
   fastify.put<{
-    Body: { Info: AccomplishmentInfo; challengeId: number };
+    Body: { info: AccomplishmentInfo; challengeId: number };
     Reply: string;
   }>(
     "/",
@@ -102,7 +102,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const accomplishmentInfo = request.body.Info;
+      const accomplishmentInfo = request.body.info;
 
       await createAccomplishment(
         fastify,
