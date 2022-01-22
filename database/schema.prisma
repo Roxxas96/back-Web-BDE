@@ -60,7 +60,7 @@ model Goodies {
   name String @default("Unnamed Goodies")
   description String @default("")
   price Int @default(0)
-  limit Int @default(1)
+  buyLimit Int @default(1)
   image String @default("")
   createdAt DateTime @default(now())
   creatorId Int
