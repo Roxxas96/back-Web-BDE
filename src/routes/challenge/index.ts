@@ -3,7 +3,9 @@ import { FastifyPluginAsync } from "fastify";
 import {
   ChallengeInfo,
   ChallengeInfoMinimal,
+  ChallengeSchema,
 } from "../../models/ChallengeInfo";
+import { GoodiesSchema } from "../../models/GoodiesInfo";
 import {
   createChallenge,
   deleteChallenge,
@@ -18,6 +20,12 @@ const challengeRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{ Reply: ChallengeInfoMinimal[] }>(
     "/",
+    {
+      schema: {
+        tags: ["challenge"],
+        description: "Fetch Minimal info on all Challenges",
+      },
+    },
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
@@ -28,6 +36,20 @@ const challengeRoute: FastifyPluginAsync = async (
   );
   fastify.get<{ Params: { id: string }; Reply: Challenges }>(
     "/:id",
+    {
+      schema: {
+        tags: ["challenge"],
+        description: "Fetch info on a specific challenge",
+        params: {
+          type: "object",
+          description: "Id of the challenge to fetch",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
@@ -42,36 +64,82 @@ const challengeRoute: FastifyPluginAsync = async (
   fastify.put<{
     Body: ChallengeInfo;
     Reply: string;
-  }>("/", async function (request, reply) {
-    const challengeInfo = request.body;
+  }>(
+    "/",
+    {
+      schema: {
+        tags: ["challenge", "admin"],
+        description: "Create a challenge with the provided info",
+        body: ChallengeSchema,
+      },
+    },
+    async function (request, reply) {
+      const challengeInfo = request.body;
 
-    const userId = await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
-    await fastify.auth.authorize(userId, 1);
+      await fastify.auth.authorize(userId, 1);
 
-    await createChallenge(fastify, challengeInfo, userId);
+      await createChallenge(fastify, challengeInfo, userId);
 
-    return reply.status(201).send("Challenge created");
-  });
+      return reply.status(201).send("Challenge created");
+    }
+  );
   fastify.patch<{
     Body: ChallengeInfo;
     Params: { id: string };
     Reply: string;
-  }>("/:id", async function (request, reply) {
-    console.log(typeof request.body.reward);
+  }>(
+    "/:id",
+    {
+      schema: {
+        tags: ["challenge", "admin"],
+        description: "Update a challenge with the provided info",
+        params: {
+          type: "object",
+          description: "Id of the challenge to update",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+        body: GoodiesSchema,
+      },
+    },
+    async function (request, reply) {
+      console.log(typeof request.body.reward);
 
-    const challengeInfo = request.body;
+      const challengeInfo = request.body;
 
-    const userId = await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
-    await fastify.auth.authorize(userId, 1);
+      await fastify.auth.authorize(userId, 1);
 
-    await updateChallenge(fastify, parseInt(request.params.id), challengeInfo);
+      await updateChallenge(
+        fastify,
+        parseInt(request.params.id),
+        challengeInfo
+      );
 
-    return reply.status(200).send("Challenge updated");
-  });
+      return reply.status(200).send("Challenge updated");
+    }
+  );
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
+    {
+      schema: {
+        tags: ["challenge", "admin"],
+        description: "Delete a specific challenge",
+        params: {
+          type: "object",
+          description: "Id of the challenge to delete",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 

@@ -11,25 +11,48 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Purchases[] }>("/", async function (request, reply) {
-    const userId = await fastify.auth.authenticate(request.headers);
+  fastify.get<{ Reply: Purchases[] }>(
+    "/",
+    {
+      schema: {
+        tags: ["purchase"],
+        description: "Fetch user's purchases",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
 
-    let purchases;
+      let purchases;
 
-    switch (await fastify.auth.getPrivilege(userId)) {
-      case 0:
-        purchases = await getManyPurchase(fastify, userId);
-        break;
-      default:
-        purchases = await getManyPurchase(fastify);
-        break;
+      switch (await fastify.auth.getPrivilege(userId)) {
+        case 0:
+          purchases = await getManyPurchase(fastify, userId);
+          break;
+        default:
+          purchases = await getManyPurchase(fastify);
+          break;
+      }
+
+      return reply.status(200).send(purchases);
     }
-
-    return reply.status(200).send(purchases);
-  });
+  );
 
   fastify.get<{ Params: { id: string }; Reply: Purchases }>(
     "/:id",
+    {
+      schema: {
+        tags: ["purchase"],
+        description: "Fetch a specific user's purchase",
+        params: {
+          type: "object",
+          description: "Id of the purchase to fetch",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
@@ -45,6 +68,20 @@ const purchaseRoute: FastifyPluginAsync = async (
 
   fastify.put<{ Body: { goodiesId: string }; Reply: string }>(
     "/",
+    {
+      schema: {
+        tags: ["purchase"],
+        description: "Create a purchase for the current user",
+        body: {
+          type: "object",
+          description: "Id of the goodies to buy",
+          properties: {
+            goodiesId: { type: "number" },
+          },
+          required: ["goodiesId"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
@@ -56,6 +93,20 @@ const purchaseRoute: FastifyPluginAsync = async (
 
   fastify.delete<{ Params: { id: string }; Reply: string }>(
     "/:id",
+    {
+      schema: {
+        tags: ["purchase", "admin"],
+        description: "Delete a purchase (ie. refund the user)",
+        params: {
+          type: "object",
+          description: "Id of the purchase to delete",
+          properties: {
+            id: { type: "number" },
+          },
+          required: ["id"],
+        },
+      },
+    },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
