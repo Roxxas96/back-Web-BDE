@@ -50,7 +50,7 @@ export async function deletePurchase(
   fastify: FastifyInstance,
   purchaseId: number
 ) {
-  if (purchaseId) {
+  if (!purchaseId) {
     throw fastify.httpErrors.badRequest("Invalid purchase id");
   }
 

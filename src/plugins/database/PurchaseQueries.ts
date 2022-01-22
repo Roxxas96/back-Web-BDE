@@ -61,6 +61,11 @@ export function purchaseQueries(
       try {
         await client.purchases.delete({ where: { id: purchaseId } });
       } catch (err) {
+        if (err instanceof Error) {
+          if (err.message.includes("Record to delete does not exist")) {
+            throw fastify.httpErrors.notFound("Purchase not found");
+          }
+        }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
           "Database Delete Error on Table Purchases"

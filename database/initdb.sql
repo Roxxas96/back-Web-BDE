@@ -119,8 +119,30 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE TRIGGER increase_wallet
+CREATE OR REPLACE TRIGGER decrease_wallet
     BEFORE INSERT
     ON "Purchases"
     FOR EACH ROW
     EXECUTE PROCEDURE on_purchase();
+
+CREATE OR REPLACE FUNCTION on_refund()
+  RETURNS TRIGGER 
+  LANGUAGE PLPGSQL
+  AS
+$$
+DECLARE
+	cost INTEGER;
+BEGIN
+    SELECT price INTO cost FROM "Goodies" WHERE id = OLD."goodiesId";
+
+    UPDATE "Users" SET wallet = wallet + cost WHERE id = OLD."userId";
+
+	RETURN OLD;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER increase_wallet
+    BEFORE DELETE
+    ON "Purchases"
+    FOR EACH ROW
+    EXECUTE PROCEDURE on_refund();
