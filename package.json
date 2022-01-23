@@ -8,13 +8,13 @@
   },
   "scripts": {
     "test": "npm run build:ts && tsc -p test/tsconfig.json && tap --ts test/**/*.test.ts",
-    "start": "npm run build:ts && fastify start -l info dist/app.js",
+    "start": "npm run build:ts && npm run prisma && fastify start -l info dist/app.js",
     "build:ts": "tsc",
     "dev": "tsc && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"tsc -w\" \"fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js\"",
     "prisma": "prisma generate --schema=./database/schema.prisma"
   },
   "keywords": [],
-  "author": "",
+  "author": "Alexandre Gomez",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^3.7.0",
