@@ -1,10 +1,16 @@
+//Import Prisma ORM Types
 import { Challenge } from "@prisma/client";
+
 import { FastifyPluginAsync } from "fastify";
+
+//Impor Models
 import {
   ChallengeInfo,
   ChallengeInfoMinimal,
   ChallengeSchema,
 } from "../../models/ChallengeInfo";
+
+//Import controller functions
 import {
   createChallenge,
   deleteChallenge,

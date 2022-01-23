@@ -5,19 +5,23 @@ import {
   ChallengeInfoMinimal,
 } from "../../models/ChallengeInfo";
 
+//Create challenge with provided info
 export async function createChallenge(
   fastify: FastifyInstance,
   challengeInfo: ChallengeInfo,
   creatorId: number
 ) {
+  //Chack challenge info
   if (!challengeInfo) {
     throw fastify.httpErrors.badRequest("No challenge info provided");
   }
 
+  //Check if reward is positive (if provided)
   if (challengeInfo.reward && challengeInfo.reward < 0) {
     throw fastify.httpErrors.badRequest("Reward must pe positive");
   }
 
+  //Chack creatorId
   if (!creatorId) {
     throw fastify.httpErrors.badRequest("Invalid creator id");
   }
@@ -25,19 +29,23 @@ export async function createChallenge(
   await fastify.prisma.challenge.createChallenge(challengeInfo, creatorId);
 }
 
+//Update challenge with provided info by id
 export async function updateChallenge(
   fastify: FastifyInstance,
   challengeId: number,
   challengeInfo: ChallengeInfo
 ) {
+  //Check challenge info
   if (!challengeInfo) {
     throw fastify.httpErrors.badRequest("No challenge info provided");
   }
 
+  //Check if reward is positive (if rewarded)
   if (challengeInfo.reward && challengeInfo.reward < 0) {
     throw fastify.httpErrors.badRequest("Reward must pe positive");
   }
 
+  //Check challengeId
   if (!challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge id");
   }
@@ -45,10 +53,12 @@ export async function updateChallenge(
   await fastify.prisma.challenge.updateChallenge(challengeInfo, challengeId);
 }
 
+//Delete challenge by id
 export async function deleteChallenge(
   fastify: FastifyInstance,
   challengeId: number
 ) {
+  //Check challengeId
   if (!challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge id");
   }
@@ -56,10 +66,12 @@ export async function deleteChallenge(
   await fastify.prisma.challenge.deleteChallenge(challengeId);
 }
 
+//Get challenge by id
 export async function getChallenge(
   fastify: FastifyInstance,
   challengeId: number
 ) {
+  //Check challengeId
   if (!challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge id");
   }
@@ -74,6 +86,7 @@ export async function getChallenge(
   return convertTime(challenge);
 }
 
+//Get all challenge in DB
 export async function getManyChallenge(fastify: FastifyInstance) {
   const challenges = await fastify.prisma.challenge.getManyChallenge();
 
