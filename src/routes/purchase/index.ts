@@ -1,5 +1,9 @@
+//Import Prisma ORM Types
 import { Purchase } from "@prisma/client";
+
 import { FastifyPluginAsync } from "fastify";
+
+//Import contoller functions
 import {
   createPurchase,
   deletePurchase,
