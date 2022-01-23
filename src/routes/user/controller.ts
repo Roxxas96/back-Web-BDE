@@ -2,19 +2,23 @@ import { FastifyInstance } from "fastify";
 import { UserInfo } from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 
+//Update user with provided info by id
 export async function modifyUser(
   fastify: FastifyInstance,
   userId: number,
   userInfo: UserInfo
 ) {
+  //Check uesr id
   if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
+  //Check user info
   if (!userInfo) {
     throw fastify.httpErrors.badRequest("No user info provided");
   }
 
+  //Check user email
   if (!userInfo.email) {
     throw fastify.httpErrors.badRequest("No email provided");
   }
@@ -26,10 +30,12 @@ export async function modifyUser(
     );
   }
 
+  //Check user password
   if (!userInfo.password) {
     throw fastify.httpErrors.badRequest("No password provided");
   }
 
+  //Check password length
   if (userInfo.password.length < 8) {
     throw fastify.httpErrors.badRequest("User password is too small");
   }
@@ -52,11 +58,14 @@ export async function modifyUser(
   });
 }
 
+//Create user with provided info
 export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
+  //Check user info
   if (!userInfo) {
     throw fastify.httpErrors.badRequest("No user info provided");
   }
 
+  //Check email
   if (!userInfo.email) {
     throw fastify.httpErrors.badRequest("No email provided");
   }
@@ -68,10 +77,12 @@ export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
     );
   }
 
+  //Check password
   if (!userInfo.password) {
     throw fastify.httpErrors.badRequest("No password provided");
   }
 
+  //Check password length
   if (userInfo.password.length < 8) {
     throw fastify.httpErrors.badRequest("User password is too small");
   }
@@ -94,13 +105,16 @@ export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
   });
 }
 
+//Get user by id
 export async function getUser(fastify: FastifyInstance, userId: number) {
+  //Check user id
   if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
   const user = await fastify.prisma.user.getUser(userId);
 
+  //Check if user is empty
   if (!user) {
     throw fastify.httpErrors.notFound("User not found");
   }
@@ -108,9 +122,11 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
   return user;
 }
 
+//Get all user in DB
 export async function getManyUser(fastify: FastifyInstance) {
   const users = await fastify.prisma.user.getManyUser();
 
+  //Check if user is empty
   if (!users || !users.length) {
     throw fastify.httpErrors.notFound("No users in DB");
   }
@@ -120,7 +136,9 @@ export async function getManyUser(fastify: FastifyInstance) {
   });
 }
 
+//Delete user by id
 export async function deleteUser(fastify: FastifyInstance, userId: number) {
+  //Check user id
   if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user id");
   }

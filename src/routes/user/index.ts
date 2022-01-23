@@ -1,6 +1,12 @@
+//Import Prisma ORM Types
 import { User } from "@prisma/client";
+
 import { FastifyPluginAsync } from "fastify";
+
+//Import Models
 import { UserInfo, UserInfoMinimal, UserSchema } from "../../models/UserInfo";
+
+//Import controller functions
 import {
   createUser,
   deleteUser,
