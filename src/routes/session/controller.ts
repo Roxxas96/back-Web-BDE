@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { IncomingHttpHeaders } from "http";
 
+//Impor ustils
 import { comparePassword } from "../../utils/bcrypt";
 import { createJWT } from "../../utils/jwt";
 import { hashJWT } from "../../utils/crypto";
@@ -32,10 +33,12 @@ export async function createSession(
   fastify: FastifyInstance,
   userInfo: { email: string; password: string }
 ) {
+  //Check email
   if (!userInfo.email) {
     throw fastify.httpErrors.badRequest("No email provided");
   }
 
+  //Check password
   if (!userInfo.password) {
     throw fastify.httpErrors.badRequest("No password provided");
   }
@@ -68,6 +71,7 @@ export async function createSession(
 }
 
 export async function getSession(fastify: FastifyInstance, sessionId: number) {
+  //Check session id
   if (!sessionId) {
     throw fastify.httpErrors.badRequest("Invalid session id");
   }

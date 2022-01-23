@@ -1,5 +1,9 @@
+//Import Prisma ORM Types
 import { Session } from "@prisma/client";
+
 import { FastifyPluginAsync } from "fastify";
+
+//Import controller functions
 import {
   createSession,
   deleteSession,
