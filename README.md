@@ -10,30 +10,44 @@ Back-end rest API made for student council (BDE in french).
 
 This project was bootstrapped with [Fastify-CLI](https://www.npmjs.com/package/fastify-cli).
 
-## Available Scripts
+## Requirements
+
+- node
+- docker & docker-compose
+
+## Install
+
+### Available Scripts
 
 In the project directory, you can run:
 
-### `npm run dev`
+#### `npm run dev`
 
 To start the app in dev mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-### `npm start`
+#### `npm start`
 
 For production mode
 
-### `npm run prisma`
+#### `npm run prisma`
 
 To build the ORM types needed in the project
 
-## Postgresql database
+### Environment
 
-### Start database
+You need to setup few environment variables to setup your project :
+
+- DATABASE_URI: URI to connect to DB, hint postgresql URI are formated like this : "postgresql://[user]:[password]@[host]/[database]"
+- JWT_TOKEN: JWT secret key to cipher user id, if none provided the key will be "secrettoken"
+- JWT_EXPIRATION: Expiration time for a user session, see [JWT doc](https://www.npmjs.com/package/jsonwebtoken) for formats, if none provided it will be "30d"
+- EMAIL_REGEX: Regex that matches your particular student email, for example : "^[\w\-\.]+@([\w\-]+.)*umontpellier\.fr$" matches emails with umontpellier.fr domain, if none provided regex will match a classic email
+
+### Postgresql database
 
 ### `docker-compose up -d`
 
-In the /database directory
+In the /database directory will start the database accessible from "postgresql://webbde:webbde@localhost:5432/webbde?schema=public" by default
 
 ## Usage
 
