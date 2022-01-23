@@ -1,9 +1,15 @@
+//Import Prisma ORM types
 import { Accomplishment } from "@prisma/client";
+
 import { FastifyPluginAsync } from "fastify";
+
+//Import Models
 import {
   AccomplishmentInfo,
   AccomplishmentSchema,
 } from "../../models/AccomplishmentInfo";
+
+//Import controller functions
 import {
   createAccomplishment,
   deleteAccomplishment,
@@ -53,9 +59,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Fetch info on a specific user's accomplishment",
         params: {
           type: "object",
-          description: "Id of the accomplishment to fetch",
           properties: {
-            id: { type: "number" },
+            id: {
+              type: "number",
+              description: "Id of the accomplishment to fetch",
+            },
           },
           required: ["id"],
         },
@@ -126,9 +134,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Update info related to a specific user's accomplishment",
         params: {
           type: "object",
-          description: "Id of the accomplishment to update",
           properties: {
-            id: { type: "number" },
+            id: {
+              type: "number",
+              description: "Id of the accomplishment to update",
+            },
           },
           required: ["id"],
         },
@@ -164,9 +174,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Delete a specific user's accomplishment",
         params: {
           type: "object",
-          description: "Id of the accomplishment to delete",
           properties: {
-            id: { type: "number" },
+            id: {
+              type: "number",
+              description: "Id of the accomplishment to delete",
+            },
           },
           required: ["id"],
         },
@@ -199,9 +211,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Validate a specific accomplishment",
         params: {
           type: "object",
-          description: "Id of the accomplishment to validate",
           properties: {
-            id: { type: "number" },
+            id: {
+              type: "number",
+              description: "Id of the accomplishment to validate",
+            },
           },
           required: ["id"],
         },
