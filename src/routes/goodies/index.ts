@@ -1,10 +1,16 @@
+//Import Prisma ORM Types
 import { Goodies } from "@prisma/client";
+
 import { FastifyPluginAsync } from "fastify";
+
+//Import Models
 import {
   GoodiesInfo,
   GoodiesInfoMinimal,
   GoodiesSchema,
 } from "../../models/GoodiesInfo";
+
+//Import controller functions
 import {
   createGoodies,
   deleteGoodies,
