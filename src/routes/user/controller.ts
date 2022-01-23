@@ -71,9 +71,14 @@ export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
   }
 
   //Check if mail match synthax
-  if (userInfo.email && !/\@.*umontpellier\.fr/g.test(userInfo.email)) {
+  if (
+    userInfo.email &&
+    !new RegExp(
+      process.env["EMAIL_REGEX"] || /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
+    ).test(userInfo.email)
+  ) {
     throw fastify.httpErrors.badRequest(
-      "User email must be from umontpellier.fr"
+      "User email must match your student email domain"
     );
   }
 
