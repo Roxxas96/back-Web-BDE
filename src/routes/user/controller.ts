@@ -26,7 +26,7 @@ export async function modifyUser(
   //Check if mail match synthax
   if (
     !new RegExp(
-      process.env["EMAIL_REGEX"] || /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
+      process.env["EMAIL_REGEX"] || /^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/g
     ).test(userInfo.email)
   ) {
     throw fastify.httpErrors.badRequest("User email must be a student mail");
