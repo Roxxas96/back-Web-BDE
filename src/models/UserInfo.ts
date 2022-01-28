@@ -10,6 +10,7 @@ export interface UserInfo {
 //Privacy fiendly infos un users
 export interface UserInfoMinimal {
   pseudo: string;
+  id: number;
 }
 
 //Schema used for requests

@@ -9,6 +9,7 @@ export interface ChallengeInfo {
 export interface ChallengeInfoMinimal {
   name: string;
   reward: number;
+  id: number;
 }
 
 //Schema used for requests

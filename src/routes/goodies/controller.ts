@@ -32,6 +32,7 @@ export async function getManyGoodies(fastify: FastifyInstance) {
       name: val.name,
       price: val.price,
       image: val.image,
+      id: val.id
     };
   });
 }

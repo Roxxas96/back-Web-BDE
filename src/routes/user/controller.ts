@@ -139,7 +139,7 @@ export async function getManyUser(fastify: FastifyInstance) {
   }
 
   return users.map((val) => {
-    return { pseudo: val.pseudo };
+    return { pseudo: val.pseudo, id: val.id };
   });
 }
 

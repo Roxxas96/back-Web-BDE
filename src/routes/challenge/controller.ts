@@ -100,6 +100,7 @@ export async function getManyChallenge(fastify: FastifyInstance) {
     return {
       name: val.name,
       reward: val.reward,
+      id: val.id
     };
   });
 }
