@@ -63,7 +63,11 @@ const sessionRoute: FastifyPluginAsync = async (
 
   fastify.put<{
     Body: { email: string; password: string };
-    Reply: { message: string; token: string };
+    Reply: {
+      message: string;
+      token: string;
+      userId: number;
+    };
   }>(
     "/",
     {
@@ -84,11 +88,13 @@ const sessionRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userInfo = request.body;
 
-      const token = await createSession(fastify, userInfo);
+      const session = await createSession(fastify, userInfo);
 
-      return reply
-        .status(201)
-        .send({ message: "Session created", token: token });
+      return reply.status(201).send({
+        message: "Session created",
+        token: session.token,
+        userId: session.userId,
+      });
     }
   );
 

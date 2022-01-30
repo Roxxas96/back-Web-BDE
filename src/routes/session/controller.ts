@@ -67,7 +67,10 @@ export async function createSession(
   //Create session in DB
   await fastify.prisma.session.createSession(hashedToken, user.id);
 
-  return token;
+  return {
+    token,
+    userId: user.id,
+  };
 }
 
 export async function getSession(fastify: FastifyInstance, sessionId: number) {
