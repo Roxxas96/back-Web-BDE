@@ -5,12 +5,14 @@ const defaultSecretKey: string = process.env["JWT_TOKEN"] || "secrettoken";
 //Get payload from a JWT, payloads contains userId
 export function getPayload(token: string) {
   return new Promise<{ id: number } | undefined>((resolve, reject) => {
+    console.log(token);
     jwt.verify(
       token,
       process.env["JWT_TOKEN"] || defaultSecretKey,
       (err, decoded) => {
-        if (err) {
-          reject(err);
+        //Ignore wrong jwt
+        if (err && !err.message.includes("jwt malformed")) {
+          console.error(err);
         }
         resolve(<{ id: number }>decoded);
       }

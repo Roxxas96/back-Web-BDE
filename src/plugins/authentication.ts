@@ -20,10 +20,14 @@ export default fp<AuthenticationPluginOptions>(async (fastify, opts) => {
 
       const token = headers.authorization.replace("Bearer ", "");
 
+      console.log(token.length);
+
       //Check for empty token
       if (!token) {
         throw fastify.httpErrors.unauthorized("No token provided");
       }
+
+      console.log(token);
 
       const payload: { id: number } | undefined = await getPayload(token);
 
