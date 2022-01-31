@@ -126,7 +126,15 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
     throw fastify.httpErrors.notFound("User not found");
   }
 
-  return user;
+  return {
+    id: user.id,
+    name: user.name,
+    surname: user.surname,
+    pseudo: user.pseudo,
+    email: user.email,
+    wallet: user.wallet,
+    privilege: user.privilege,
+  };
 }
 
 //Get all user in DB

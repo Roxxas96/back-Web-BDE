@@ -1,6 +1,4 @@
 //Import Prisma ORM Types
-import { User } from "@prisma/client";
-
 import { FastifyPluginAsync } from "fastify";
 
 //Import Models
@@ -33,7 +31,18 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: User }>(
+  fastify.get<{
+    Params: { id: number };
+    Reply: {
+      id: number;
+      name: string;
+      surname: string;
+      pseudo: string;
+      email: string;
+      wallet: number;
+      privilege: number;
+    };
+  }>(
     "/:id",
     {
       schema: {
