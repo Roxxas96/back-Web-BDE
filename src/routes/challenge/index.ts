@@ -23,7 +23,9 @@ const challengeRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: ChallengeInfoMinimal[] }>(
+  fastify.get<{
+    Reply: { message: string; challenges: ChallengeInfoMinimal[] };
+  }>(
     "/",
     {
       schema: {
@@ -36,10 +38,13 @@ const challengeRoute: FastifyPluginAsync = async (
 
       const challenges = await getManyChallenge(fastify);
 
-      return reply.status(200).send(challenges);
+      return reply.status(200).send({ message: "Success", challenges });
     }
   );
-  fastify.get<{ Params: { id: number }; Reply: Challenge }>(
+  fastify.get<{
+    Params: { id: number };
+    Reply: { message: string; challenge: Challenge };
+  }>(
     "/:id",
     {
       schema: {
@@ -60,12 +65,12 @@ const challengeRoute: FastifyPluginAsync = async (
 
       const challenge = await getChallenge(fastify, request.params.id);
 
-      return reply.status(200).send(challenge);
+      return reply.status(200).send({ message: "Success", challenge });
     }
   );
   fastify.put<{
     Body: ChallengeInfo;
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/",
     {
@@ -84,13 +89,13 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await createChallenge(fastify, challengeInfo, userId);
 
-      return reply.status(201).send("Challenge created");
+      return reply.status(201).send({ message: "Challenge created" });
     }
   );
   fastify.patch<{
     Body: ChallengeInfo;
     Params: { id: number };
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/:id",
     {
@@ -109,7 +114,6 @@ const challengeRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-
       const challengeInfo = request.body;
 
       const userId = await fastify.auth.authenticate(request.headers);
@@ -118,10 +122,10 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await updateChallenge(fastify, request.params.id, challengeInfo);
 
-      return reply.status(200).send("Challenge updated");
+      return reply.status(200).send({ message: "Challenge updated" });
     }
   );
-  fastify.delete<{ Params: { id: number }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
     "/:id",
     {
       schema: {
@@ -144,7 +148,7 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await deleteChallenge(fastify, request.params.id);
 
-      return reply.status(200).send("Challenge deleted");
+      return reply.status(200).send({ message: "Challenge deleted" });
     }
   );
 };

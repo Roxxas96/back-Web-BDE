@@ -15,7 +15,7 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Purchase[] }>(
+  fastify.get<{ Reply: { message: string; purchases: Purchase[] } }>(
     "/",
     {
       schema: {
@@ -37,11 +37,14 @@ const purchaseRoute: FastifyPluginAsync = async (
           break;
       }
 
-      return reply.status(200).send(purchases);
+      return reply.status(200).send({ message: "Success", purchases });
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Purchase }>(
+  fastify.get<{
+    Params: { id: number };
+    Reply: { message: string; purchase: Purchase };
+  }>(
     "/:id",
     {
       schema: {
@@ -66,11 +69,11 @@ const purchaseRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 1);
       }
 
-      return reply.status(200).send(purchase);
+      return reply.status(200).send({ message: "Success", purchase });
     }
   );
 
-  fastify.put<{ Body: { goodiesId: string }; Reply: string }>(
+  fastify.put<{ Body: { goodiesId: string }; Reply: { message: string } }>(
     "/",
     {
       schema: {
@@ -91,11 +94,11 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       await createPurchase(fastify, userId, parseInt(request.body.goodiesId));
 
-      return reply.status(201).send("Purchase created");
+      return reply.status(201).send({ message: "Purchase created" });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
     "/:id",
     {
       schema: {
@@ -118,7 +121,7 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       await deletePurchase(fastify, request.params.id);
 
-      return reply.status(200).send("Purchase deleted");
+      return reply.status(200).send({ message: "Purchase deleted" });
     }
   );
 };

@@ -23,7 +23,9 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Accomplishment[] }>(
+  fastify.get<{
+    Reply: { message: string; accomplishments: Accomplishment[] };
+  }>(
     "/",
     {
       schema: {
@@ -47,11 +49,14 @@ const accomplishmentRoute: FastifyPluginAsync = async (
           break;
       }
 
-      return reply.status(200).send(accomplishments);
+      return reply.status(200).send({ message: "Success", accomplishments });
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Accomplishment }>(
+  fastify.get<{
+    Params: { id: number };
+    Reply: { message: string; accomplishment: Accomplishment };
+  }>(
     "/:id",
     {
       schema: {
@@ -82,12 +87,12 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 1);
       }
 
-      return reply.status(200).send(accomplishment);
+      return reply.status(200).send({ message: "Success", accomplishment });
     }
   );
   fastify.put<{
     Body: { info: AccomplishmentInfo; challengeId: number };
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/",
     {
@@ -119,13 +124,13 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         request.body.challengeId
       );
 
-      return reply.status(201).send("Accomplishment created");
+      return reply.status(201).send({ message: "Accomplishment created" });
     }
   );
   fastify.patch<{
     Params: { id: number };
     Body: AccomplishmentInfo;
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/:id",
     {
@@ -162,11 +167,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       await updateAccomplishment(fastify, accomplishmentInfo, accomplishment);
 
-      return reply.status(201).send("Accomplishment updated");
+      return reply.status(201).send({ message: "Accomplishment updated" });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
     "/:id",
     {
       schema: {
@@ -199,11 +204,15 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       await deleteAccomplishment(fastify, accomplishment);
 
-      return reply.status(200).send("Accomplishment deleted");
+      return reply.status(200).send({ message: "Accomplishment deleted" });
     }
   );
 
-  fastify.patch<{ Params: { id: number }; Body: { state: 1 | -1 } }>(
+  fastify.patch<{
+    Params: { id: number };
+    Body: { state: 1 | -1 };
+    Reply: { message: string };
+  }>(
     "/validate/:id",
     {
       schema: {
@@ -240,7 +249,9 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         request.params.id
       );
 
-      return reply.status(201).send("Accomplishment validation changed");
+      return reply
+        .status(201)
+        .send({ message: "Accomplishment validation changed" });
     }
   );
 };
