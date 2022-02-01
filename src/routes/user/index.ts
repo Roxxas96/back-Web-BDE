@@ -14,7 +14,7 @@ import {
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get<{ Reply: UserInfoMinimal[] }>(
+  fastify.get<{ Reply: { message: string; users: UserInfoMinimal[] } }>(
     "/",
     {
       schema: {
@@ -27,20 +27,23 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const users = await getManyUser(fastify);
 
-      return reply.status(200).send(users);
+      return reply.status(200).send({ message: "Success", users });
     }
   );
 
   fastify.get<{
     Params: { id: number };
     Reply: {
-      id: number;
-      name: string;
-      surname: string;
-      pseudo: string;
-      email: string;
-      wallet: number;
-      privilege: number;
+      message: string;
+      user: {
+        id: number;
+        name: string;
+        surname: string;
+        pseudo: string;
+        email: string;
+        wallet: number;
+        privilege: number;
+      };
     };
   }>(
     "/:id",
@@ -63,13 +66,13 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const user = await getUser(fastify, request.params.id);
 
-      return reply.status(200).send(user);
+      return reply.status(200).send({ message: "Success", user });
     }
   );
 
   fastify.put<{
     Body: UserInfo;
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/",
     {
@@ -84,13 +87,13 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await createUser(fastify, userInfo);
 
-      return reply.status(201).send("User created");
+      return reply.status(201).send({ message: "User created" });
     }
   );
 
   fastify.patch<{
     Body: UserInfo;
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/",
     {
@@ -107,14 +110,14 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await modifyUser(fastify, userId, userInfo);
 
-      return reply.status(200).send("User updated");
+      return reply.status(200).send({ message: "User updated" });
     }
   );
 
   fastify.patch<{
     Params: { id: number };
     Body: UserInfo;
-    Reply: string;
+    Reply: { message: string };
   }>(
     "/:id",
     {
@@ -141,11 +144,11 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await modifyUser(fastify, request.params.id, userInfo);
 
-      return reply.status(200).send("User updated");
+      return reply.status(200).send({ message: "User updated" });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: string }>(
+  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
     "/:id",
     {
       schema: {
@@ -168,7 +171,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await deleteUser(fastify, request.params.id);
 
-      return reply.status(200).send("User deleted");
+      return reply.status(200).send({ message: "User deleted" });
     }
   );
 };

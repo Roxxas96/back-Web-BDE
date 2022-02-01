@@ -23,7 +23,7 @@ const goodiesRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: GoodiesInfoMinimal[] }>(
+  fastify.get<{ Reply: { message: string; goodies: GoodiesInfoMinimal[] } }>(
     "/",
     {
       schema: {
@@ -36,11 +36,14 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       const goodies = await getManyGoodies(fastify);
 
-      return reply.status(200).send(goodies);
+      return reply.status(200).send({ message: "Success", goodies });
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Goodies }>(
+  fastify.get<{
+    Params: { id: number };
+    Reply: { message: string; goodies: Goodies };
+  }>(
     "/:id",
     {
       schema: {
@@ -61,11 +64,11 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       const goodies = await getGoodies(fastify, request.params.id);
 
-      return reply.status(200).send(goodies);
+      return reply.status(200).send({ message: "Success", goodies });
     }
   );
 
-  fastify.put<{ Body: GoodiesInfo; Reply: string }>(
+  fastify.put<{ Body: GoodiesInfo; Reply: { message: string } }>(
     "/",
     {
       schema: {
@@ -83,11 +86,15 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await createGoodies(fastify, goodiesInfo, userId);
 
-      return reply.status(201).send("Goodies created");
+      return reply.status(201).send({ message: "Goodies created" });
     }
   );
 
-  fastify.patch<{ Body: GoodiesInfo; Params: { id: number }; Reply: string }>(
+  fastify.patch<{
+    Body: GoodiesInfo;
+    Params: { id: number };
+    Reply: { message: string };
+  }>(
     "/:id",
     {
       schema: {
@@ -113,11 +120,11 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await updateGoodies(fastify, goodiesInfo, request.params.id);
 
-      return reply.status(201).send("Goodies updated");
+      return reply.status(201).send({ message: "Goodies updated" });
     }
   );
 
-  fastify.delete<{ Params: { id: number } }>(
+  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
     "/:id",
     {
       schema: {
@@ -140,7 +147,7 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await deleteGoodies(fastify, request.params.id);
 
-      return reply.status(200).send("Goodies deleted");
+      return reply.status(200).send({ message: "Goodies deleted" });
     }
   );
 };

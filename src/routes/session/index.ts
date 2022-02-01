@@ -15,7 +15,7 @@ const sessionRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: Session[] }>(
+  fastify.get<{ Reply: { message: string; sessions: Session[] } }>(
     "/",
     {
       schema: {
@@ -30,11 +30,14 @@ const sessionRoute: FastifyPluginAsync = async (
 
       const sessions = await getManySession(fastify);
 
-      return reply.status(200).send(sessions);
+      return reply.status(200).send({ message: "Success", sessions });
     }
   );
 
-  fastify.get<{ Params: { id: number }; Reply: Session }>(
+  fastify.get<{
+    Params: { id: number };
+    Reply: { message: string; session: Session };
+  }>(
     "/:id",
     {
       schema: {
@@ -57,7 +60,7 @@ const sessionRoute: FastifyPluginAsync = async (
 
       const session = await getSession(fastify, request.params.id);
 
-      return reply.status(200).send(session);
+      return reply.status(200).send({ message: "Success", session });
     }
   );
 
@@ -98,7 +101,7 @@ const sessionRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.delete<{ Reply: string }>(
+  fastify.delete<{ Reply: { message: string } }>(
     "/",
     {
       schema: {
@@ -111,7 +114,7 @@ const sessionRoute: FastifyPluginAsync = async (
 
       await deleteSession(fastify, request.headers);
 
-      return reply.status(200).send("Session deleted");
+      return reply.status(200).send({ message: "Session deleted" });
     }
   );
 };
