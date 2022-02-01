@@ -62,6 +62,22 @@ export async function createAccomplishment(
     throw fastify.httpErrors.badRequest("No accomplishment info provided");
   }
 
+  const ownedAccomplishments = await getManyAccomplishment(fastify, userId);
+
+  if (
+    ownedAccomplishments.filter((accomplishment) => {
+      return (
+        (accomplishment.validation === 1 ||
+          accomplishment.validation === null) &&
+        accomplishment.challengeId === challengeId
+      );
+    }).length
+  ) {
+    throw fastify.httpErrors.badRequest(
+      "You already have a Pending or an Accepted accomplishment"
+    );
+  }
+
   await fastify.prisma.accomplishment.createAccomplishment(
     accomplishmentInfo,
     userId,
