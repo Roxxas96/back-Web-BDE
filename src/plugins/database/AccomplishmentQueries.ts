@@ -10,7 +10,6 @@ export function accomplishmentQueries(
     //Get Many accomplishment, by default fetch all DB, if a userId is provided just fetch accomplishmend made by this user
     getManyAccomplishment: async function (userId?: number) {
       let accomplishment;
-      console.log(userId);
       try {
         accomplishment = await client.accomplishment.findMany({
           where: { userId: userId },
@@ -21,7 +20,6 @@ export function accomplishmentQueries(
           "Database Fetch Error on Table Accomplishment"
         );
       }
-      console.log(accomplishment);
       return accomplishment;
     },
 

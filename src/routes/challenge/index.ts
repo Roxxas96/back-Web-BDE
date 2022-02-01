@@ -109,7 +109,6 @@ const challengeRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      console.log(typeof request.body.reward);
 
       const challengeInfo = request.body;
 
