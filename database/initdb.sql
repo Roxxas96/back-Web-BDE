@@ -123,7 +123,7 @@ DECLARE
 BEGIN
     SELECT price, "buyLimit" INTO cost, bought_limit FROM "Goodies" WHERE id = NEW."goodiesId";
     SELECT wallet INTO bank FROM "User" WHERE id = NEW."userId";
-    SELECT count(id) INTO bought_count FROM "Purchase" WHERE "userId" = NEW."userId";
+    SELECT count(p.id) INTO bought_count FROM "Purchase" p INNER JOIN "Goodies" g ON g.id = p."goodiesId" WHERE p."userId" = NEW."userId";
 
     IF bought_count >= bought_limit THEN
         RAISE EXCEPTION 'Limit reached';
