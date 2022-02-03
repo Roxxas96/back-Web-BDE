@@ -17,6 +17,10 @@ This project was bootstrapped with [Fastify-CLI](https://www.npmjs.com/package/f
 
 ## Install
 
+### Install dependancies
+
+`npm install`
+
 ### Available Scripts
 
 In the project directory, you can run:
@@ -24,7 +28,7 @@ In the project directory, you can run:
 #### `npm run dev`
 
 To start the app in dev mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Open [http://localhost:4000](http://localhost:4000) to view it in the browser.
 
 #### `npm start`
 
