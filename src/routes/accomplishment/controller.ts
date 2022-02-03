@@ -62,7 +62,8 @@ export async function createAccomplishment(
     throw fastify.httpErrors.badRequest("No accomplishment info provided");
   }
 
-  const ownedAccomplishments = await getManyAccomplishment(fastify, userId);
+  const ownedAccomplishments =
+    await fastify.prisma.accomplishment.getManyAccomplishment(userId);
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
