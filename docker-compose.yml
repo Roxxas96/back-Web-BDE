@@ -15,3 +15,12 @@ services:
             - POSTGRESQL_USER=webbde
             - POSTGRESQL_PASSWORD=webbde
             - POSTGRESQL_DATABASE=webbde
+    app:
+        image: webbde-back
+        ports:
+            - 4000:4000
+        environment:
+            - DATABASE_URI=postgresql://webbde:webbde@database_db_1:5432/webbde
+            - JWT_TOKEN=secrettoken
+            - JWT_EXPIRATION=30d
+            - EMAIL_REGEX='^[\w-.]+@([\w-]+.)*umontpellier.fr$'
