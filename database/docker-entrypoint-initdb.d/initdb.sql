@@ -87,6 +87,9 @@ $$
 DECLARE
 	gain INTEGER;
 BEGIN
+    IF NEW."challengeId" IS NULL OR NEW."userId" IS NULL THEN
+        RETURN NEW;
+    END IF;
     IF OLD.validation = 1 OR OLD.validation = -1 THEN
         RAISE EXCEPTION 'Accomplishment has allready a validation state';
     END IF;

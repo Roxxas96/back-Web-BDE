@@ -23,7 +23,7 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
         url: "https://swagger.io",
         description: "Find more info here",
       },
-      host: process.env["API-URL"],
+      host: process.env["API-HOST"] || "localhost:4000",
       schemes: ["http"],
       consumes: ["application/json"],
       produces: ["application/json"],
