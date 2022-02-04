@@ -46,6 +46,7 @@ You need to setup few environment variables to setup your project :
 - JWT_TOKEN: JWT secret key to cipher user id, if none provided the key will be "secrettoken"
 - JWT_EXPIRATION: Expiration time for a user session, see [JWT doc](https://www.npmjs.com/package/jsonwebtoken) for formats, if none provided it will be "30d"
 - EMAIL_REGEX: Regex that matches your particular student email, for example : "^[\w\-\.]+@([\w\-]+.)*umontpellier\.fr$" matches emails with umontpellier.fr domain, if none provided regex will match a classic email
+- API-URL: URL user by the swagger to make API calls
 
 ### Postgresql database
 
