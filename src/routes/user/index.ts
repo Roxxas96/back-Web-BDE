@@ -1,5 +1,5 @@
 //Import Prisma ORM Types
-import { FastifyPluginAsync } from "fastify";
+import fastify, { FastifyPluginAsync } from "fastify";
 
 //Import Models
 import { UserInfo, UserInfoMinimal, UserSchema } from "../../models/UserInfo";

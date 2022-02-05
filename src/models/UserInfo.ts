@@ -5,6 +5,7 @@ export interface UserInfo {
   name?: string;
   surname?: string;
   pseudo?: string;
+  privilege?: number;
 }
 
 //Privacy fiendly infos un users
@@ -24,6 +25,7 @@ export const UserSchema = {
     pseudo: { type: "string" },
     email: { type: "string", format: "email" },
     password: { type: "string" },
+    privilege: { type: "number" },
   },
   additionalProperties: false,
 };

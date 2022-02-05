@@ -57,6 +57,7 @@ export async function modifyUser(
     name: userInfo.name,
     surname: userInfo.surname,
     pseudo: userInfo.pseudo,
+    privilege: userInfo.privilege,
   });
 }
 
