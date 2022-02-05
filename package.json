@@ -8,11 +8,11 @@
   },
   "scripts": {
     "test": "npm run prisma && npm run build:ts && tsc -p test/tsconfig.json && tap --ts test/**/*.test.ts",
-    "start": "npm run prisma && npm run build:ts && fastify start -p 4000 -l info dist/app.js",
+    "start": "npm run build && fastify start -p 4000 -l info dist/app.js",
     "build": "npm run prisma && npm run build:ts",
     "build:ts": "tsc",
-    "dev": "tsc && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"tsc -w\" \"fastify start -p 4000 --ignore-watch=.ts$ -w -l info -P dist/app.js\"",
-    "prisma": "prisma generate --schema=./database/schema.prisma"
+    "prisma": "prisma generate",
+    "dev": "tsc && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"tsc -w\" \"fastify start -p 4000 --ignore-watch=.ts$ -w -l info -P dist/app.js\""
   },
   "keywords": [],
   "author": "Alexandre Gomez",
