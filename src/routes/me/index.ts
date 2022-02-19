@@ -1,19 +1,12 @@
 import { FastifyPluginAsync } from "fastify";
+import { UserWithoutPassword } from "../../models/UserInfo";
 import { getMe } from "./controller";
 
 const meRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{
     Reply: {
       message: string;
-      user: {
-        id: number;
-        name: string;
-        surname: string;
-        pseudo: string;
-        email: string;
-        wallet: number;
-        privilege: number;
-      };
+      user: UserWithoutPassword;
     };
   }>(
     "/",

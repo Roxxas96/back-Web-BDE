@@ -14,6 +14,16 @@ export interface UserInfoMinimal {
   id: number;
 }
 
+export interface UserWithoutPassword {
+  id: number;
+  name: string;
+  surname: string;
+  pseudo: string;
+  email: string;
+  wallet: number;
+  privilege: number;
+}
+
 //Schema used for requests
 export const UserSchema = {
   type: "object",
