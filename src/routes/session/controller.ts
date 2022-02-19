@@ -92,11 +92,13 @@ export async function getSession(fastify: FastifyInstance, sessionId: number) {
 export async function getManySession(
   fastify: FastifyInstance,
   limit?: number,
-  offset?: number
+  offset?: number,
+  userId?: number
 ) {
   const sessions = await fastify.prisma.session.getManySession(
     limit || 20,
-    offset
+    offset,
+    userId
   );
 
   //Check if session DB empty

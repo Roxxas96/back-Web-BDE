@@ -92,7 +92,11 @@ declare module "fastify" {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
-        getManySession: (limit: number, offset?: number) => Promise<Session[]>;
+        getManySession: (
+          limit: number,
+          offset?: number,
+          userId?: number
+        ) => Promise<Session[]>;
       };
 
       challenge: {
@@ -131,7 +135,8 @@ declare module "fastify" {
           limit?: number,
           offset?: number,
           userId?: number,
-          validation?: -1 | null | 1
+          validation?: -1 | null | 1,
+          challengeId?: number
         ) => Promise<Accomplishment[]>;
       };
 
@@ -154,7 +159,8 @@ declare module "fastify" {
         getManyPurchase: (
           limit: number,
           offset?: number,
-          userId?: number
+          userId?: number,
+          goodiesId?: number
         ) => Promise<Purchase[]>;
         createPurchase: (userId: number, goodiesId: number) => Promise<void>;
         deletePurchase: (purchaseId: number) => Promise<void>;

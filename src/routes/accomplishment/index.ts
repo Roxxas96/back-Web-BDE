@@ -14,11 +14,9 @@ import {
   createAccomplishment,
   deleteAccomplishment,
   getAccomplishment,
-  getUserAccomplishment as getUserAccomplishment,
-  getPendingAccomplishment,
+  getManyAccomplishment,
   updateAccomplishment,
   validateAccomplishment,
-  getAllAccomplishment,
 } from "./controller";
 
 const accomplishmentRoute: FastifyPluginAsync = async (
@@ -26,7 +24,13 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
-    Querystring: { limit?: number; offset?: number };
+    Querystring: {
+      limit?: number;
+      offset?: number;
+      challengeId?: number;
+      userId?: number;
+      status?: "accepted" | "pending" | "refused";
+    };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
     "/",
@@ -45,6 +49,19 @@ const accomplishmentRoute: FastifyPluginAsync = async (
               type: "number",
               description: "Offset in element list from which fetch begins",
             },
+            challengeId: {
+              type: "number",
+              description: "Filter by challenge id",
+            },
+            userId: {
+              type: "number",
+              description: "Filter by user id",
+            },
+            status: {
+              type: "string",
+              enum: ["accepted", "pending", "refused"],
+              description: "Filter by status",
+            },
           },
         },
       },
@@ -52,9 +69,26 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const accomplishments = await getUserAccomplishment(
+      //Only admins can fetch other's accomplishments or all accomplishmants
+      if (request.query.userId) {
+        if (request.query.userId !== userId) {
+          await fastify.auth.authorize(userId, 1);
+        }
+      } else {
+        await fastify.auth.authorize(userId, 1);
+      }
+
+      const accomplishments = await getManyAccomplishment(
         fastify,
         userId,
+        request.query.challengeId,
+        request.query.status === "accepted"
+          ? 1
+          : request.query.status === "pending"
+          ? null
+          : request.query.status === "refused"
+          ? -1
+          : undefined,
         request.query.limit,
         request.query.offset
       );
@@ -98,84 +132,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       }
 
       return reply.status(200).send({ message: "Success", accomplishment });
-    }
-  );
-
-  fastify.get<{
-    Querystring: { limit?: number; offset?: number };
-    Reply: { message: string; accomplishments: Accomplishment[] };
-  }>(
-    "/pending",
-    {
-      schema: {
-        tags: ["accomplishment", "admin"],
-        description: "Fetch all pending accomplishments",
-        querystring: {
-          type: "object",
-          properties: {
-            limit: {
-              type: "number",
-              description: "Number of elements to fetch",
-            },
-            offset: {
-              type: "number",
-              description: "Offset in element list from which fetch begins",
-            },
-          },
-        },
-      },
-    },
-    async function (request, reply) {
-      const userId = await fastify.auth.authenticate(request.headers);
-
-      await fastify.auth.authorize(userId, 1);
-
-      const accomplishments = await getPendingAccomplishment(
-        fastify,
-        request.query.limit,
-        request.query.offset
-      );
-
-      return reply.status(200).send({ message: "Success", accomplishments });
-    }
-  );
-
-  fastify.get<{
-    Querystring: { limit?: number; offset?: number };
-    Reply: { message: string; accomplishments: Accomplishment[] };
-  }>(
-    "/all",
-    {
-      schema: {
-        tags: ["accomplishment", "super admin"],
-        description: "Fetch all existing acomplishments",
-        querystring: {
-          type: "object",
-          properties: {
-            limit: {
-              type: "number",
-              description: "Number of elements to fetch",
-            },
-            offset: {
-              type: "number",
-              description: "Offset in element list from which fetch begins",
-            },
-          },
-        },
-      },
-    },
-    async function (request, reply) {
-      const userId = await fastify.auth.authenticate(request.headers);
-
-      await fastify.auth.authorize(userId, 2);
-
-      const accomplishments = await getAllAccomplishment(
-        fastify,
-        request.query.limit,
-        request.query.offset
-      );
-
-      return reply.status(200).send({ message: "Success", accomplishments });
     }
   );
 

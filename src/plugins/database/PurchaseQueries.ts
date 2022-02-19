@@ -10,12 +10,13 @@ export function purchaseQueries(
     getManyPurchase: async function (
       limit: number,
       offset?: number,
-      userId?: number
+      userId?: number,
+      goodiesId?: number
     ) {
       let purchase;
       try {
         purchase = await client.purchase.findMany({
-          where: { userId: userId },
+          where: { userId, goodiesId },
           take: limit,
           skip: offset,
         });
