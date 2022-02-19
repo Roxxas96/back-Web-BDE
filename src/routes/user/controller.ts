@@ -139,8 +139,12 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
 }
 
 //Get all user in DB
-export async function getManyUser(fastify: FastifyInstance) {
-  const users = await fastify.prisma.user.getManyUser();
+export async function getManyUser(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
+  const users = await fastify.prisma.user.getManyUser(limit || 20, offset);
 
   //Check if user is empty
   if (!users || !users.length) {
