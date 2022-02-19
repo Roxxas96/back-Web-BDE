@@ -19,8 +19,8 @@ export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
 }
 
 //Get all goodies in DB
-export async function getManyGoodies(fastify: FastifyInstance) {
-  const goodies = await fastify.prisma.goodies.getManyGoodies();
+export async function getManyGoodies(fastify: FastifyInstance, limit?: number, offset?: number) {
+  const goodies = await fastify.prisma.goodies.getManyGoodies(limit || 20, offset);
 
   //Check goodies id
   if (!goodies || !goodies.length) {
