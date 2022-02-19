@@ -155,7 +155,8 @@ declare module "fastify" {
         getManyPurchase: (
           limit: number,
           offset?: number,
-          userId?: number
+          userId?: number,
+          goodiesId?: number
         ) => Promise<Purchase[]>;
         createPurchase: (userId: number, goodiesId: number) => Promise<void>;
         deletePurchase: (purchaseId: number) => Promise<void>;

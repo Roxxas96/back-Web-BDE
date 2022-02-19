@@ -7,9 +7,8 @@ import { FastifyPluginAsync } from "fastify";
 import {
   createPurchase,
   deletePurchase,
-  getUserPurchase,
+  getManyPurchase,
   getPurchase,
-  getAllPurchase,
 } from "./controller";
 
 const purchaseRoute: FastifyPluginAsync = async (
@@ -18,7 +17,12 @@ const purchaseRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{
     Reply: { message: string; purchases: Purchase[] };
-    Querystring: { limit?: number; offset?: number };
+    Querystring: {
+      limit?: number;
+      offset?: number;
+      goodiesId?: number;
+      userId?: number;
+    };
   }>(
     "/",
     {
@@ -36,6 +40,14 @@ const purchaseRoute: FastifyPluginAsync = async (
               type: "number",
               description: "Offset in element list from which fetch begins",
             },
+            goodiesId: {
+              type: "number",
+              description: "Filter by goodies id",
+            },
+            userId: {
+              type: "number",
+              description: "Filter by user id",
+            },
           },
         },
       },
@@ -43,9 +55,19 @@ const purchaseRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const purchases = await getUserPurchase(
+      //Only admins can get other's purchases or get all purchases
+      if (request.query.userId) {
+        if (request.query.userId !== userId) {
+          await fastify.auth.authorize(userId, 1);
+        }
+      } else {
+        await fastify.auth.authorize(userId, 1);
+      }
+
+      const purchases = await getManyPurchase(
         fastify,
-        userId,
+        request.query.userId,
+        request.query.goodiesId,
         request.query.limit,
         request.query.offset
       );
@@ -83,45 +105,6 @@ const purchaseRoute: FastifyPluginAsync = async (
       }
 
       return reply.status(200).send({ message: "Success", purchase });
-    }
-  );
-
-  fastify.get<{
-    Reply: { message: string; purchases: Purchase[] };
-    Querystring: { limit?: number; offset?: number };
-  }>(
-    "/all",
-    {
-      schema: {
-        tags: ["purchase", "super admin"],
-        description: "Fetch all existing purchases",
-        querystring: {
-          type: "object",
-          properties: {
-            limit: {
-              type: "number",
-              description: "Number of elements to fetch",
-            },
-            offset: {
-              type: "number",
-              description: "Offset in element list from which fetch begins",
-            },
-          },
-        },
-      },
-    },
-    async function (request, reply) {
-      const userId = await fastify.auth.authenticate(request.headers);
-
-      await fastify.auth.authorize(userId, 2);
-
-      const purchases = await getAllPurchase(
-        fastify,
-        request.query.limit,
-        request.query.offset
-      );
-
-      return reply.status(200).send({ message: "Success", purchases });
     }
   );
 
