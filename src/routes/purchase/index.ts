@@ -65,7 +65,7 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get(
+  fastify.get<{ Reply: { message: string; purchases: Purchase[] } }>(
     "/all",
     {
       schema: {

@@ -68,7 +68,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     }
   );
 
-  fastify.get(
+  fastify.get<{ Reply: { message: string; user: UserWithoutPassword } }>(
     "/me",
     {
       schema: {

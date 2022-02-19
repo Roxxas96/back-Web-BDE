@@ -82,7 +82,9 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get(
+  fastify.get<{
+    Reply: { message: string; accomplishments: Accomplishment[] };
+  }>(
     "/pending",
     {
       schema: {
@@ -101,7 +103,9 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get(
+  fastify.get<{
+    Reply: { message: string; accomplishments: Accomplishment[] };
+  }>(
     "/all",
     {
       schema: {
