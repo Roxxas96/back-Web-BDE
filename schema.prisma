@@ -38,6 +38,7 @@ model Challenge {
   name String @default("Unnamed challenge")
   description String @default("")
   reward Int @default(0)
+  maxAtempts Int @default(3)
   createdAt DateTime @default(now())
   creatorId Int?
   challengeCreator User? @relation(fields: [creatorId], references: [id], onDelete: SetNull)
@@ -61,6 +62,8 @@ model Goodies {
   description String @default("")
   price Int @default(0)
   buyLimit Int @default(1)
+  stock Int @default(3)
+  bought Int @default(0)
   image String @default("")
   createdAt DateTime @default(now())
   creatorId Int?

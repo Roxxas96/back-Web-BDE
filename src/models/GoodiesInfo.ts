@@ -3,6 +3,7 @@ export interface GoodiesInfo {
   name?: string;
   description?: string;
   buyLimit?: number;
+  stock?: number;
   price?: number;
   image?: string;
 }
@@ -26,6 +27,7 @@ export const GoodiesSchema = {
     image: { type: "string" },
     price: { type: "number" },
     buyLimit: { type: "number" },
+    stock: { type: "number" },
   },
   additionalProperties: false,
 };
