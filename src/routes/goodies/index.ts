@@ -25,14 +25,14 @@ const goodiesRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{
     Reply: { message: string; goodies: GoodiesInfoMinimal[] };
-    Params: { limit?: number; offset?: number };
+    Querystring: { limit?: number; offset?: number };
   }>(
     "/",
     {
       schema: {
         tags: ["goodies"],
         description: "Fetch all goodies",
-        params: {
+        querystring: {
           type: "object",
           properties: {
             limit: {
@@ -44,7 +44,6 @@ const goodiesRoute: FastifyPluginAsync = async (
               description: "Offset in element list from which fetch begins",
             },
           },
-          required: [],
         },
       },
     },
@@ -53,8 +52,8 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       const goodies = await getManyGoodies(
         fastify,
-        request.params.limit,
-        request.params.offset
+        request.query.limit,
+        request.query.offset
       );
 
       return reply.status(200).send({ message: "Success", goodies });

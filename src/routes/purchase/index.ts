@@ -18,14 +18,14 @@ const purchaseRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{
     Reply: { message: string; purchases: Purchase[] };
-    Params: { limit?: number; offset?: number };
+    Querystring: { limit?: number; offset?: number };
   }>(
     "/",
     {
       schema: {
         tags: ["purchase"],
         description: "Fetch user's purchases",
-        params: {
+        querystring: {
           type: "object",
           properties: {
             limit: {
@@ -37,7 +37,6 @@ const purchaseRoute: FastifyPluginAsync = async (
               description: "Offset in element list from which fetch begins",
             },
           },
-          required: [],
         },
       },
     },
@@ -47,8 +46,8 @@ const purchaseRoute: FastifyPluginAsync = async (
       const purchases = await getUserPurchase(
         fastify,
         userId,
-        request.params.limit,
-        request.params.offset
+        request.query.limit,
+        request.query.offset
       );
 
       return reply.status(200).send({ message: "Success", purchases });
@@ -89,14 +88,14 @@ const purchaseRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Reply: { message: string; purchases: Purchase[] };
-    Params: { limit?: number; offset?: number };
+    Querystring: { limit?: number; offset?: number };
   }>(
     "/all",
     {
       schema: {
         tags: ["purchase", "super admin"],
         description: "Fetch all existing purchases",
-        params: {
+        querystring: {
           type: "object",
           properties: {
             limit: {
@@ -108,7 +107,6 @@ const purchaseRoute: FastifyPluginAsync = async (
               description: "Offset in element list from which fetch begins",
             },
           },
-          required: [],
         },
       },
     },
@@ -119,8 +117,8 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       const purchases = await getAllPurchase(
         fastify,
-        request.params.limit,
-        request.params.offset
+        request.query.limit,
+        request.query.offset
       );
 
       return reply.status(200).send({ message: "Success", purchases });
