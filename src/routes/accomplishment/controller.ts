@@ -27,14 +27,20 @@ export async function getAccomplishment(
 //Get accomplishments, if admin (ie. no userId provided) return all accomplishments in DB, if basic user (ie. userId provided) only return the related ones
 export async function getUserAccomplishment(
   fastify: FastifyInstance,
-  userId: number
+  userId: number,
+  limit?: number,
+  offset?: number
 ) {
   if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
   const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(userId);
+    await fastify.prisma.accomplishment.getManyAccomplishment(
+      limit || 20,
+      offset,
+      userId
+    );
 
   //Check for empty result
   if (!accomplishments || !accomplishments.length) {
@@ -44,9 +50,16 @@ export async function getUserAccomplishment(
   return accomplishments;
 }
 
-export async function getAllAccomplishment(fastify: FastifyInstance) {
+export async function getAllAccomplishment(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
   const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment();
+    await fastify.prisma.accomplishment.getManyAccomplishment(
+      limit || 20,
+      offset
+    );
 
   if (!accomplishments || !accomplishments.length) {
     throw fastify.httpErrors.notFound("No Accomplishment found");
@@ -56,9 +69,18 @@ export async function getAllAccomplishment(fastify: FastifyInstance) {
 }
 
 //Get pending accomplishments, return all pending accomplishments, admin only
-export async function getPendingAccomplishment(fastify: FastifyInstance) {
+export async function getPendingAccomplishment(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
   const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(undefined, null);
+    await fastify.prisma.accomplishment.getManyAccomplishment(
+      limit || 20,
+      offset,
+      undefined,
+      null
+    );
 
   //Check for empty result
   if (!accomplishments || !accomplishments.length) {
