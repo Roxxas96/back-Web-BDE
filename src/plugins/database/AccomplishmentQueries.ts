@@ -12,12 +12,13 @@ export function accomplishmentQueries(
       limit?: number,
       offset?: number,
       userId?: number,
-      validation?: -1 | null | 1
+      validation?: -1 | null | 1,
+      challengeId?: number
     ) {
       let accomplishment;
       try {
         accomplishment = await client.accomplishment.findMany({
-          where: { userId, validation },
+          where: { userId, validation, challengeId },
           take: limit,
           skip: offset,
         });

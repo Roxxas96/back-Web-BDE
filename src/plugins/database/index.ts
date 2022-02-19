@@ -131,7 +131,8 @@ declare module "fastify" {
           limit?: number,
           offset?: number,
           userId?: number,
-          validation?: -1 | null | 1
+          validation?: -1 | null | 1,
+          challengeId?: number
         ) => Promise<Accomplishment[]>;
       };
 

@@ -25,52 +25,11 @@ export async function getAccomplishment(
 }
 
 //Get accomplishments, if admin (ie. no userId provided) return all accomplishments in DB, if basic user (ie. userId provided) only return the related ones
-export async function getUserAccomplishment(
+export async function getManyAccomplishment(
   fastify: FastifyInstance,
-  userId: number,
-  limit?: number,
-  offset?: number
-) {
-  if (!userId) {
-    throw fastify.httpErrors.badRequest("Invalid user id");
-  }
-
-  const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(
-      limit || 20,
-      offset,
-      userId
-    );
-
-  //Check for empty result
-  if (!accomplishments || !accomplishments.length) {
-    throw fastify.httpErrors.notFound("No Accomplishment found");
-  }
-
-  return accomplishments;
-}
-
-export async function getAllAccomplishment(
-  fastify: FastifyInstance,
-  limit?: number,
-  offset?: number
-) {
-  const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(
-      limit || 20,
-      offset
-    );
-
-  if (!accomplishments || !accomplishments.length) {
-    throw fastify.httpErrors.notFound("No Accomplishment found");
-  }
-
-  return accomplishments;
-}
-
-//Get pending accomplishments, return all pending accomplishments, admin only
-export async function getPendingAccomplishment(
-  fastify: FastifyInstance,
+  userId?: number,
+  challengeId?: number,
+  validation?: -1 | null | 1,
   limit?: number,
   offset?: number
 ) {
@@ -78,8 +37,9 @@ export async function getPendingAccomplishment(
     await fastify.prisma.accomplishment.getManyAccomplishment(
       limit || 20,
       offset,
-      undefined,
-      null
+      userId,
+      validation,
+      challengeId
     );
 
   //Check for empty result
