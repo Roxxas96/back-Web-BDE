@@ -24,6 +24,7 @@ const challengeRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
+    Params: { limit?: number; offset?: number };
     Reply: { message: string; challenges: ChallengeInfoMinimal[] };
   }>(
     "/",
@@ -31,12 +32,30 @@ const challengeRoute: FastifyPluginAsync = async (
       schema: {
         tags: ["challenge"],
         description: "Fetch Minimal info on all Challenge",
+        params: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+          required: [],
+        },
       },
     },
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const challenges = await getManyChallenge(fastify);
+      const challenges = await getManyChallenge(
+        fastify,
+        request.params.limit,
+        request.params.offset
+      );
 
       return reply.status(200).send({ message: "Success", challenges });
     }
