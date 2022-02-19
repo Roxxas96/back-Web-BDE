@@ -7,11 +7,17 @@ export function purchaseQueries(
 ) {
   return {
     //Get Many purchase, by default fetch all DB, if a userId is provided just fetch purchase made by this user
-    getManyPurchase: async function (userId: number) {
+    getManyPurchase: async function (
+      limit: number,
+      offset?: number,
+      userId?: number
+    ) {
       let purchase;
       try {
         purchase = await client.purchase.findMany({
           where: { userId: userId },
+          take: limit,
+          skip: offset,
         });
       } catch (err) {
         fastify.log.error(err);

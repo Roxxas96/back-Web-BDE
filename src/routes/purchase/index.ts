@@ -16,18 +16,39 @@ const purchaseRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: { message: string; purchases: Purchase[] } }>(
+  fastify.get<{
+    Reply: { message: string; purchases: Purchase[] };
+    Querystring: { limit?: number; offset?: number };
+  }>(
     "/",
     {
       schema: {
         tags: ["purchase"],
         description: "Fetch user's purchases",
+        querystring: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const purchases = await getUserPurchase(fastify, userId);
+      const purchases = await getUserPurchase(
+        fastify,
+        userId,
+        request.query.limit,
+        request.query.offset
+      );
 
       return reply.status(200).send({ message: "Success", purchases });
     }
@@ -65,12 +86,28 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.get<{ Reply: { message: string; purchases: Purchase[] } }>(
+  fastify.get<{
+    Reply: { message: string; purchases: Purchase[] };
+    Querystring: { limit?: number; offset?: number };
+  }>(
     "/all",
     {
       schema: {
         tags: ["purchase", "super admin"],
         description: "Fetch all existing purchases",
+        querystring: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
@@ -78,7 +115,11 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 2);
 
-      const purchases = await getAllPurchase(fastify);
+      const purchases = await getAllPurchase(
+        fastify,
+        request.query.limit,
+        request.query.offset
+      );
 
       return reply.status(200).send({ message: "Success", purchases });
     }

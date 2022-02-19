@@ -9,13 +9,15 @@ export function accomplishmentQueries(
   return {
     //Get Many accomplishment, by default fetch all DB, if a userId is provided just fetch accomplishmend made by this user
     getManyAccomplishment: async function (
+      limit: number, offset?: number,
       userId?: number,
-      validation?: -1 | null | 1
+      validation?: -1 | null | 1,
     ) {
       let accomplishment;
       try {
         accomplishment = await client.accomplishment.findMany({
           where: { userId, validation },
+          take: limit, skip: offset
         });
       } catch (err) {
         fastify.log.error(err);

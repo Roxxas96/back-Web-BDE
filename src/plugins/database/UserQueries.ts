@@ -5,10 +5,13 @@ import { UserInfo } from "../../models/UserInfo";
 function userQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all users in DB
-    getManyUser: async function () {
+    getManyUser: async function (limit: number, offset?: number) {
       let User;
       try {
-        User = await client.user.findMany();
+        User = await client.user.findMany({
+          take: limit,
+          skip: offset,
+        });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(

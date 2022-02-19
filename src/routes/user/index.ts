@@ -20,18 +20,38 @@ import {
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get<{ Reply: { message: string; users: UserInfoMinimal[] } }>(
+  fastify.get<{
+    Reply: { message: string; users: UserInfoMinimal[] };
+    Querystring: { limit?: number; offset?: number };
+  }>(
     "/",
     {
       schema: {
         tags: ["user"],
         description: "Fetch minimal info on all users",
+        querystring: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const users = await getManyUser(fastify);
+      const users = await getManyUser(
+        fastify,
+        request.query.limit,
+        request.query.offset
+      );
 
       return reply.status(200).send({ message: "Success", users });
     }

@@ -5,10 +5,13 @@ import { GoodiesInfo } from "../../models/GoodiesInfo";
 export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all goodies in DB
-    getManyGoodies: async function () {
+    getManyGoodies: async function (limit: number, offset?: number) {
       let goodies;
       try {
-        goodies = await client.goodies.findMany();
+        goodies = await client.goodies.findMany({
+          take: limit,
+          skip: offset,
+        });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(

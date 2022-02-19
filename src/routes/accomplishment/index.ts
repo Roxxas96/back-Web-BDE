@@ -26,6 +26,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
+    Querystring: { limit?: number; offset?: number };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
     "/",
@@ -33,12 +34,30 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       schema: {
         tags: ["accomplishment"],
         description: "Fetch info on user's accomplishments",
+        querystring: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const accomplishments = await getUserAccomplishment(fastify, userId);
+      const accomplishments = await getUserAccomplishment(
+        fastify,
+        userId,
+        request.query.limit,
+        request.query.offset
+      );
 
       return reply.status(200).send({ message: "Success", accomplishments });
     }
@@ -83,6 +102,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
 
   fastify.get<{
+    Querystring: { limit?: number; offset?: number };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
     "/pending",
@@ -90,6 +110,19 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       schema: {
         tags: ["accomplishment", "admin"],
         description: "Fetch all pending accomplishments",
+        querystring: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
@@ -97,13 +130,18 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      const accomplishments = await getPendingAccomplishment(fastify);
+      const accomplishments = await getPendingAccomplishment(
+        fastify,
+        request.query.limit,
+        request.query.offset
+      );
 
       return reply.status(200).send({ message: "Success", accomplishments });
     }
   );
 
   fastify.get<{
+    Querystring: { limit?: number; offset?: number };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
     "/all",
@@ -111,6 +149,19 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       schema: {
         tags: ["accomplishment", "super admin"],
         description: "Fetch all existing acomplishments",
+        querystring: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
@@ -118,7 +169,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 2);
 
-      const accomplishments = await getAllAccomplishment(fastify);
+      const accomplishments = await getAllAccomplishment(
+        fastify,
+        request.query.limit,
+        request.query.offset
+      );
 
       return reply.status(200).send({ message: "Success", accomplishments });
     }

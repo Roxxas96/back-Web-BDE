@@ -4,10 +4,16 @@ import { AccomplishmentInfo } from "../../../models/AccomplishmentInfo";
 //Get user's accomplishments
 export async function getUserAccomplishment(
   fastify: FastifyInstance,
-  userId: number
+  userId: number,
+  limit?: number,
+  offset?: number
 ) {
   const accomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(userId);
+    await fastify.prisma.accomplishment.getManyAccomplishment(
+      limit || 20,
+      offset,
+      userId
+    );
 
   //Check for empty result
   if (!accomplishments || !accomplishments.length) {
