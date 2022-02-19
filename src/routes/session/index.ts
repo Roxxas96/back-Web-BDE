@@ -17,14 +17,14 @@ const sessionRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{
     Reply: { message: string; sessions: Session[] };
-    Params: { limit?: number; offset?: number };
+    Querystring: { limit?: number; offset?: number };
   }>(
     "/",
     {
       schema: {
         tags: ["session", "super admin"],
         description: "Fetch all sessions",
-        params: {
+        querystring: {
           type: "object",
           properties: {
             limit: {
@@ -36,7 +36,6 @@ const sessionRoute: FastifyPluginAsync = async (
               description: "Offset in element list from which fetch begins",
             },
           },
-          required: [],
         },
       },
     },
@@ -47,8 +46,8 @@ const sessionRoute: FastifyPluginAsync = async (
 
       const sessions = await getManySession(
         fastify,
-        request.params.limit,
-        request.params.offset
+        request.query.limit,
+        request.query.offset
       );
 
       return reply.status(200).send({ message: "Success", sessions });

@@ -7,7 +7,8 @@ const userPurchaseRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
-    Params: { id: number; limit?: number; offset?: number };
+    Params: { id: number };
+    Querystring: { limit?: number; offset?: number };
     Reply: { message: string; purchases: Purchase[] };
   }>(
     "/:id",
@@ -15,10 +16,9 @@ const userPurchaseRoute: FastifyPluginAsync = async (
       schema: {
         tags: ["user", "purchase"],
         description: "Get a user purchases",
-        params: {
+        querystring: {
           type: "object",
           properties: {
-            id: { type: "number", description: "Id of the user" },
             limit: {
               type: "number",
               description: "Number of elements to fetch",
@@ -27,6 +27,12 @@ const userPurchaseRoute: FastifyPluginAsync = async (
               type: "number",
               description: "Offset in element list from which fetch begins",
             },
+          },
+        },
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "number", description: "Id of the user" },
           },
           required: ["id"],
         },
@@ -42,8 +48,8 @@ const userPurchaseRoute: FastifyPluginAsync = async (
       const purchases = await getUserPurchase(
         fastify,
         request.params.id,
-        request.params.limit,
-        request.params.offset
+        request.query.limit,
+        request.query.offset
       );
 
       return reply.status(200).send({ message: "Success", purchases });

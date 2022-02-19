@@ -46,7 +46,7 @@ export async function createAccomplishment(
   }
 
   const ownedAccomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(userId);
+    await fastify.prisma.accomplishment.getManyAccomplishment(undefined,undefined,userId);
 
   if (
     ownedAccomplishments.filter((accomplishment) => {

@@ -20,7 +20,7 @@ export interface GoodiesInfoMinimal {
 export const GoodiesSchema = {
   type: "object",
   description: "Goodies metadata",
-  required: [],
+
   properties: {
     name: { type: "string" },
     description: { type: "string" },

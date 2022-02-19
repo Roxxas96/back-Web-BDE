@@ -22,14 +22,14 @@ import {
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{
     Reply: { message: string; users: UserInfoMinimal[] };
-    Params: { limit?: number; offset?: number };
+    Querystring: { limit?: number; offset?: number };
   }>(
     "/",
     {
       schema: {
         tags: ["user"],
         description: "Fetch minimal info on all users",
-        params: {
+        querystring: {
           type: "object",
           properties: {
             limit: {
@@ -41,7 +41,6 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
               description: "Offset in element list from which fetch begins",
             },
           },
-          required: [],
         },
       },
     },
@@ -50,8 +49,8 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const users = await getManyUser(
         fastify,
-        request.params.limit,
-        request.params.offset
+        request.query.limit,
+        request.query.offset
       );
 
       return reply.status(200).send({ message: "Success", users });
