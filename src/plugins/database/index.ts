@@ -92,7 +92,11 @@ declare module "fastify" {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
-        getManySession: (limit: number, offset?: number) => Promise<Session[]>;
+        getManySession: (
+          limit: number,
+          offset?: number,
+          userId?: number
+        ) => Promise<Session[]>;
       };
 
       challenge: {
