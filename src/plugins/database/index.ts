@@ -128,7 +128,7 @@ declare module "fastify" {
           accomplishmentId: number
         ) => Promise<Accomplishment>;
         getManyAccomplishment: (
-          limit: number,
+          limit?: number,
           offset?: number,
           userId?: number,
           validation?: -1 | null | 1
