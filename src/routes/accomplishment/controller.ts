@@ -112,8 +112,14 @@ export async function createAccomplishment(
     throw fastify.httpErrors.badRequest("No accomplishment info provided");
   }
 
+  const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
+
   const ownedAccomplishments =
-    await fastify.prisma.accomplishment.getManyAccomplishment(undefined,undefined,userId);
+    await fastify.prisma.accomplishment.getManyAccomplishment(
+      undefined,
+      undefined,
+      userId
+    );
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
@@ -129,6 +135,18 @@ export async function createAccomplishment(
     );
   }
 
+  if (
+    ownedAccomplishments.filter((accomplishment) => {
+      return (
+        accomplishment.validation === -1 &&
+        accomplishment.challengeId === challengeId
+      );
+    }).length >= challenge.maxAtempts
+  ) {
+    throw fastify.httpErrors.badRequest(
+      "You have failed to many times to accomplish this challenge"
+    );
+  }
   await fastify.prisma.accomplishment.createAccomplishment(
     accomplishmentInfo,
     userId,
