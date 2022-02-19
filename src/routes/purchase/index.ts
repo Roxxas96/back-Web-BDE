@@ -7,8 +7,9 @@ import { FastifyPluginAsync } from "fastify";
 import {
   createPurchase,
   deletePurchase,
-  getManyPurchase,
+  getUserPurchase,
   getPurchase,
+  getAllPurchase,
 } from "./controller";
 
 const purchaseRoute: FastifyPluginAsync = async (
@@ -26,16 +27,7 @@ const purchaseRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      let purchases;
-
-      switch (await fastify.auth.getPrivilege(userId)) {
-        case 0:
-          purchases = await getManyPurchase(fastify, userId);
-          break;
-        default:
-          purchases = await getManyPurchase(fastify);
-          break;
-      }
+      const purchases = await getUserPurchase(fastify, userId);
 
       return reply.status(200).send({ message: "Success", purchases });
     }
@@ -70,6 +62,25 @@ const purchaseRoute: FastifyPluginAsync = async (
       }
 
       return reply.status(200).send({ message: "Success", purchase });
+    }
+  );
+
+  fastify.get(
+    "/all",
+    {
+      schema: {
+        tags: ["purchase", "super admin"],
+        description: "Fetch all existing purchases",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 2);
+
+      const purchases = await getAllPurchase(fastify);
+
+      return reply.status(200).send({ message: "Success", purchases });
     }
   );
 
