@@ -4,10 +4,13 @@ import { FastifyInstance } from "fastify";
 function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all sessions in DB
-    getManySession: async function () {
+    getManySession: async function (limit: number, offset?: number) {
       let Session;
       try {
-        Session = await client.session.findMany();
+        Session = await client.session.findMany({
+          take: limit,
+          skip: offset,
+        });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(

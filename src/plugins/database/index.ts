@@ -85,14 +85,14 @@ declare module "fastify" {
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
         getUser: (userId?: number, email?: string) => Promise<User>;
-        getManyUser: () => Promise<User[]>;
+        getManyUser: (limit: number, offset?: number) => Promise<User[]>;
       };
 
       session: {
         deleteSession: (token: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
-        getManySession: () => Promise<Session[]>;
+        getManySession: (limit: number, offset?: number) => Promise<Session[]>;
       };
 
       challenge: {
@@ -106,7 +106,10 @@ declare module "fastify" {
           creatorId: number
         ) => Promise<void>;
         getChallenge: (challengeId: number) => Promise<Challenge>;
-        getManyChallenge: () => Promise<Challenge[]>;
+        getManyChallenge: (
+          limit: number,
+          offset?: number
+        ) => Promise<Challenge[]>;
       };
 
       accomplishment: {
@@ -125,6 +128,8 @@ declare module "fastify" {
           accomplishmentId: number
         ) => Promise<Accomplishment>;
         getManyAccomplishment: (
+          limit: number,
+          offset?: number,
           userId?: number,
           validation?: -1 | null | 1
         ) => Promise<Accomplishment[]>;
@@ -132,7 +137,7 @@ declare module "fastify" {
 
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
-        getManyGoodies: () => Promise<Goodies[]>;
+        getManyGoodies: (limit: number, offset?: number) => Promise<Goodies[]>;
         createGoodies: (
           goodiesInfo: GoodiesInfo,
           creatorId: number
@@ -146,7 +151,11 @@ declare module "fastify" {
 
       purchase: {
         getPurchase: (purchaseId: number) => Promise<Purchase>;
-        getManyPurchase: (userId?: number) => Promise<Purchase[]>;
+        getManyPurchase: (
+          limit: number,
+          offset?: number,
+          userId?: number
+        ) => Promise<Purchase[]>;
         createPurchase: (userId: number, goodiesId: number) => Promise<void>;
         deletePurchase: (purchaseId: number) => Promise<void>;
       };

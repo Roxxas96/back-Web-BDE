@@ -8,10 +8,13 @@ export function challengeQueries(
 ) {
   return {
     //Get all challenges in DB
-    getManyChallenge: async function () {
+    getManyChallenge: async function (limit: number, offset?: number) {
       let challenge;
       try {
-        challenge = await client.challenge.findMany();
+        challenge = await client.challenge.findMany({
+          take: limit,
+          skip: offset,
+        });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
