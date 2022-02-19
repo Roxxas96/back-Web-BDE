@@ -3,13 +3,19 @@ import { FastifyInstance } from "fastify";
 //Get all purchase concerning the user when userId is provided, or if admin (ie. no userId provided) get all purchases in DB
 export async function getUserPurchase(
   fastify: FastifyInstance,
-  userId: number
+  userId: number,
+  limit?: number,
+  offset?: number
 ) {
   if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid User id");
   }
 
-  const purchases = await fastify.prisma.purchase.getManyPurchase(userId);
+  const purchases = await fastify.prisma.purchase.getManyPurchase(
+    limit || 20,
+    offset,
+    userId
+  );
 
   //Check if purchase is empty
   if (!purchases || !purchases.length) {
