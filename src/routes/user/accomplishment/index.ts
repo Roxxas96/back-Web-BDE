@@ -36,20 +36,24 @@ const userAccomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 1);
       }
 
-      const accomplishments = await getUserAccomplishment(fastify, request.id);
+      const accomplishments = await getUserAccomplishment(
+        fastify,
+        request.params.id
+      );
 
       return reply.status(200).send({ message: "Success", accomplishments });
     }
   );
 
   fastify.put<{
+    Params: { id: number };
     Body: { info: AccomplishmentInfo; challengeId: number };
     Reply: { message: string };
   }>(
     "/:id",
     {
       schema: {
-        tags: ["accomplishment"],
+        tags: ["user" ,"accomplishment"],
         description:
           "Create an accomplishment for a user with the provided info",
         body: {
@@ -74,12 +78,12 @@ const userAccomplishmentRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      const userId = await fastify.auth.authenticate(request.headers);
+      await fastify.auth.authenticate(request.headers);
 
       await createAccomplishment(
         fastify,
         request.body.info,
-        userId,
+        request.params.id,
         request.body.challengeId
       );
 

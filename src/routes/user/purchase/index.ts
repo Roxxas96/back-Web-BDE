@@ -13,7 +13,7 @@ const userPurchaseRoute: FastifyPluginAsync = async (
     "/:id",
     {
       schema: {
-        tags: ["purchase"],
+        tags: ["user", "purchase"],
         description: "Get a user purchases",
         params: {
           type: "object",
@@ -26,7 +26,11 @@ const userPurchaseRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      if (request.params.id !== userId) {
+        await fastify.auth.authorize(userId, 1);
+      }
 
       const purchases = await getUserPurchase(fastify, request.params.id);
 
@@ -42,7 +46,7 @@ const userPurchaseRoute: FastifyPluginAsync = async (
     "/:id",
     {
       schema: {
-        tags: ["purchase"],
+        tags: ["user", "purchase"],
         description: "Create a purchase for the provided user",
         body: {
           type: "object",
