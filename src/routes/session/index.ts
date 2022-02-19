@@ -15,12 +15,29 @@ const sessionRoute: FastifyPluginAsync = async (
   fastify,
   opts
 ): Promise<void> => {
-  fastify.get<{ Reply: { message: string; sessions: Session[] } }>(
+  fastify.get<{
+    Reply: { message: string; sessions: Session[] };
+    Params: { limit?: number; offset?: number };
+  }>(
     "/",
     {
       schema: {
         tags: ["session", "super admin"],
         description: "Fetch all sessions",
+        params: {
+          type: "object",
+          properties: {
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
+          },
+          required: [],
+        },
       },
     },
     async function (request, reply) {
@@ -28,7 +45,11 @@ const sessionRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 2);
 
-      const sessions = await getManySession(fastify);
+      const sessions = await getManySession(
+        fastify,
+        request.params.limit,
+        request.params.offset
+      );
 
       return reply.status(200).send({ message: "Success", sessions });
     }
