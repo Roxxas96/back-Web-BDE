@@ -14,9 +14,11 @@ import {
   createAccomplishment,
   deleteAccomplishment,
   getAccomplishment,
-  getManyAccomplishment,
+  getUserAccomplishment as getUserAccomplishment,
+  getPendingAccomplishment,
   updateAccomplishment,
   validateAccomplishment,
+  getAllAccomplishment,
 } from "./controller";
 
 const accomplishmentRoute: FastifyPluginAsync = async (
@@ -36,18 +38,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      let accomplishments;
-
-      switch (await fastify.auth.getPrivilege(userId)) {
-        //Classic user route
-        case 0:
-          accomplishments = await getManyAccomplishment(fastify, userId);
-          break;
-        //Admin route
-        default:
-          accomplishments = await getManyAccomplishment(fastify);
-          break;
-      }
+      const accomplishments = await getUserAccomplishment(fastify, userId);
 
       return reply.status(200).send({ message: "Success", accomplishments });
     }
@@ -90,6 +81,49 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       return reply.status(200).send({ message: "Success", accomplishment });
     }
   );
+
+  fastify.get<{
+    Reply: { message: string; accomplishments: Accomplishment[] };
+  }>(
+    "/pending",
+    {
+      schema: {
+        tags: ["accomplishment", "admin"],
+        description: "Fetch all pending accomplishments",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 1);
+
+      const accomplishments = await getPendingAccomplishment(fastify);
+
+      return reply.status(200).send({ message: "Success", accomplishments });
+    }
+  );
+
+  fastify.get<{
+    Reply: { message: string; accomplishments: Accomplishment[] };
+  }>(
+    "/all",
+    {
+      schema: {
+        tags: ["accomplishment", "super admin"],
+        description: "Fetch all existing acomplishments",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 2);
+
+      const accomplishments = await getAllAccomplishment(fastify);
+
+      return reply.status(200).send({ message: "Success", accomplishments });
+    }
+  );
+
   fastify.put<{
     Body: { info: AccomplishmentInfo; challengeId: number };
     Reply: { message: string };

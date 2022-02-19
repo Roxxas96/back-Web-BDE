@@ -2,7 +2,12 @@
 import { FastifyPluginAsync } from "fastify";
 
 //Import Models
-import { UserInfo, UserInfoMinimal, UserSchema } from "../../models/UserInfo";
+import {
+  UserInfo,
+  UserInfoMinimal,
+  UserSchema,
+  UserWithoutPassword,
+} from "../../models/UserInfo";
 
 //Import controller functions
 import {
@@ -11,6 +16,7 @@ import {
   getUser,
   getManyUser,
   modifyUser,
+  getMe,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -35,15 +41,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: { id: number };
     Reply: {
       message: string;
-      user: {
-        id: number;
-        name: string;
-        surname: string;
-        pseudo: string;
-        email: string;
-        wallet: number;
-        privilege: number;
-      };
+      user: UserWithoutPassword;
     };
   }>(
     "/:id",
@@ -65,6 +63,23 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       await fastify.auth.authenticate(request.headers);
 
       const user = await getUser(fastify, request.params.id);
+
+      return reply.status(200).send({ message: "Success", user });
+    }
+  );
+
+  fastify.get<{ Reply: { message: string; user: UserWithoutPassword } }>(
+    "/me",
+    {
+      schema: {
+        tags: ["user"],
+        description: "Get information on self",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      const user = await getMe(fastify, userId);
 
       return reply.status(200).send({ message: "Success", user });
     }
