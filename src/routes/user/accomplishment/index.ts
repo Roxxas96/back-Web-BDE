@@ -11,7 +11,7 @@ const userAccomplishmentRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
-    Params: { id: number };
+    Params: { id: number; limit?: number; offset?: number };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
     "/:id",
@@ -21,9 +21,16 @@ const userAccomplishmentRoute: FastifyPluginAsync = async (
         description: "Get a user accomplishments",
         params: {
           type: "object",
-          description: "Id of the user",
           properties: {
-            id: { type: "number" },
+            id: { type: "number", description: "Id of the user" },
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
+            },
           },
           required: ["id"],
         },
@@ -38,7 +45,9 @@ const userAccomplishmentRoute: FastifyPluginAsync = async (
 
       const accomplishments = await getUserAccomplishment(
         fastify,
-        request.params.id
+        request.params.id,
+        request.params.limit,
+        request.params.offset
       );
 
       return reply.status(200).send({ message: "Success", accomplishments });
@@ -53,7 +62,7 @@ const userAccomplishmentRoute: FastifyPluginAsync = async (
     "/:id",
     {
       schema: {
-        tags: ["user" ,"accomplishment"],
+        tags: ["user", "accomplishment"],
         description:
           "Create an accomplishment for a user with the provided info",
         body: {
