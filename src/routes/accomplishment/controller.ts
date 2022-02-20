@@ -1,4 +1,4 @@
-import { Accomplishment } from "@prisma/client";
+import { Accomplishment, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
@@ -29,7 +29,7 @@ export async function getManyAccomplishment(
   fastify: FastifyInstance,
   userId?: number,
   challengeId?: number,
-  validation?: -1 | null | 1,
+  validation?: Validation,
   limit?: number,
   offset?: number
 ) {
@@ -95,9 +95,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return (
-        accomplishment.validation === 1 || accomplishment.validation === null
-      );
+      return accomplishment.validation !== "refused";
     }).length
   ) {
     throw fastify.httpErrors.badRequest(
@@ -107,7 +105,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return accomplishment.validation === -1;
+      return accomplishment.validation === "refused";
     }).length >= challenge.maxAtempts
   ) {
     throw fastify.httpErrors.badRequest(
@@ -135,7 +133,7 @@ export async function updateAccomplishment(
   }
 
   //Check if accomplishment has a validation state
-  if (accomplishment.validation) {
+  if (accomplishment.validation !== "pending") {
     throw fastify.httpErrors.badRequest(
       "Can't modify a validated accomplishment"
     );
@@ -158,7 +156,7 @@ export async function deleteAccomplishment(
   }
 
   //Check if it has a validation state
-  if (accomplishment.validation) {
+  if (accomplishment.validation !== "pending") {
     throw fastify.httpErrors.badRequest(
       "Can't modify a validated accomplishment"
     );
@@ -170,7 +168,7 @@ export async function deleteAccomplishment(
 //Validate accomplishment
 export async function validateAccomplishment(
   fastify: FastifyInstance,
-  validation: 1 | -1,
+  validation: Validation,
   accomplishmentId: number
 ) {
   //check for accomplishmentId
@@ -179,7 +177,7 @@ export async function validateAccomplishment(
   }
 
   //Check if it has a validation state
-  if (!(validation === 1 || validation === -1)) {
+  if (validation === "pending") {
     throw fastify.httpErrors.badRequest("Invalid validation state");
   }
 
@@ -193,7 +191,7 @@ export async function validateAccomplishment(
   }
 
   //If accomplishment was already validated, throw
-  if (accomplishment.validation !== null) {
+  if (accomplishment.validation !== "pending") {
     throw fastify.httpErrors.badRequest(
       "Accomplishment already have a validation state"
     );

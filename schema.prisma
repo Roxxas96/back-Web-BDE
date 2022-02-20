@@ -51,9 +51,15 @@ model Accomplishment {
   challengeId Int?
   createdAt DateTime @default(now())
   proof String @default("")
-  validation Int?
+  validation Validation @default(pending)
   accomplishmentCreator User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   accomplishmentChallenge Challenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)
+}
+
+enum Validation {
+  accepted
+  pending
+  refused
 }
 
 model Goodies {

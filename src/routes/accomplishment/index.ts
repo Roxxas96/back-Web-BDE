@@ -1,5 +1,5 @@
 //Import Prisma ORM types
-import { Accomplishment } from "@prisma/client";
+import { Accomplishment, Validation } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
 
@@ -82,13 +82,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         fastify,
         userId,
         request.query.challengeId,
-        request.query.status === "accepted"
-          ? 1
-          : request.query.status === "pending"
-          ? null
-          : request.query.status === "refused"
-          ? -1
-          : undefined,
+        request.query.status,
         request.query.limit,
         request.query.offset
       );
@@ -255,7 +249,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.patch<{
     Params: { id: number };
-    Body: { state: 1 | -1 };
+    Body: { state: Validation };
     Reply: { message: string };
   }>(
     "/validate/:id",
@@ -277,7 +271,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
           type: "object",
           description: "Validation state, it can be Refused: -1 or Accepted: 1",
           properties: {
-            state: { enum: [1, -1] },
+            state: { enum: ["accepted", "pending", "refused"] },
           },
           required: ["state"],
         },
