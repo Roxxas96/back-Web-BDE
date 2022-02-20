@@ -50,8 +50,14 @@ export async function modifyUser(
     throw fastify.httpErrors.internalServerError("Password hash Error");
   }
 
+  const user = await fastify.prisma.user.getUser(userId);
+
+  if (!user) {
+    throw fastify.httpErrors.notFound("User not found");
+  }
+
   //Update user in DB
-  await fastify.prisma.user.updateUser(userId, {
+  await fastify.prisma.user.updateUser(user.id, {
     email: userInfo.email,
     password: hashedPassword,
     name: userInfo.name,
@@ -186,6 +192,12 @@ export async function deleteUser(fastify: FastifyInstance, userId: number) {
   //Check user id
   if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user id");
+  }
+
+  const user = await fastify.prisma.user.getUser(userId);
+
+  if (!user) {
+    throw fastify.httpErrors.notFound("User not found");
   }
 
   await fastify.prisma.user.deleteUser(userId);
