@@ -95,7 +95,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return accomplishment.validation !== "refused";
+      return accomplishment.validation !== "REFUSED";
     }).length
   ) {
     throw fastify.httpErrors.badRequest(
@@ -105,7 +105,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return accomplishment.validation === "refused";
+      return accomplishment.validation === "REFUSED";
     }).length >= challenge.maxAtempts
   ) {
     throw fastify.httpErrors.badRequest(
@@ -140,7 +140,7 @@ export async function updateAccomplishment(
   }
 
   //Check if accomplishment has a validation state
-  if (accomplishment.validation !== "pending") {
+  if (accomplishment.validation !== "PENDING") {
     throw fastify.httpErrors.badRequest(
       "Can't modify a validated accomplishment"
     );
@@ -180,7 +180,7 @@ export async function deleteAccomplishment(
   }
 
   //Check if it has a validation state
-  if (accomplishment.validation !== "pending") {
+  if (accomplishment.validation !== "PENDING") {
     throw fastify.httpErrors.badRequest(
       "Can't modify a validated accomplishment"
     );

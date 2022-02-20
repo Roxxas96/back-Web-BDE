@@ -28,7 +28,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       offset?: number;
       challengeId?: number;
       userId?: number;
-      status?: "accepted" | "pending" | "refused";
+      status?: Validation;
     };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
@@ -58,7 +58,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
             },
             status: {
               type: "string",
-              enum: ["accepted", "pending", "refused"],
+              enum: ["ACCEPTED", "PENDING", "REFUSED"],
               description: "Filter by status",
             },
           },
@@ -167,7 +167,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
   fastify.patch<{
     Params: { id: number };
-    Body: { info: AccomplishmentInfo; status: Validation };
+    Body: { info: AccomplishmentInfo; status: "ACCEPTED" | "REFUSED" };
     Reply: { message: string };
   }>(
     "/:id",
@@ -191,7 +191,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
             info: AccomplishmentSchema,
             status: {
               type: "string",
-              enum: ["accepted", "refused"],
+              enum: ["ACCEPTED", "REFUSED"],
               description: "Validation status to apply to the accomplishment",
             },
           },
