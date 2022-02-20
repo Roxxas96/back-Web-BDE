@@ -74,11 +74,21 @@ export async function createAccomplishment(
 
   const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
 
+  if (!challenge) {
+    throw fastify.httpErrors.badRequest("Referenced challenge not found");
+  }
+
+  const user = await fastify.prisma.user.getUser(userId);
+
+  if (!user) {
+    throw fastify.httpErrors.badRequest("Referenced user not found");
+  }
+
   const ownedAccomplishments =
     await fastify.prisma.accomplishment.getManyAccomplishment(
       undefined,
       undefined,
-      userId
+      user.id
     );
 
   if (
@@ -86,7 +96,7 @@ export async function createAccomplishment(
       return (
         (accomplishment.validation === 1 ||
           accomplishment.validation === null) &&
-        accomplishment.challengeId === challengeId
+        accomplishment.challengeId === challenge.id
       );
     }).length
   ) {
@@ -99,7 +109,7 @@ export async function createAccomplishment(
     ownedAccomplishments.filter((accomplishment) => {
       return (
         accomplishment.validation === -1 &&
-        accomplishment.challengeId === challengeId
+        accomplishment.challengeId === challenge.id
       );
     }).length >= challenge.maxAtempts
   ) {
@@ -107,10 +117,11 @@ export async function createAccomplishment(
       "You have failed to many times to accomplish this challenge"
     );
   }
+
   await fastify.prisma.accomplishment.createAccomplishment(
     accomplishmentInfo,
-    userId,
-    challengeId
+    user.id,
+    challenge.id
   );
 }
 
