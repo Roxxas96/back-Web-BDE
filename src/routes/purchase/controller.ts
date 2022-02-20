@@ -59,7 +59,43 @@ export async function createPurchase(
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
-  await fastify.prisma.purchase.createPurchase(userId, goodiesId);
+  const user = await fastify.prisma.user.getUser(userId);
+
+  if (!user) {
+    throw fastify.httpErrors.badRequest("Referenced user not found");
+  }
+
+  const goodies = await fastify.prisma.goodies.getGoodies(goodiesId);
+
+  if (!goodies) {
+    throw fastify.httpErrors.badRequest("Referenced goodies not found");
+  }
+
+  const ownedPurchases = await fastify.prisma.purchase.getManyPurchase(
+    undefined,
+    undefined,
+    user.id,
+    goodies.id
+  );
+
+  if (ownedPurchases && ownedPurchases.length >= goodies.buyLimit) {
+    throw fastify.httpErrors.badRequest(
+      "Maximum buy limit reached for this goodies"
+    );
+  }
+
+  if (user.wallet < goodies.price) {
+    throw fastify.httpErrors.badRequest(
+      "Not enought in wallet to buy this goodies"
+    );
+  }
+
+  //Decrease user's wallet
+  await fastify.prisma.user.updateUser(user.id, {
+    wallet: user.wallet - goodies.price,
+  });
+
+  await fastify.prisma.purchase.createPurchase(user.id, goodies.id);
 }
 
 //Delete  purchase (ie. refund) by id
@@ -70,6 +106,12 @@ export async function deletePurchase(
   //Check purchase id
   if (!purchaseId) {
     throw fastify.httpErrors.badRequest("Invalid purchase id");
+  }
+
+  const purchase = await fastify.prisma.purchase.getPurchase(purchaseId);
+
+  if (!purchase) {
+    throw fastify.httpErrors.notFound("Purchase not found");
   }
 
   await fastify.prisma.purchase.deletePurchase(purchaseId);

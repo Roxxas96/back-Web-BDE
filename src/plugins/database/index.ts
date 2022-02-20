@@ -183,7 +183,7 @@ declare module "fastify" {
       purchase: {
         getPurchase: (purchaseId: number) => Promise<Purchase>;
         getManyPurchase: (
-          limit: number,
+          limit?: number,
           offset?: number,
           userId?: number,
           goodiesId?: number
