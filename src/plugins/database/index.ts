@@ -96,7 +96,18 @@ declare module "fastify" {
     prisma: {
       client: PrismaClient;
       user: {
-        updateUser: (userId: number, userInfo: UserInfo) => Promise<void>;
+        updateUser: (
+          userId: number,
+          userInfo: {
+            email?: string;
+            password?: string;
+            pseudo?: string;
+            name?: string;
+            surname?: string;
+            privilege?: number;
+            wallet?: number;
+          }
+        ) => Promise<void>;
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
         getUser: (userId?: number, email?: string) => Promise<User>;

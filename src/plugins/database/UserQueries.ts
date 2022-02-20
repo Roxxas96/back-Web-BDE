@@ -61,7 +61,18 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     },
 
     //Update user by Id
-    updateUser: async function (userId: number, userInfo: UserInfo) {
+    updateUser: async function (
+      userId: number,
+      userInfo: {
+        email?: string;
+        password?: string;
+        pseudo?: string;
+        name?: string;
+        surname?: string;
+        privilege?: number;
+        wallet?: number;
+      }
+    ) {
       try {
         await client.user.update({
           where: { id: userId },
