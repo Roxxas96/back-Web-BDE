@@ -88,15 +88,15 @@ export async function createAccomplishment(
     await fastify.prisma.accomplishment.getManyAccomplishment(
       undefined,
       undefined,
-      user.id
+      user.id,
+      undefined,
+      challenge.id
     );
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
       return (
-        (accomplishment.validation === 1 ||
-          accomplishment.validation === null) &&
-        accomplishment.challengeId === challenge.id
+        accomplishment.validation === 1 || accomplishment.validation === null
       );
     }).length
   ) {
@@ -107,10 +107,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return (
-        accomplishment.validation === -1 &&
-        accomplishment.challengeId === challenge.id
-      );
+      return accomplishment.validation === -1;
     }).length >= challenge.maxAtempts
   ) {
     throw fastify.httpErrors.badRequest(
