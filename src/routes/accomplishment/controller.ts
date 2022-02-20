@@ -124,12 +124,19 @@ export async function createAccomplishment(
   is beacause we need to check if the accomplishment has a validation state. We do not allow admin to modify validated accomplishments*/
 export async function updateAccomplishment(
   fastify: FastifyInstance,
-  accomplishmentInfo: AccomplishmentInfo,
-  accomplishment: Accomplishment
+  accomplishment: Accomplishment,
+  accomplishmentInfo?: AccomplishmentInfo,
+  validation?: Validation
 ) {
   //Check for accomplishmendId
   if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
+  }
+
+  if (validation && accomplishmentInfo) {
+    throw fastify.httpErrors.badRequest(
+      "Can't modify both info and validation state at the same time"
+    );
   }
 
   //Check if accomplishment has a validation state
@@ -139,9 +146,26 @@ export async function updateAccomplishment(
     );
   }
 
+  //For validation update we need to check for wallet update
+  //If accomplishment is referencing existing user & challenge then increase user wallet by reward
+  if (validation && accomplishment.userId && accomplishment.challengeId) {
+    const user = await fastify.prisma.user.getUser(accomplishment.userId);
+    const challenge = await fastify.prisma.challenge.getChallenge(
+      accomplishment.challengeId
+    );
+
+    //Increase user wallet
+    if (user && challenge) {
+      await fastify.prisma.user.updateUser(user.id, {
+        wallet: user.wallet + challenge.reward,
+      });
+    }
+  }
+
   await fastify.prisma.accomplishment.updateAccomplishment(
     accomplishment.id,
-    accomplishmentInfo
+    accomplishmentInfo,
+    validation
   );
 }
 
@@ -163,58 +187,4 @@ export async function deleteAccomplishment(
   }
 
   await fastify.prisma.accomplishment.deleteAccomplishment(accomplishment.id);
-}
-
-//Validate accomplishment
-export async function validateAccomplishment(
-  fastify: FastifyInstance,
-  validation: Validation,
-  accomplishmentId: number
-) {
-  //check for accomplishmentId
-  if (!accomplishmentId) {
-    throw fastify.httpErrors.badRequest("Invalid accomplishment id");
-  }
-
-  //Check if it has a validation state
-  if (validation === "pending") {
-    throw fastify.httpErrors.badRequest("Invalid validation state");
-  }
-
-  const accomplishment = await fastify.prisma.accomplishment.getAccomplishment(
-    accomplishmentId
-  );
-
-  //Check for empty
-  if (!accomplishment) {
-    throw fastify.httpErrors.notFound("Accomplishment not found");
-  }
-
-  //If accomplishment was already validated, throw
-  if (accomplishment.validation !== "pending") {
-    throw fastify.httpErrors.badRequest(
-      "Accomplishment already have a validation state"
-    );
-  }
-
-  //If accomplishment is referencing existing user & challenge then increase user wallet by reward
-  if (accomplishment.userId && accomplishment.challengeId) {
-    const user = await fastify.prisma.user.getUser(accomplishment.userId);
-    const challenge = await fastify.prisma.challenge.getChallenge(
-      accomplishment.challengeId
-    );
-
-    //Increase user wallet
-    if (user && challenge) {
-      await fastify.prisma.user.updateUser(user.id, {
-        wallet: user.wallet + challenge.reward,
-      });
-    }
-  }
-
-  await fastify.prisma.accomplishment.updateAccomplishment(
-    accomplishmentId,
-    undefined,
-    validation
-  );
 }
