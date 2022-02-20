@@ -7,6 +7,7 @@ import {
   Purchase,
   Session,
   User,
+  Validation,
 } from "@prisma/client";
 
 import fp from "fastify-plugin";
@@ -146,7 +147,7 @@ declare module "fastify" {
         updateAccomplishment: (
           accomplishmentId: number,
           accomplishmentInfo?: AccomplishmentInfo,
-          validation?: 1 | -1
+          validation?: Validation
         ) => Promise<void>;
         deleteAccomplishment: (accomplishmentId: number) => Promise<void>;
         createAccomplishment: (
@@ -161,7 +162,7 @@ declare module "fastify" {
           limit?: number,
           offset?: number,
           userId?: number,
-          validation?: -1 | null | 1,
+          validation?: Validation,
           challengeId?: number
         ) => Promise<Accomplishment[]>;
       };

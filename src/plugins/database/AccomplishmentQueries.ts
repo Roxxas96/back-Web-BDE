@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
@@ -12,7 +12,7 @@ export function accomplishmentQueries(
       limit?: number,
       offset?: number,
       userId?: number,
-      validation?: -1 | null | 1,
+      validation?: Validation,
       challengeId?: number
     ) {
       let accomplishment;
@@ -82,12 +82,12 @@ export function accomplishmentQueries(
     updateAccomplishment: async function (
       accomplishmentId: number,
       accomplishmentInfo?: AccomplishmentInfo,
-      validation?: 1 | -1
+      validation?: Validation
     ) {
       try {
         await client.accomplishment.update({
           where: { id: accomplishmentId },
-          data: { ...accomplishmentInfo, validation: validation },
+          data: { ...accomplishmentInfo, validation },
         });
       } catch (err) {
         if (err instanceof Error) {

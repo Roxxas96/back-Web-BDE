@@ -1,4 +1,4 @@
-import { Accomplishment } from "@prisma/client";
+import { Accomplishment, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
@@ -29,7 +29,7 @@ export async function getManyAccomplishment(
   fastify: FastifyInstance,
   userId?: number,
   challengeId?: number,
-  validation?: -1 | null | 1,
+  validation?: Validation,
   limit?: number,
   offset?: number
 ) {
@@ -95,9 +95,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return (
-        accomplishment.validation === 1 || accomplishment.validation === null
-      );
+      return accomplishment.validation !== "REFUSED";
     }).length
   ) {
     throw fastify.httpErrors.badRequest(
@@ -107,7 +105,7 @@ export async function createAccomplishment(
 
   if (
     ownedAccomplishments.filter((accomplishment) => {
-      return accomplishment.validation === -1;
+      return accomplishment.validation === "REFUSED";
     }).length >= challenge.maxAtempts
   ) {
     throw fastify.httpErrors.badRequest(
@@ -126,81 +124,31 @@ export async function createAccomplishment(
   is beacause we need to check if the accomplishment has a validation state. We do not allow admin to modify validated accomplishments*/
 export async function updateAccomplishment(
   fastify: FastifyInstance,
-  accomplishmentInfo: AccomplishmentInfo,
-  accomplishment: Accomplishment
+  accomplishment: Accomplishment,
+  accomplishmentInfo?: AccomplishmentInfo,
+  validation?: Validation
 ) {
   //Check for accomplishmendId
   if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
+  if (validation && accomplishmentInfo) {
+    throw fastify.httpErrors.badRequest(
+      "Can't modify both info and validation state at the same time"
+    );
+  }
+
   //Check if accomplishment has a validation state
-  if (accomplishment.validation) {
+  if (accomplishment.validation !== "PENDING") {
     throw fastify.httpErrors.badRequest(
       "Can't modify a validated accomplishment"
     );
   }
 
-  await fastify.prisma.accomplishment.updateAccomplishment(
-    accomplishment.id,
-    accomplishmentInfo
-  );
-}
-
-//Delete the provided accomplishment, if it has no validation state
-export async function deleteAccomplishment(
-  fastify: FastifyInstance,
-  accomplishment: Accomplishment
-) {
-  //Chack for accomplishmentId
-  if (!accomplishment.id) {
-    throw fastify.httpErrors.badRequest("Invalid accomplishment id");
-  }
-
-  //Check if it has a validation state
-  if (accomplishment.validation) {
-    throw fastify.httpErrors.badRequest(
-      "Can't modify a validated accomplishment"
-    );
-  }
-
-  await fastify.prisma.accomplishment.deleteAccomplishment(accomplishment.id);
-}
-
-//Validate accomplishment
-export async function validateAccomplishment(
-  fastify: FastifyInstance,
-  validation: 1 | -1,
-  accomplishmentId: number
-) {
-  //check for accomplishmentId
-  if (!accomplishmentId) {
-    throw fastify.httpErrors.badRequest("Invalid accomplishment id");
-  }
-
-  //Check if it has a validation state
-  if (!(validation === 1 || validation === -1)) {
-    throw fastify.httpErrors.badRequest("Invalid validation state");
-  }
-
-  const accomplishment = await fastify.prisma.accomplishment.getAccomplishment(
-    accomplishmentId
-  );
-
-  //Check for empty
-  if (!accomplishment) {
-    throw fastify.httpErrors.notFound("Accomplishment not found");
-  }
-
-  //If accomplishment was already validated, throw
-  if (accomplishment.validation !== null) {
-    throw fastify.httpErrors.badRequest(
-      "Accomplishment already have a validation state"
-    );
-  }
-
+  //For validation update we need to check for wallet update
   //If accomplishment is referencing existing user & challenge then increase user wallet by reward
-  if (accomplishment.userId && accomplishment.challengeId) {
+  if (validation && accomplishment.userId && accomplishment.challengeId) {
     const user = await fastify.prisma.user.getUser(accomplishment.userId);
     const challenge = await fastify.prisma.challenge.getChallenge(
       accomplishment.challengeId
@@ -215,8 +163,28 @@ export async function validateAccomplishment(
   }
 
   await fastify.prisma.accomplishment.updateAccomplishment(
-    accomplishmentId,
-    undefined,
+    accomplishment.id,
+    accomplishmentInfo,
     validation
   );
+}
+
+//Delete the provided accomplishment, if it has no validation state
+export async function deleteAccomplishment(
+  fastify: FastifyInstance,
+  accomplishment: Accomplishment
+) {
+  //Chack for accomplishmentId
+  if (!accomplishment.id) {
+    throw fastify.httpErrors.badRequest("Invalid accomplishment id");
+  }
+
+  //Check if it has a validation state
+  if (accomplishment.validation !== "PENDING") {
+    throw fastify.httpErrors.badRequest(
+      "Can't modify a validated accomplishment"
+    );
+  }
+
+  await fastify.prisma.accomplishment.deleteAccomplishment(accomplishment.id);
 }

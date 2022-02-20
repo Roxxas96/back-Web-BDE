@@ -1,5 +1,5 @@
 //Import Prisma ORM types
-import { Accomplishment } from "@prisma/client";
+import { Accomplishment, Validation } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
 
@@ -16,7 +16,6 @@ import {
   getAccomplishment,
   getManyAccomplishment,
   updateAccomplishment,
-  validateAccomplishment,
 } from "./controller";
 
 const accomplishmentRoute: FastifyPluginAsync = async (
@@ -29,7 +28,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       offset?: number;
       challengeId?: number;
       userId?: number;
-      status?: "accepted" | "pending" | "refused";
+      status?: Validation;
     };
     Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
@@ -59,7 +58,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
             },
             status: {
               type: "string",
-              enum: ["accepted", "pending", "refused"],
+              enum: ["ACCEPTED", "PENDING", "REFUSED"],
               description: "Filter by status",
             },
           },
@@ -82,13 +81,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         fastify,
         userId,
         request.query.challengeId,
-        request.query.status === "accepted"
-          ? 1
-          : request.query.status === "pending"
-          ? null
-          : request.query.status === "refused"
-          ? -1
-          : undefined,
+        request.query.status,
         request.query.limit,
         request.query.offset
       );
@@ -174,7 +167,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
   fastify.patch<{
     Params: { id: number };
-    Body: AccomplishmentInfo;
+    Body: { info: AccomplishmentInfo; status: "ACCEPTED" | "REFUSED" };
     Reply: { message: string };
   }>(
     "/:id",
@@ -192,25 +185,43 @@ const accomplishmentRoute: FastifyPluginAsync = async (
           },
           required: ["id"],
         },
-        body: AccomplishmentSchema,
+        body: {
+          type: "object",
+          properties: {
+            info: AccomplishmentSchema,
+            status: {
+              type: "string",
+              enum: ["ACCEPTED", "REFUSED"],
+              description: "Validation status to apply to the accomplishment",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
-
-      const accomplishmentInfo = request.body;
 
       const accomplishment = await getAccomplishment(
         fastify,
         request.params.id
       );
 
-      //Need super admin to modify other's accomplishments
-      if (accomplishment.userId !== userId) {
+      //Need super admin to modify other's accomplishments info
+      if (request.body.info && accomplishment.userId !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateAccomplishment(fastify, accomplishmentInfo, accomplishment);
+      //Need a classic admin to validate other's accomplishment
+      if (request.body.status) {
+        await fastify.auth.authorize(userId, 1);
+      }
+
+      await updateAccomplishment(
+        fastify,
+        accomplishment,
+        request.body.info,
+        request.body.status
+      );
 
       return reply.status(201).send({ message: "Accomplishment updated" });
     }
@@ -250,53 +261,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       await deleteAccomplishment(fastify, accomplishment);
 
       return reply.status(200).send({ message: "Accomplishment deleted" });
-    }
-  );
-
-  fastify.patch<{
-    Params: { id: number };
-    Body: { state: 1 | -1 };
-    Reply: { message: string };
-  }>(
-    "/validate/:id",
-    {
-      schema: {
-        tags: ["accomplishment", "admin"],
-        description: "Validate a specific accomplishment",
-        params: {
-          type: "object",
-          properties: {
-            id: {
-              type: "number",
-              description: "Id of the accomplishment to validate",
-            },
-          },
-          required: ["id"],
-        },
-        body: {
-          type: "object",
-          description: "Validation state, it can be Refused: -1 or Accepted: 1",
-          properties: {
-            state: { enum: [1, -1] },
-          },
-          required: ["state"],
-        },
-      },
-    },
-    async function (request, reply) {
-      const userId = await fastify.auth.authenticate(request.headers);
-
-      await fastify.auth.authorize(userId, 1);
-
-      await validateAccomplishment(
-        fastify,
-        request.body.state,
-        request.params.id
-      );
-
-      return reply
-        .status(201)
-        .send({ message: "Accomplishment validation changed" });
     }
   );
 };
