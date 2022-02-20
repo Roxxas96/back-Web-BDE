@@ -115,7 +115,7 @@ declare module "fastify" {
       };
 
       session: {
-        deleteSession: (token: string) => Promise<void>;
+        deleteSession: (sessionId?: number, token?: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
         getManySession: (

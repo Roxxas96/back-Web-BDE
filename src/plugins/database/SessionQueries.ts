@@ -30,7 +30,7 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       let session;
       try {
         session = await client.session.findUnique({
-          where: { id: sessionId, jwt: jwt },
+          where: { id: sessionId, jwt },
         });
       } catch (err) {
         fastify.log.error(err);
@@ -56,9 +56,9 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
     },
 
     //Delete session by Id
-    deleteSession: async function (token: string) {
+    deleteSession: async function (sessionId?: number, jwt?: string) {
       try {
-        await client.session.delete({ where: { jwt: token } });
+        await client.session.delete({ where: { jwt, id: sessionId } });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(

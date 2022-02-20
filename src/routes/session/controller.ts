@@ -25,8 +25,17 @@ export async function deleteSession(
   //Hash token
   const hashedToken = hashJWT(token);
 
+  const tokenInDB = await fastify.prisma.session.getSession(
+    undefined,
+    hashedToken
+  );
+
+  if (!tokenInDB) {
+    throw fastify.httpErrors.notFound("Session not found");
+  }
+
   //Delete Session in DB
-  await fastify.prisma.session.deleteSession(hashedToken);
+  await fastify.prisma.session.deleteSession(undefined, hashedToken);
 }
 
 export async function createSession(
