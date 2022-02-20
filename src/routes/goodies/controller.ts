@@ -19,8 +19,15 @@ export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
 }
 
 //Get all goodies in DB
-export async function getManyGoodies(fastify: FastifyInstance, limit?: number, offset?: number) {
-  const goodies = await fastify.prisma.goodies.getManyGoodies(limit || 20, offset);
+export async function getManyGoodies(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
+  const goodies = await fastify.prisma.goodies.getManyGoodies(
+    limit || 20,
+    offset
+  );
 
   //Check goodies id
   if (!goodies || !goodies.length) {
@@ -32,7 +39,7 @@ export async function getManyGoodies(fastify: FastifyInstance, limit?: number, o
       name: val.name,
       price: val.price,
       image: val.image,
-      id: val.id
+      id: val.id,
     };
   });
 }
@@ -58,7 +65,13 @@ export async function createGoodies(
     throw fastify.httpErrors.badRequest("Invalid creator id");
   }
 
-  await fastify.prisma.goodies.createGoodies(goodiesInfo, creatorId);
+  const creator = await fastify.prisma.user.getUser(creatorId);
+
+  if (!creator) {
+    throw fastify.httpErrors.badRequest("Creator not found");
+  }
+
+  await fastify.prisma.goodies.createGoodies(goodiesInfo, creator.id);
 }
 
 //Update goodies with provided info by id
@@ -82,7 +95,13 @@ export async function updateGoodies(
     throw fastify.httpErrors.badRequest("Invalid goodies id");
   }
 
-  await fastify.prisma.goodies.updateGoodies(goodiesInfo, goodiesId);
+  const goodies = await fastify.prisma.goodies.getGoodies(goodiesId);
+
+  if (!goodies) {
+    throw fastify.httpErrors.notFound("Goodies nor found");
+  }
+
+  await fastify.prisma.goodies.updateGoodies(goodiesInfo, goodies.id);
 }
 
 //Delete goodies by id
@@ -95,5 +114,11 @@ export async function deleteGoodies(
     throw fastify.httpErrors.badRequest("Invalid goodies id");
   }
 
-  await fastify.prisma.goodies.deleteGoodies(goodiesId);
+  const goodies = await fastify.prisma.goodies.getGoodies(goodiesId);
+
+  if (!goodies) {
+    throw fastify.httpErrors.notFound("Goodies not found");
+  }
+
+  await fastify.prisma.goodies.deleteGoodies(goodies.id);
 }
