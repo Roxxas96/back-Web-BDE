@@ -114,5 +114,18 @@ export async function deletePurchase(
     throw fastify.httpErrors.notFound("Purchase not found");
   }
 
+  //If purchase is referencing valid goodies & user, refund user
+  if (purchase.goodiesId && purchase.userId) {
+    const goodies = await fastify.prisma.goodies.getGoodies(purchase.goodiesId);
+    const user = await fastify.prisma.user.getUser(purchase.userId);
+
+    //Refund user
+    if (user && goodies) {
+      await fastify.prisma.user.updateUser(user.id, {
+        wallet: user.wallet + goodies.price,
+      });
+    }
+  }
+
   await fastify.prisma.purchase.deletePurchase(purchaseId);
 }
