@@ -34,17 +34,32 @@ export interface DatabasePluginOptions {
 export default fp<DatabasePluginOptions>(async (fastify, opts) => {
   const client = new PrismaClient();
 
-  //TODO : Retry connection doesn't work
   //Try Database connection
-  const connectionInterval = setInterval(async () => {
+  let connectionTimeout = 1;
+  async function connectToDatabase() {
     try {
       await client.$connect();
+
       fastify.log.info("Database connected");
-      clearInterval(connectionInterval);
-    } catch (err) {
-      fastify.log.error(err);
+    } catch {
+      if (connectionTimeout > 100) {
+        fastify.log.error(
+          "Database connection max retries reached, exiting process"
+        );
+
+        process.exit(1);
+      }
+
+      fastify.log.info(
+        `Database connection failed, retrying in ${connectionTimeout} sec`
+      );
+
+      setTimeout(connectToDatabase, connectionTimeout * 1000);
+
+      connectionTimeout *= 2;
     }
-  }, 5000);
+  }
+  connectToDatabase();
 
   //Disconnect Database on process exit
   fastify.addHook("onClose", async (fastify) => {
