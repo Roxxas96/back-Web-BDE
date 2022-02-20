@@ -96,7 +96,18 @@ declare module "fastify" {
     prisma: {
       client: PrismaClient;
       user: {
-        updateUser: (userId: number, userInfo: UserInfo) => Promise<void>;
+        updateUser: (
+          userId: number,
+          userInfo: {
+            email?: string;
+            password?: string;
+            pseudo?: string;
+            name?: string;
+            surname?: string;
+            privilege?: number;
+            wallet?: number;
+          }
+        ) => Promise<void>;
         createUser: (userInfo: UserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
         getUser: (userId?: number, email?: string) => Promise<User>;
@@ -104,7 +115,7 @@ declare module "fastify" {
       };
 
       session: {
-        deleteSession: (token: string) => Promise<void>;
+        deleteSession: (sessionId?: number, token?: string) => Promise<void>;
         createSession: (token: string, userId: number) => Promise<void>;
         getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
         getManySession: (
@@ -172,7 +183,7 @@ declare module "fastify" {
       purchase: {
         getPurchase: (purchaseId: number) => Promise<Purchase>;
         getManyPurchase: (
-          limit: number,
+          limit?: number,
           offset?: number,
           userId?: number,
           goodiesId?: number

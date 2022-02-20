@@ -26,7 +26,13 @@ export async function createChallenge(
     throw fastify.httpErrors.badRequest("Invalid creator id");
   }
 
-  await fastify.prisma.challenge.createChallenge(challengeInfo, creatorId);
+  const creator = await fastify.prisma.user.getUser(creatorId);
+
+  if (!creator) {
+    throw fastify.httpErrors.badRequest("Creator not found");
+  }
+
+  await fastify.prisma.challenge.createChallenge(challengeInfo, creator.id);
 }
 
 //Update challenge with provided info by id
@@ -50,7 +56,13 @@ export async function updateChallenge(
     throw fastify.httpErrors.badRequest("Invalid challenge id");
   }
 
-  await fastify.prisma.challenge.updateChallenge(challengeInfo, challengeId);
+  const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
+
+  if (!challenge) {
+    throw fastify.httpErrors.notFound("Challenge not found");
+  }
+
+  await fastify.prisma.challenge.updateChallenge(challengeInfo, challenge.id);
 }
 
 //Delete challenge by id
@@ -63,7 +75,13 @@ export async function deleteChallenge(
     throw fastify.httpErrors.badRequest("Invalid challenge id");
   }
 
-  await fastify.prisma.challenge.deleteChallenge(challengeId);
+  const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
+
+  if (!challenge) {
+    throw fastify.httpErrors.notFound("Challenge not found");
+  }
+
+  await fastify.prisma.challenge.deleteChallenge(challenge.id);
 }
 
 //Get challenge by id

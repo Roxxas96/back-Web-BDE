@@ -8,7 +8,7 @@ export function purchaseQueries(
   return {
     //Get Many purchase, by default fetch all DB, if a userId is provided just fetch purchase made by this user
     getManyPurchase: async function (
-      limit: number,
+      limit?: number,
       offset?: number,
       userId?: number,
       goodiesId?: number
