@@ -78,7 +78,6 @@ export async function createSession(
 
   return {
     token,
-    userId: user.id,
   };
 }
 

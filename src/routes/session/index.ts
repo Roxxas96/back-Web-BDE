@@ -94,7 +94,6 @@ const sessionRoute: FastifyPluginAsync = async (
     Reply: {
       message: string;
       token: string;
-      userId: number;
     };
   }>(
     "/",
@@ -121,7 +120,6 @@ const sessionRoute: FastifyPluginAsync = async (
       return reply.status(201).send({
         message: "Session created",
         token: session.token,
-        userId: session.userId,
       });
     }
   );
