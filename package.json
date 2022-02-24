@@ -7,8 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npm run prisma && npm run build:ts && tsc -p test/tsconfig.json && tap --ts test/**/*.test.ts",
-    "start": "npm run build && fastify start dist/app.js",
+    "test": "npm run build && tsc -p test/tsconfig.json && tap --ts test/**/*.test.ts",
+    "start": "fastify start dist/app.js",
     "build": "prisma generate && tsc",
     "dev": "tsc && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"tsc -w\" \"fastify start -p 4000 --ignore-watch=.ts$ -w -l info -P dist/app.js\""
   },
