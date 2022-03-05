@@ -124,7 +124,8 @@ export async function updateAccomplishment(
   fastify: FastifyInstance,
   accomplishment: Accomplishment,
   comment?: string,
-  validation?: Validation
+  validation?: Validation,
+  proof?: Buffer
 ) {
   //Check for accomplishmendId
   if (!accomplishment.id) {
@@ -158,6 +159,28 @@ export async function updateAccomplishment(
         wallet: user.wallet + challenge.reward,
       });
     }
+  }
+
+  if (proof && accomplishment.userId && accomplishment.challengeId) {
+    const ownedAccomplishments =
+      await fastify.prisma.accomplishment.getManyAccomplishment(
+        undefined,
+        undefined,
+        accomplishment.userId,
+        undefined,
+        accomplishment.challengeId
+      );
+
+    const tries = ownedAccomplishments.filter((accomplishment) => {
+      return accomplishment.validation === "REFUSED";
+    }).length;
+
+    await fastify.minio.proof.putProof(
+      proof,
+      accomplishment.id,
+      accomplishment.userId,
+      tries
+    );
   }
 
   await fastify.prisma.accomplishment.updateAccomplishment(

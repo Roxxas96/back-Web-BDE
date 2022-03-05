@@ -20,17 +20,9 @@ export default fp<MinioPluginOptions>(async (fastify, opts) => {
   let connectionTimeout = 1;
   async function connectToMinio() {
     try {
-      if (await client.bucketExists("webbde")) {
-        fastify.log.info("Minio bucket connected");
-      } else {
-        fastify.log.error(
-          `Minio connected but bucket does not exist, retrying in ${connectionTimeout} seconds`
-        );
+      await client.listBuckets();
 
-        setTimeout(connectToMinio, connectionTimeout * 1000);
-
-        connectionTimeout *= 2;
-      }
+      fastify.log.info("Minio bucket connected");
     } catch {
       if (connectionTimeout > 100) {
         fastify.log.error(

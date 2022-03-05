@@ -25,7 +25,7 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
       },
       host: process.env["API_HOST"] || "localhost:4000",
       schemes: ["http"],
-      consumes: ["application/json"],
+      consumes: ["application/json", "form/multipart"],
       produces: ["application/json"],
       tags: [
         { name: "user", description: "User related end-points" },

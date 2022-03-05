@@ -127,13 +127,14 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     Body: {
       comment?: { value: string };
       challengeId: { value: number };
-      proof: MultipartFile
+      proof: MultipartFile;
     };
     Reply: { message: string };
   }>(
     "/",
     {
       schema: {
+        tags: ["accomplishment"],
         body: {
           type: "object",
           required: ["challengeId", "proof"],
@@ -164,8 +165,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       const file = await request.body.proof.toBuffer();
 
-      console.log(file);
-
       await createAccomplishment(
         fastify,
         userId,
@@ -179,7 +178,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
   fastify.patch<{
     Params: { id: number };
-    Body: { comment?: string; status?: "ACCEPTED" | "REFUSED" };
+    Body: {
+      comment?: { value: string };
+      status?: { value: "ACCEPTED" | "REFUSED" };
+      proof?: MultipartFile;
+    };
     Reply: { message: string };
   }>(
     "/:id",
@@ -200,14 +203,24 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         body: {
           type: "object",
           properties: {
+            proof: { $ref: "multipartSharedSchema" },
             comment: {
-              type: "string",
-              description: "Optional comment in addition to the proof",
+              properties: {
+                value: {
+                  type: "string",
+                  description: "Optional comment in addition to the proof",
+                },
+              },
             },
             status: {
-              type: "string",
-              enum: ["ACCEPTED", "REFUSED"],
-              description: "Validation status to apply to the accomplishment",
+              properties: {
+                value: {
+                  type: "string",
+                  enum: ["ACCEPTED", "REFUSED"],
+                  description:
+                    "Validation status to apply to the accomplishment",
+                },
+              },
             },
           },
         },
@@ -231,11 +244,14 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 1);
       }
 
+      const proofFile = await request.body.proof?.toBuffer();
+
       await updateAccomplishment(
         fastify,
         accomplishment,
-        request.body.comment,
-        request.body.status
+        request.body.comment?.value,
+        request.body.status?.value,
+        proofFile
       );
 
       return reply.status(201).send({ message: "Accomplishment updated" });
