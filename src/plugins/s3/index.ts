@@ -1,5 +1,7 @@
 import fp from "fastify-plugin";
 import * as Minio from "minio";
+import internal = require("stream");
+import { ProofQueries } from "./ProofQueries";
 
 export interface MinioPluginOptions {
   // Specify Support plugin options here
@@ -50,14 +52,32 @@ export default fp<MinioPluginOptions>(async (fastify, opts) => {
   }
   connectToMinio();
 
-  fastify.decorate("minio", function () {
-    return client;
-  });
+  const minio = {
+    client: client,
+    proof: ProofQueries(fastify, client),
+  };
+
+  fastify.decorate("minio", minio);
 });
 
 // When using .decorate you have to specify added properties for Typescript
 declare module "fastify" {
   export interface FastifyInstance {
-    someSupport(): string;
+    minio: {
+      client: Minio.Client;
+      proof: {
+        putProof: (
+          proof: internal.Readable,
+          accomplishmentId: number,
+          userId: number,
+          tries: number
+        ) => Promise<void>;
+        getProof: (
+          accomplishmentId: number,
+          userId: number,
+          tries: number
+        ) => Promise<internal.Readable>;
+      };
+    };
   }
 }
