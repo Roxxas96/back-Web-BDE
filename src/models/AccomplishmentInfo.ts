@@ -1,6 +1,6 @@
 //Metadata fot accomplishments
 export interface AccomplishmentInfo {
-  proof?: string;
+  comment?: string;
 }
 
 //Schema used for requests
@@ -9,7 +9,7 @@ export const AccomplishmentSchema = {
   description: "Accomplishment metadata",
 
   properties: {
-    proof: { type: "string" },
+    comment: { type: "string" },
   },
   additionalProperties: false,
 };
