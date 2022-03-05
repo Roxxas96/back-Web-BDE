@@ -2,12 +2,7 @@
 import { Accomplishment, Validation } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
-
-//Import Models
-import {
-  AccomplishmentInfo,
-  AccomplishmentSchema,
-} from "../../models/AccomplishmentInfo";
+import { MultipartFile } from "fastify-multipart";
 
 //Import controller functions
 import {
@@ -129,37 +124,54 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
 
   fastify.put<{
-    Body: { info: AccomplishmentInfo; challengeId: number };
+    Body: {
+      comment?: { value: string };
+      challengeId: { value: number };
+      proof: MultipartFile
+    };
     Reply: { message: string };
   }>(
     "/",
     {
       schema: {
-        tags: ["accomplishment"],
-        description: "Create an accomplishment with the provided info",
         body: {
           type: "object",
+          required: ["challengeId", "proof"],
           properties: {
-            info: AccomplishmentSchema,
+            proof: { $ref: "multipartSharedSchema" },
+            comment: {
+              properties: {
+                value: {
+                  type: "string",
+                  description: "Optional comment in addition to the proof",
+                },
+              },
+            },
             challengeId: {
-              type: "number",
-              description: "Id of the challenge related to the accomplishment",
+              properties: {
+                value: {
+                  type: "number",
+                  description: "Id of the challenge",
+                },
+              },
             },
           },
-          required: ["info", "challengeId"],
         },
       },
     },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const accomplishmentInfo = request.body.info;
+      const file = await request.body.proof.toBuffer();
+
+      console.log(file);
 
       await createAccomplishment(
         fastify,
-        accomplishmentInfo,
         userId,
-        request.body.challengeId
+        request.body.challengeId.value,
+        file,
+        request.body.comment?.value
       );
 
       return reply.status(201).send({ message: "Accomplishment created" });
@@ -167,7 +179,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
   fastify.patch<{
     Params: { id: number };
-    Body: { info: AccomplishmentInfo; status: "ACCEPTED" | "REFUSED" };
+    Body: { comment?: string; status?: "ACCEPTED" | "REFUSED" };
     Reply: { message: string };
   }>(
     "/:id",
@@ -188,7 +200,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         body: {
           type: "object",
           properties: {
-            info: AccomplishmentSchema,
+            comment: {
+              type: "string",
+              description: "Optional comment in addition to the proof",
+            },
             status: {
               type: "string",
               enum: ["ACCEPTED", "REFUSED"],
@@ -207,7 +222,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       );
 
       //Need super admin to modify other's accomplishments info
-      if (request.body.info && accomplishment.userId !== userId) {
+      if (request.body.comment && accomplishment.userId !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
@@ -219,7 +234,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       await updateAccomplishment(
         fastify,
         accomplishment,
-        request.body.info,
+        request.body.comment,
         request.body.status
       );
 

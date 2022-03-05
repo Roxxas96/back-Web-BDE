@@ -1,6 +1,5 @@
 import fp from "fastify-plugin";
 import * as Minio from "minio";
-import internal = require("stream");
 import { ProofQueries } from "./ProofQueries";
 
 export interface MinioPluginOptions {
@@ -67,7 +66,7 @@ declare module "fastify" {
       client: Minio.Client;
       proof: {
         putProof: (
-          proof: internal.Readable,
+          proof: Buffer,
           accomplishmentId: number,
           userId: number,
           tries: number
@@ -76,7 +75,7 @@ declare module "fastify" {
           accomplishmentId: number,
           userId: number,
           tries: number
-        ) => Promise<internal.Readable>;
+        ) => Promise<Buffer>;
       };
     };
   }

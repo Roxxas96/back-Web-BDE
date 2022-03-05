@@ -1,6 +1,5 @@
 import { PrismaClient, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
-import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
 export function accomplishmentQueries(
   fastify: FastifyInstance,
@@ -49,18 +48,20 @@ export function accomplishmentQueries(
 
     //Create an accomplishment
     createAccomplishment: async function (
-      accomplishmentInfo: AccomplishmentInfo,
       userId: number,
-      challengeId: number
+      challengeId: number,
+      comment?: string
     ) {
       try {
-        await client.accomplishment.create({
-          data: {
-            ...accomplishmentInfo,
-            userId: userId,
-            challengeId: challengeId,
-          },
-        });
+        return (
+          await client.accomplishment.create({
+            data: {
+              comment,
+              userId: userId,
+              challengeId: challengeId,
+            },
+          })
+        ).id;
       } catch (err) {
         if (err instanceof Error) {
           if (
@@ -81,13 +82,13 @@ export function accomplishmentQueries(
     //Update an accomplishment by Id
     updateAccomplishment: async function (
       accomplishmentId: number,
-      accomplishmentInfo?: AccomplishmentInfo,
+      comment?: string,
       validation?: Validation
     ) {
       try {
         await client.accomplishment.update({
           where: { id: accomplishmentId },
-          data: { ...accomplishmentInfo, validation },
+          data: { comment, validation },
         });
       } catch (err) {
         if (err instanceof Error) {
