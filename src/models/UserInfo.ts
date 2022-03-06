@@ -11,7 +11,7 @@ export interface CreateUserInfo {
 //Metadata for users
 export interface UpdateUserInfo {
   email?: string;
-  password: string;
+  password?: string;
   name?: string;
   surname?: string;
   pseudo?: string;
@@ -56,7 +56,6 @@ export const CreateUserSchema = {
 export const UpdateUserSchema = {
   type: "object",
   description: "User metadata",
-  required: ["password"],
   properties: {
     name: { type: "string" },
     surname: { type: "string" },

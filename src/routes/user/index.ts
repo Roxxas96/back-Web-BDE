@@ -165,7 +165,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async function (request, reply) {
       const userInfo = request.body;
 
-      if (request.query.recoverToken) {
+      if (request.query.recoverToken && userInfo.password) {
         await modifyUserPasswor(
           fastify,
           userInfo.password,
@@ -219,7 +219,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
       }
 
-      await modifyUserInfo(fastify, userId, userInfo);
+      await modifyUserInfo(fastify, request.params.id, userInfo);
 
       return reply.status(200).send({ message: "User updated" });
     }
