@@ -4,7 +4,10 @@ import internal = require("stream");
 
 export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
   return {
-    putProof: async function (proof: internal.Readable, accomplishmentId: number) {
+    putProof: async function (
+      proof: internal.Readable,
+      accomplishmentId: number
+    ) {
       try {
         await client.putObject("proofs", `${accomplishmentId}`, proof);
       } catch (err) {
@@ -18,6 +21,13 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
       try {
         proof = await client.getObject("proofs", `${accomplishmentId}`);
       } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message.includes("The specified key does not exist")
+        ) {
+          throw fastify.httpErrors.notFound("Proof not found");
+        }
+
         fastify.log.error(err);
 
         throw fastify.httpErrors.internalServerError("Proof download failed");

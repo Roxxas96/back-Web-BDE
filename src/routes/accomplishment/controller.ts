@@ -219,5 +219,7 @@ export async function deleteProof(
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
   }
 
+  await fastify.minio.proof.getProof(accomplishment.id);
+
   return await fastify.minio.proof.deleteProof(accomplishment.id);
 }

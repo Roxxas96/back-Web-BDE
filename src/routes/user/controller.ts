@@ -1,6 +1,10 @@
 import { FastifyInstance } from "fastify";
 import internal = require("stream");
-import { CreateUserInfo, UpdateUserInfo, UserWithoutPassword } from "../../models/UserInfo";
+import {
+  CreateUserInfo,
+  UpdateUserInfo,
+  UserWithoutPassword,
+} from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 import { generateRandomKey } from "../../utils/crypto";
 
@@ -314,6 +318,8 @@ export async function deleteAvatar(
   if (!user || !user.id) {
     throw fastify.httpErrors.badRequest("Invalid user");
   }
+
+  await fastify.minio.avatar.getAvatar(user.id);
 
   return await fastify.minio.avatar.deleteAvatar(user.id);
 }

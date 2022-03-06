@@ -18,6 +18,13 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
       try {
         avatar = await client.getObject("avatars", `${userId}`);
       } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message.includes("The specified key does not exist")
+        ) {
+          throw fastify.httpErrors.notFound("Avatar not found");
+        }
+
         fastify.log.error(err);
 
         throw fastify.httpErrors.internalServerError("Avatar download failed");
