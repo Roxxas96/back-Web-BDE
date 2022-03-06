@@ -272,5 +272,9 @@ export async function modifyUserPasswor(
     throw fastify.httpErrors.internalServerError("Password hash Error");
   }
 
-  fastify.prisma.user.updateUser(user.id, { password: hashedPassword });
+  await fastify.prisma.user.updateUser(user.id, {
+    password: hashedPassword,
+    recoverToken: null,
+    recoverTokenExpiration: null,
+  });
 }

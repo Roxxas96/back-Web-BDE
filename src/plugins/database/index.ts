@@ -107,8 +107,8 @@ declare module "fastify" {
             surname?: string;
             privilege?: number;
             wallet?: number;
-            recoverToken?: string;
-            recoverTokenExpiration?: Date;
+            recoverToken?: string | null;
+            recoverTokenExpiration?: Date | null;
           }
         ) => Promise<void>;
         createUser: (userInfo: CreateUserInfo) => Promise<void>;

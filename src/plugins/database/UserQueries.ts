@@ -22,7 +22,11 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     },
 
     //Get user by Id or by email
-    getUser: async function (userId?: number, email?: string, recoverToken?: string) {
+    getUser: async function (
+      userId?: number,
+      email?: string,
+      recoverToken?: string
+    ) {
       let user;
       try {
         user = await client.user.findUnique({
@@ -71,8 +75,8 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
         surname?: string;
         privilege?: number;
         wallet?: number;
-        recoverToken?: string;
-        recoverTokenExpiration?: Date;
+        recoverToken?: string | null;
+        recoverTokenExpiration?: Date | null;
       }
     ) {
       try {
