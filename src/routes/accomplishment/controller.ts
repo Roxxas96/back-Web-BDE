@@ -20,7 +20,9 @@ export async function getAccomplishment(
     throw fastify.httpErrors.notFound("Accomplishment not found");
   }
 
-  return accomplishment;
+  const proof = await fastify.minio.proof.getProof(accomplishmentId);
+
+  return { accomplishment, proof };
 }
 
 //Get accomplishments, if admin (ie. no userId provided) return all accomplishments in DB, if basic user (ie. userId provided) only return the related ones
@@ -115,7 +117,7 @@ export async function createAccomplishment(
       comment
     );
 
-  await fastify.minio.proof.putProof(proof, accomplishmentId, user.id, tries);
+  await fastify.minio.proof.putProof(proof, accomplishmentId);
 }
 
 /*Update the provided accomplishment, the reason why we need to fetch the accomplishment before updating
@@ -132,7 +134,7 @@ export async function updateAccomplishment(
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
-  if (validation && comment) {
+  if (validation && (comment || proof)) {
     throw fastify.httpErrors.badRequest(
       "Can't modify both info and validation state at the same time"
     );
@@ -161,26 +163,9 @@ export async function updateAccomplishment(
     }
   }
 
-  if (proof && accomplishment.userId && accomplishment.challengeId) {
-    const ownedAccomplishments =
-      await fastify.prisma.accomplishment.getManyAccomplishment(
-        undefined,
-        undefined,
-        accomplishment.userId,
-        undefined,
-        accomplishment.challengeId
-      );
-
-    const tries = ownedAccomplishments.filter((accomplishment) => {
-      return accomplishment.validation === "REFUSED";
-    }).length;
-
-    await fastify.minio.proof.putProof(
-      proof,
-      accomplishment.id,
-      accomplishment.userId,
-      tries
-    );
+  //If a proof was provided, replace the actual in the bucker by this one
+  if (proof) {
+    fastify.minio.proof.putProof(proof, accomplishment.id);
   }
 
   await fastify.prisma.accomplishment.updateAccomplishment(

@@ -3,6 +3,7 @@ import { Accomplishment, Validation } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
 import { MultipartFile } from "fastify-multipart";
+import FormData = require("form-data");
 
 //Import controller functions
 import {
@@ -87,7 +88,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Params: { id: number };
-    Reply: { message: string; accomplishment: Accomplishment };
+    Reply: FormData;
   }>(
     "/:id",
     {
@@ -115,11 +116,18 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       );
 
       //Classic users can't fetch other's accomplishments
-      if (accomplishment.userId !== userId) {
+      if (accomplishment.accomplishment.userId !== userId) {
         await fastify.auth.authorize(userId, 1);
       }
 
-      return reply.status(200).send({ message: "Success", accomplishment });
+      const formData = new FormData();
+      formData.append("message", "Success");
+      Object.entries(accomplishment.accomplishment).forEach(([key, val]) => {
+        formData.append(key, Object(val).toString());
+      });
+      formData.append("proof", accomplishment.proof);
+
+      return reply.type("multipart/mixed").status(200).send(formData);
     }
   );
 
@@ -235,7 +243,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       );
 
       //Need super admin to modify other's accomplishments info
-      if (request.body.comment && accomplishment.userId !== userId) {
+      if (
+        request.body.comment &&
+        accomplishment.accomplishment.userId !== userId
+      ) {
         await fastify.auth.authorize(userId, 2);
       }
 
@@ -248,7 +259,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       await updateAccomplishment(
         fastify,
-        accomplishment,
+        accomplishment.accomplishment,
         request.body.comment?.value,
         request.body.status?.value,
         proofFile
@@ -285,11 +296,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       );
 
       //Need super admin to delete other's accomplishments
-      if (accomplishment.userId !== userId) {
+      if (accomplishment.accomplishment.userId !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteAccomplishment(fastify, accomplishment);
+      await deleteAccomplishment(fastify, accomplishment.accomplishment);
 
       return reply.status(200).send({ message: "Accomplishment deleted" });
     }

@@ -57,17 +57,8 @@ declare module "fastify" {
     minio: {
       client: Minio.Client;
       proof: {
-        putProof: (
-          proof: Buffer,
-          accomplishmentId: number,
-          userId: number,
-          tries: number
-        ) => Promise<void>;
-        getProof: (
-          accomplishmentId: number,
-          userId: number,
-          tries: number
-        ) => Promise<Buffer>;
+        putProof: (proof: Buffer, accomplishmentId: number) => Promise<void>;
+        getProof: (accomplishmentId: number) => Promise<Buffer>;
       };
     };
   }
