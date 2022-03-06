@@ -8,7 +8,6 @@ import {
   UserSchema,
   UserWithoutPassword,
 } from "../../models/UserInfo";
-import { generateRandomKey } from "../../utils/crypto";
 
 //Import controller functions
 import {
@@ -18,6 +17,7 @@ import {
   getManyUser,
   modifyUser,
   getMe,
+  recoverPassword,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -214,7 +214,11 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{ Body: { email: string }; Reply: { message: string } }>(
     "/recover",
     async function (request, reply) {
-      reply.send({ message: await generateRandomKey(32) });
+      await recoverPassword(fastify, request.body.email);
+
+      reply
+        .status(200)
+        .send({ message: `A mail has been sent to ${request.body.email}` });
     }
   );
 };

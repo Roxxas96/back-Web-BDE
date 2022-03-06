@@ -17,6 +17,8 @@ model User {
   pseudo   String @default("Anonym user")
   email    String     @unique
   password String
+  recoverToken String?
+  recoverTokenExpiration DateTime?
   privilege  Int    @default(0)
   wallet Int @default(0)
   sessions Session[]

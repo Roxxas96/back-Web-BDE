@@ -71,6 +71,8 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
         surname?: string;
         privilege?: number;
         wallet?: number;
+        recoverToken?: string;
+        recoverTokenExpiration?: Date;
       }
     ) {
       try {

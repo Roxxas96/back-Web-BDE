@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { UserInfo } from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
+import { generateRandomKey } from "../../utils/crypto";
 
 //Update user with provided info by id
 export async function modifyUser(
@@ -204,15 +205,28 @@ export async function deleteUser(fastify: FastifyInstance, userId: number) {
 }
 
 export async function recoverPassword(fastify: FastifyInstance, email: string) {
-  if (!email){
+  if (!email) {
     throw fastify.httpErrors.badRequest("Invalid email");
   }
 
   const user = await fastify.prisma.user.getUser(undefined, email);
 
-  if(!user){
+  if (!user) {
     throw fastify.httpErrors.notFound("User not found");
   }
 
-  
+  const recoverToken = await generateRandomKey(
+    parseInt(process.env["RECOVER_TOKEN_LENGTH"] || "32")
+  );
+
+  const recoverTokenExpiration = new Date();
+  recoverTokenExpiration.setHours(
+    new Date().getHours() +
+      parseInt(process.env["RECOVER_TOKEN_EXPIRATION_HOURS"] || "1")
+  );
+
+  await fastify.prisma.user.updateUser(user.id, {
+    recoverToken,
+    recoverTokenExpiration,
+  });
 }
