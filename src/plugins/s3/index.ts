@@ -1,5 +1,6 @@
 import fp from "fastify-plugin";
 import * as Minio from "minio";
+import { AvatarQueries } from "./AvatarQueries";
 import { ProofQueries } from "./ProofQueries";
 
 export interface MinioPluginOptions {
@@ -46,6 +47,7 @@ export default fp<MinioPluginOptions>(async (fastify, opts) => {
   const minio = {
     client: client,
     proof: ProofQueries(fastify, client),
+    avatar: AvatarQueries(fastify, client),
   };
 
   fastify.decorate("minio", minio);
@@ -59,6 +61,12 @@ declare module "fastify" {
       proof: {
         putProof: (proof: Buffer, accomplishmentId: number) => Promise<void>;
         getProof: (accomplishmentId: number) => Promise<Buffer>;
+        deleteProof: (accomplishmentId: number) => Promise<void>;
+      };
+      avatar: {
+        putAvatar: (avatar: Buffer, userId: number) => Promise<void>;
+        getAvatar: (userId: number) => Promise<Buffer>;
+        deleteAvatar: (userId: number) => Promise<void>;
       };
     };
   }

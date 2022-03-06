@@ -53,6 +53,7 @@ export const CreateUserSchema = {
 export const UpdateUserSchema = {
   type: "object",
   description: "User metadata",
+  required: ["password"],
   properties: {
     name: { type: "string" },
     surname: { type: "string" },

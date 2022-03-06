@@ -23,5 +23,14 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
       }
       return proof;
     },
+    deleteProof: async function (accomplishmentId: number) {
+      try {
+        await client.removeObject("proofs", `${accomplishmentId})`);
+      } catch (err) {
+        fastify.log.error(err);
+
+        throw fastify.httpErrors.internalServerError("Proof delete failed");
+      }
+    },
   };
 }
