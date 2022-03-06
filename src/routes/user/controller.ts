@@ -229,4 +229,22 @@ export async function recoverPassword(fastify: FastifyInstance, email: string) {
     recoverToken,
     recoverTokenExpiration,
   });
+
+  await fastify.mailer.sendMail({
+    from: process.env["MAILER_USER"],
+    to: user.email,
+    subject: "Webbde Password Recovery",
+    html: `
+    <h1>Webbde Password Recovery</h1>
+    <p>Hello,</p>
+    <p>You recently asked to recover your password, please follow this link : https://${
+      process.env["HOST"] || "localhost:3000"
+    }/recover?token=${recoverToken}</p>
+    <p>This link is effective ${
+      process.env["RECOVER_TOKEN_EXPIRATION_HOURS"] || 1
+    } hour(s)</p>
+    <p>Warning ! : Do not share this link with anyone else !</p>
+    <p>If you didn't asked for a recovery please contact a maintainer</p>
+    `,
+  });
 }
