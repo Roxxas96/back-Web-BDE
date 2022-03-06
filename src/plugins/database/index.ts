@@ -13,7 +13,6 @@ import {
 import fp from "fastify-plugin";
 
 //Import models
-import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 import { ChallengeInfo } from "../../models/ChallengeInfo";
 import { GoodiesInfo } from "../../models/GoodiesInfo";
 import { CreateUserInfo } from "../../models/UserInfo";
@@ -152,15 +151,15 @@ declare module "fastify" {
       accomplishment: {
         updateAccomplishment: (
           accomplishmentId: number,
-          accomplishmentInfo?: AccomplishmentInfo,
+          comment?: string,
           validation?: Validation
         ) => Promise<void>;
         deleteAccomplishment: (accomplishmentId: number) => Promise<void>;
         createAccomplishment: (
-          accomplishmentInfo: AccomplishmentInfo,
           userId: number,
-          challengeId: number
-        ) => Promise<void>;
+          challengeId: number,
+          comment?: string
+        ) => Promise<number>;
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishment>;

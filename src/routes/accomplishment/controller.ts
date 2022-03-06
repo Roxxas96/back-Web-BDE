@@ -1,6 +1,5 @@
 import { Accomplishment, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
-import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 
 //Get an accomplishment by Id
 export async function getAccomplishment(
@@ -21,7 +20,9 @@ export async function getAccomplishment(
     throw fastify.httpErrors.notFound("Accomplishment not found");
   }
 
-  return accomplishment;
+  const proof = await fastify.minio.proof.getProof(accomplishmentId);
+
+  return { accomplishment, proof };
 }
 
 //Get accomplishments, if admin (ie. no userId provided) return all accomplishments in DB, if basic user (ie. userId provided) only return the related ones
@@ -53,9 +54,10 @@ export async function getManyAccomplishment(
 //Create an accomplishment for the current user
 export async function createAccomplishment(
   fastify: FastifyInstance,
-  accomplishmentInfo: AccomplishmentInfo,
   userId: number,
-  challengeId: number
+  challengeId: number,
+  proof: Buffer,
+  comment?: string
 ) {
   //Check for userId
   if (!userId) {
@@ -65,11 +67,6 @@ export async function createAccomplishment(
   //Check for challengeId
   if (!challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge id");
-  }
-
-  //Check for infos
-  if (!accomplishmentInfo) {
-    throw fastify.httpErrors.badRequest("No accomplishment info provided");
   }
 
   const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
@@ -103,21 +100,24 @@ export async function createAccomplishment(
     );
   }
 
-  if (
-    ownedAccomplishments.filter((accomplishment) => {
-      return accomplishment.validation === "REFUSED";
-    }).length >= challenge.maxAtempts
-  ) {
+  const tries = ownedAccomplishments.filter((accomplishment) => {
+    return accomplishment.validation === "REFUSED";
+  }).length;
+
+  if (tries >= challenge.maxAtempts) {
     throw fastify.httpErrors.badRequest(
       "You have failed to many times to accomplish this challenge"
     );
   }
 
-  await fastify.prisma.accomplishment.createAccomplishment(
-    accomplishmentInfo,
-    user.id,
-    challenge.id
-  );
+  const accomplishmentId =
+    await fastify.prisma.accomplishment.createAccomplishment(
+      user.id,
+      challenge.id,
+      comment
+    );
+
+  await fastify.minio.proof.putProof(proof, accomplishmentId);
 }
 
 /*Update the provided accomplishment, the reason why we need to fetch the accomplishment before updating
@@ -125,15 +125,16 @@ export async function createAccomplishment(
 export async function updateAccomplishment(
   fastify: FastifyInstance,
   accomplishment: Accomplishment,
-  accomplishmentInfo?: AccomplishmentInfo,
-  validation?: Validation
+  comment?: string,
+  validation?: Validation,
+  proof?: Buffer
 ) {
   //Check for accomplishmendId
   if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
-  if (validation && accomplishmentInfo) {
+  if (validation && (comment || proof)) {
     throw fastify.httpErrors.badRequest(
       "Can't modify both info and validation state at the same time"
     );
@@ -162,9 +163,14 @@ export async function updateAccomplishment(
     }
   }
 
+  //If a proof was provided, replace the actual in the bucker by this one
+  if (proof) {
+    fastify.minio.proof.putProof(proof, accomplishment.id);
+  }
+
   await fastify.prisma.accomplishment.updateAccomplishment(
     accomplishment.id,
-    accomplishmentInfo,
+    comment,
     validation
   );
 }
