@@ -16,7 +16,7 @@ import fp from "fastify-plugin";
 import { AccomplishmentInfo } from "../../models/AccomplishmentInfo";
 import { ChallengeInfo } from "../../models/ChallengeInfo";
 import { GoodiesInfo } from "../../models/GoodiesInfo";
-import { UserInfo } from "../../models/UserInfo";
+import { CreateUserInfo } from "../../models/UserInfo";
 
 //Import all queries
 import accomplishmentQueries from "./AccomplishmentQueries";
@@ -107,11 +107,17 @@ declare module "fastify" {
             surname?: string;
             privilege?: number;
             wallet?: number;
+            recoverToken?: string | null;
+            recoverTokenExpiration?: Date | null;
           }
         ) => Promise<void>;
-        createUser: (userInfo: UserInfo) => Promise<void>;
+        createUser: (userInfo: CreateUserInfo) => Promise<void>;
         deleteUser: (userId: number) => Promise<void>;
-        getUser: (userId?: number, email?: string) => Promise<User>;
+        getUser: (
+          userId?: number,
+          email?: string,
+          recoverToken?: string
+        ) => Promise<User>;
         getManyUser: (limit: number, offset?: number) => Promise<User[]>;
       };
 
