@@ -1,5 +1,6 @@
 import fp from "fastify-plugin";
 import * as Minio from "minio";
+import internal = require("stream");
 import { AvatarQueries } from "./AvatarQueries";
 import { ProofQueries } from "./ProofQueries";
 
@@ -59,8 +60,11 @@ declare module "fastify" {
     minio: {
       client: Minio.Client;
       proof: {
-        putProof: (proof: Buffer, accomplishmentId: number) => Promise<void>;
-        getProof: (accomplishmentId: number) => Promise<Buffer>;
+        putProof: (
+          proof: internal.Readable,
+          accomplishmentId: number
+        ) => Promise<void>;
+        getProof: (accomplishmentId: number) => Promise<internal.Readable>;
         deleteProof: (accomplishmentId: number) => Promise<void>;
       };
       avatar: {

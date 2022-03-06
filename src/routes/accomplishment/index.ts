@@ -2,16 +2,18 @@
 import { Accomplishment, Validation } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
-import { MultipartFile } from "fastify-multipart";
-import FormData = require("form-data");
+import internal = require("stream");
 
 //Import controller functions
 import {
   createAccomplishment,
   deleteAccomplishment,
+  deleteProof,
   getAccomplishment,
   getManyAccomplishment,
+  getProof,
   updateAccomplishment,
+  updateProof,
 } from "./controller";
 
 const accomplishmentRoute: FastifyPluginAsync = async (
@@ -64,12 +66,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      //Only admins can fetch other's accomplishments or all accomplishmants
-      if (request.query.userId) {
-        if (request.query.userId !== userId) {
-          await fastify.auth.authorize(userId, 1);
-        }
-      } else {
+      //Only admins can fetch other's accomplishments or all accomplishments
+      if (
+        (request.query.userId && request.query.userId !== userId) ||
+        !request.query.userId
+      ) {
         await fastify.auth.authorize(userId, 1);
       }
 
@@ -88,7 +89,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Params: { id: number };
-    Reply: FormData;
+    Reply: { accomplishment: Accomplishment; message: string };
   }>(
     "/:id",
     {
@@ -115,19 +116,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         request.params.id
       );
 
-      //Classic users can't fetch other's accomplishments
-      if (accomplishment.accomplishment.userId !== userId) {
+      if (accomplishment.userId != userId) {
         await fastify.auth.authorize(userId, 1);
       }
 
-      const formData = new FormData();
-      formData.append("message", "Success");
-      Object.entries(accomplishment.accomplishment).forEach(([key, val]) => {
-        formData.append(key, Object(val).toString());
-      });
-      formData.append("proof", accomplishment.proof);
-
-      return reply.type("multipart/mixed").status(200).send(formData);
+      return reply.status(200).send({ message: "Success", accomplishment });
     }
   );
 
@@ -135,7 +128,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     Body: {
       comment?: { value: string };
       challengeId: { value: number };
-      proof: MultipartFile;
     };
     Reply: { message: string };
   }>(
@@ -145,24 +137,15 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         tags: ["accomplishment"],
         body: {
           type: "object",
-          required: ["challengeId", "proof"],
+          required: ["challengeId"],
           properties: {
-            proof: { $ref: "multipartSharedSchema" },
             comment: {
-              properties: {
-                value: {
-                  type: "string",
-                  description: "Optional comment in addition to the proof",
-                },
-              },
+              type: "string",
+              description: "Optional comment in addition to the proof",
             },
             challengeId: {
-              properties: {
-                value: {
-                  type: "number",
-                  description: "Id of the challenge",
-                },
-              },
+              type: "number",
+              description: "Id of the challenge",
             },
           },
         },
@@ -171,13 +154,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const file = await request.body.proof.toBuffer();
-
       await createAccomplishment(
         fastify,
         userId,
         request.body.challengeId.value,
-        file,
         request.body.comment?.value
       );
 
@@ -189,7 +169,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     Body: {
       comment?: { value: string };
       status?: { value: "ACCEPTED" | "REFUSED" };
-      proof?: MultipartFile;
     };
     Reply: { message: string };
   }>(
@@ -211,24 +190,14 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         body: {
           type: "object",
           properties: {
-            proof: { $ref: "multipartSharedSchema" },
             comment: {
-              properties: {
-                value: {
-                  type: "string",
-                  description: "Optional comment in addition to the proof",
-                },
-              },
+              type: "string",
+              description: "Optional comment in addition to the proof",
             },
             status: {
-              properties: {
-                value: {
-                  type: "string",
-                  enum: ["ACCEPTED", "REFUSED"],
-                  description:
-                    "Validation status to apply to the accomplishment",
-                },
-              },
+              type: "string",
+              enum: ["ACCEPTED", "REFUSED"],
+              description: "Validation status to apply to the accomplishment",
             },
           },
         },
@@ -243,10 +212,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       );
 
       //Need super admin to modify other's accomplishments info
-      if (
-        request.body.comment &&
-        accomplishment.accomplishment.userId !== userId
-      ) {
+      if (request.body.comment && accomplishment.userId !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
@@ -255,14 +221,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 1);
       }
 
-      const proofFile = await request.body.proof?.toBuffer();
-
       await updateAccomplishment(
         fastify,
-        accomplishment.accomplishment,
+        accomplishment,
         request.body.comment?.value,
-        request.body.status?.value,
-        proofFile
+        request.body.status?.value
       );
 
       return reply.status(201).send({ message: "Accomplishment updated" });
@@ -296,13 +259,121 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       );
 
       //Need super admin to delete other's accomplishments
-      if (accomplishment.accomplishment.userId !== userId) {
+      if (accomplishment.userId !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteAccomplishment(fastify, accomplishment.accomplishment);
+      await deleteAccomplishment(fastify, accomplishment);
 
       return reply.status(200).send({ message: "Accomplishment deleted" });
+    }
+  );
+
+  fastify.put<{
+    Querystring: { accomplishmentId: number };
+    Reply: { message: string };
+  }>(
+    "/proof",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Upload a proof for the designated accomplishment",
+        consumes: ["multipart/form-data"],
+        querystring: {
+          type: "object",
+          properties: {
+            accomplishmentId: {
+              type: "number",
+              description: "Id of the accomplishment",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      const accomplishment = await getAccomplishment(
+        fastify,
+        request.query.accomplishmentId
+      );
+
+      if (accomplishment.userId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
+
+      await updateProof(fastify, (await request.file()).file, accomplishment);
+
+      reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get<{
+    Querystring: { accomplishmentId: number };
+    Reply: internal.Readable;
+  }>(
+    "/proof",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Get the proof of the designated accomplishment",
+        produces: ["application/octet-stream"],
+        querystring: {
+          type: "object",
+          properties: {
+            accomplishmentId: {
+              type: "number",
+              description: "Id of the accomplishment",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const accomplishment = await getAccomplishment(
+        fastify,
+        request.query.accomplishmentId
+      );
+
+      const proof = await getProof(fastify, accomplishment);
+
+      reply.status(200).send(proof);
+    }
+  );
+
+  fastify.delete<{
+    Querystring: { accomplishmentId: number };
+    Reply: { message: string };
+  }>(
+    "/proof",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Delete the proof of the designated accomplishment",
+        querystring: {
+          type: "object",
+          properties: {
+            accomplishmentId: {
+              type: "number",
+              description: "Id of the accomplishment",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const accomplishment = await getAccomplishment(
+        fastify,
+        request.query.accomplishmentId
+      );
+
+      await deleteProof(fastify, accomplishment);
+
+      reply.status(200).send({ message: "Success" });
     }
   );
 };

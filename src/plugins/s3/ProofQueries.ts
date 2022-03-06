@@ -1,9 +1,10 @@
 import { FastifyInstance } from "fastify";
 import * as Minio from "minio";
+import internal = require("stream");
 
 export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
   return {
-    putProof: async function (proof: Buffer, accomplishmentId: number) {
+    putProof: async function (proof: internal.Readable, accomplishmentId: number) {
       try {
         await client.putObject("proofs", `${accomplishmentId}`, proof);
       } catch (err) {
