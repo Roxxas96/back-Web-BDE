@@ -147,6 +147,15 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         tags: ["user"],
         description: "Modify info of the current user",
         body: UpdateUserSchema,
+        querystring: {
+          type: "object",
+          properties: {
+            recoverToken: {
+              type: "string",
+              description: "Recovery token that has been sent by email",
+            },
+          },
+        },
       },
     },
     async function (request, reply) {
@@ -176,7 +185,6 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: { id: number };
     Body: UpdateUserInfo;
     Reply: { message: string };
-    Querystring: { recoverToken: string };
   }>(
     "/:id",
     {
@@ -238,6 +246,19 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.post<{ Body: { email: string }; Reply: { message: string } }>(
     "/recover",
+    {
+      schema: {
+        tags: ["user"],
+        description: "Send a mail to recover password",
+        body: {
+          type: "object",
+          properties: {
+            email: { type: "string" },
+          },
+          required: ["email"],
+        },
+      },
+    },
     async function (request, reply) {
       await recoverPassword(fastify, request.body.email);
 

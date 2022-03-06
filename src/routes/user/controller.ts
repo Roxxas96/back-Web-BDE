@@ -254,14 +254,14 @@ export async function modifyUserPasswor(
   );
 
   if (!user) {
-    fastify.httpErrors.notFound("User not found");
+    throw fastify.httpErrors.notFound("User not found");
   }
 
   if (
     !user.recoverTokenExpiration ||
     user.recoverTokenExpiration < new Date()
   ) {
-    fastify.httpErrors.badRequest("Token has expired");
+    throw fastify.httpErrors.badRequest("Token has expired");
   }
 
   //Hash password
