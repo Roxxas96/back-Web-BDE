@@ -202,3 +202,17 @@ export async function deleteUser(fastify: FastifyInstance, userId: number) {
 
   await fastify.prisma.user.deleteUser(userId);
 }
+
+export async function recoverPassword(fastify: FastifyInstance, email: string) {
+  if (!email){
+    throw fastify.httpErrors.badRequest("Invalid email");
+  }
+
+  const user = await fastify.prisma.user.getUser(undefined, email);
+
+  if(!user){
+    throw fastify.httpErrors.notFound("User not found");
+  }
+
+  
+}

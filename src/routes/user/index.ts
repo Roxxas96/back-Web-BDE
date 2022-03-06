@@ -8,6 +8,7 @@ import {
   UserSchema,
   UserWithoutPassword,
 } from "../../models/UserInfo";
+import { generateRandomKey } from "../../utils/crypto";
 
 //Import controller functions
 import {
@@ -207,6 +208,13 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       await deleteUser(fastify, request.params.id);
 
       return reply.status(200).send({ message: "User deleted" });
+    }
+  );
+
+  fastify.post<{ Body: { email: string }; Reply: { message: string } }>(
+    "/recover",
+    async function (request, reply) {
+      reply.send({ message: await generateRandomKey(32) });
     }
   );
 };
