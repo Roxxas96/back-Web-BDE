@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { FastifyInstance } from "fastify";
-import { UserInfo } from "../../models/UserInfo";
+import { CreateUserInfo } from "../../models/UserInfo";
 
 function userQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
@@ -22,11 +22,11 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     },
 
     //Get user by Id or by email
-    getUser: async function (userId?: number, email?: string) {
+    getUser: async function (userId?: number, email?: string, recoverToken?: string) {
       let user;
       try {
         user = await client.user.findUnique({
-          where: { id: userId, email: email },
+          where: { id: userId, email, recoverToken },
         });
       } catch (err) {
         fastify.log.error(err);
@@ -38,7 +38,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     },
 
     //Create user
-    createUser: async function (userInfo: UserInfo) {
+    createUser: async function (userInfo: CreateUserInfo) {
       try {
         await client.user.create({
           data: userInfo,

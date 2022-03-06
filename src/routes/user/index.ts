@@ -3,10 +3,12 @@ import { FastifyPluginAsync } from "fastify";
 
 //Import Models
 import {
-  UserInfo,
+  CreateUserInfo,
   UserInfoMinimal,
-  UserSchema,
+  CreateUserSchema,
   UserWithoutPassword,
+  UpdateUserInfo,
+  UpdateUserSchema,
 } from "../../models/UserInfo";
 
 //Import controller functions
@@ -15,9 +17,10 @@ import {
   deleteUser,
   getUser,
   getManyUser,
-  modifyUser,
+  modifyUserInfo,
   getMe,
   recoverPassword,
+  modifyUserPasswor,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -107,7 +110,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   );
 
   fastify.put<{
-    Body: UserInfo;
+    Body: CreateUserInfo;
     Reply: { message: string };
   }>(
     "/",
@@ -115,11 +118,17 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       schema: {
         tags: ["user"],
         description: "Create a user with provided info",
-        body: UserSchema,
+        body: CreateUserSchema,
       },
     },
     async function (request, reply) {
       let userInfo = request.body;
+
+      if (userInfo.privilege) {
+        const userId = await fastify.auth.authenticate(request.headers);
+
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await createUser(fastify, userInfo);
 
@@ -128,23 +137,36 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   );
 
   fastify.patch<{
-    Body: UserInfo;
+    Body: UpdateUserInfo;
     Reply: { message: string };
+    Querystring: { recoverToken?: string };
   }>(
     "/",
     {
       schema: {
         tags: ["user"],
         description: "Modify info of the current user",
-        body: UserSchema,
+        body: UpdateUserSchema,
       },
     },
     async function (request, reply) {
       const userInfo = request.body;
 
-      const userId = await fastify.auth.authenticate(request.headers);
+      if (request.query.recoverToken) {
+        await modifyUserPasswor(
+          fastify,
+          userInfo.password,
+          request.query.recoverToken
+        );
+      } else {
+        const userId = await fastify.auth.authenticate(request.headers);
 
-      await modifyUser(fastify, userId, userInfo);
+        if (userInfo.privilege) {
+          await fastify.auth.authorize(userId, 2);
+        }
+
+        await modifyUserInfo(fastify, userId, userInfo);
+      }
 
       return reply.status(200).send({ message: "User updated" });
     }
@@ -152,8 +174,9 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.patch<{
     Params: { id: number };
-    Body: UserInfo;
+    Body: UpdateUserInfo;
     Reply: { message: string };
+    Querystring: { recoverToken: string };
   }>(
     "/:id",
     {
@@ -168,7 +191,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
           },
           required: ["id"],
         },
-        body: UserSchema,
+        body: UpdateUserSchema,
       },
     },
     async function (request, reply) {
@@ -176,9 +199,11 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const userId = await fastify.auth.authenticate(request.headers);
 
-      await fastify.auth.authorize(userId, 2);
+      if (userId != request.params.id || userInfo.privilege) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
-      await modifyUser(fastify, request.params.id, userInfo);
+      await modifyUserInfo(fastify, userId, userInfo);
 
       return reply.status(200).send({ message: "User updated" });
     }

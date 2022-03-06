@@ -2,7 +2,7 @@ import fp from "fastify-plugin";
 import swagger from "fastify-swagger";
 import { ChallengeSchema } from "../models/ChallengeInfo";
 import { GoodiesSchema } from "../models/GoodiesInfo";
-import { UserSchema } from "../models/UserInfo";
+import { CreateUserSchema } from "../models/UserInfo";
 
 export interface SwaggerPluginOptions {
   // Specify Support plugin options here
@@ -47,7 +47,7 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
         { name: "super admin", description: "Super admin only end-points" },
       ],
       definitions: {
-        User: UserSchema,
+        User: CreateUserSchema,
         Challenge: ChallengeSchema,
         Goodies: GoodiesSchema,
       },

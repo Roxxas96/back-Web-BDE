@@ -1,13 +1,13 @@
 import { FastifyInstance } from "fastify";
-import { UserInfo } from "../../models/UserInfo";
+import { CreateUserInfo, UpdateUserInfo } from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 import { generateRandomKey } from "../../utils/crypto";
 
 //Update user with provided info by id
-export async function modifyUser(
+export async function modifyUserInfo(
   fastify: FastifyInstance,
   userId: number,
-  userInfo: UserInfo
+  userInfo: UpdateUserInfo
 ) {
   //Check uesr id
   if (!userId) {
@@ -19,13 +19,14 @@ export async function modifyUser(
     throw fastify.httpErrors.badRequest("No user info provided");
   }
 
-  //Check user email
-  if (!userInfo.email) {
-    throw fastify.httpErrors.badRequest("No email provided");
+  //Check user password
+  if (!userInfo.password) {
+    throw fastify.httpErrors.badRequest("No password provided");
   }
 
   //Check if mail match synthax
   if (
+    userInfo.email &&
     !new RegExp(
       process.env["EMAIL_REGEX"] || /^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$/g
     ).test(userInfo.email)
@@ -33,22 +34,8 @@ export async function modifyUser(
     throw fastify.httpErrors.badRequest("User email must be a student mail");
   }
 
-  //Check user password
-  if (!userInfo.password) {
-    throw fastify.httpErrors.badRequest("No password provided");
-  }
-
-  //Check password length
-  if (userInfo.password.length < 8) {
-    throw fastify.httpErrors.badRequest("User password is too small");
-  }
-
-  //Hash password
-  const hashedPassword = await hashPassword(userInfo.password);
-
-  if (!hashedPassword) {
-    fastify.log.error("Error : hashed password empty on modify user");
-    throw fastify.httpErrors.internalServerError("Password hash Error");
+  if (userInfo.pseudo && userInfo.pseudo.length < 3) {
+    throw fastify.httpErrors.badRequest("Pseudo is too small");
   }
 
   const user = await fastify.prisma.user.getUser(userId);
@@ -60,7 +47,6 @@ export async function modifyUser(
   //Update user in DB
   await fastify.prisma.user.updateUser(user.id, {
     email: userInfo.email,
-    password: hashedPassword,
     name: userInfo.name,
     surname: userInfo.surname,
     pseudo: userInfo.pseudo,
@@ -69,7 +55,10 @@ export async function modifyUser(
 }
 
 //Create user with provided info
-export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
+export async function createUser(
+  fastify: FastifyInstance,
+  userInfo: CreateUserInfo
+) {
   //Check user info
   if (!userInfo) {
     throw fastify.httpErrors.badRequest("No user info provided");
@@ -111,13 +100,7 @@ export async function createUser(fastify: FastifyInstance, userInfo: UserInfo) {
   }
 
   //Create user in DB
-  await fastify.prisma.user.createUser({
-    email: userInfo.email,
-    password: hashedPassword,
-    name: userInfo.name,
-    surname: userInfo.surname,
-    pseudo: userInfo.pseudo,
-  });
+  await fastify.prisma.user.createUser(userInfo);
 }
 
 //Get user by id
@@ -247,4 +230,47 @@ export async function recoverPassword(fastify: FastifyInstance, email: string) {
     <p>If you didn't asked for a recovery please contact a maintainer</p>
     `,
   });
+}
+
+export async function modifyUserPasswor(
+  fastify: FastifyInstance,
+  password: string,
+  recoverToken: string
+) {
+  //Check password
+  if (!password) {
+    throw fastify.httpErrors.badRequest("No password provided");
+  }
+
+  //Check password length
+  if (password.length < 8) {
+    throw fastify.httpErrors.badRequest("User password is too small");
+  }
+
+  const user = await fastify.prisma.user.getUser(
+    undefined,
+    undefined,
+    recoverToken
+  );
+
+  if (!user) {
+    fastify.httpErrors.notFound("User not found");
+  }
+
+  if (
+    !user.recoverTokenExpiration ||
+    user.recoverTokenExpiration < new Date()
+  ) {
+    fastify.httpErrors.badRequest("Token has expired");
+  }
+
+  //Hash password
+  const hashedPassword = await hashPassword(password);
+
+  if (!hashedPassword) {
+    fastify.log.error("Error : hashed password empty on modify user");
+    throw fastify.httpErrors.internalServerError("Password hash Error");
+  }
+
+  fastify.prisma.user.updateUser(user.id, { password: hashedPassword });
 }
