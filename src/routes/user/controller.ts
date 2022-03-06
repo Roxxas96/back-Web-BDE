@@ -1,5 +1,10 @@
 import { FastifyInstance } from "fastify";
-import { CreateUserInfo, UpdateUserInfo } from "../../models/UserInfo";
+import internal = require("stream");
+import {
+  CreateUserInfo,
+  UpdateUserInfo,
+  UserWithoutPassword,
+} from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 import { generateRandomKey } from "../../utils/crypto";
 
@@ -277,4 +282,44 @@ export async function modifyUserPasswor(
     recoverToken: null,
     recoverTokenExpiration: null,
   });
+}
+
+export async function updateAvatar(
+  fastify: FastifyInstance,
+  avatar: internal.Readable,
+  user: UserWithoutPassword
+) {
+  if (!user || !user.id) {
+    throw fastify.httpErrors.badRequest("Invalid user");
+  }
+
+  if (!avatar) {
+    throw fastify.httpErrors.badRequest("Invalid avatar");
+  }
+
+  await fastify.minio.avatar.putAvatar(avatar, user.id);
+}
+
+export async function getAvatar(
+  fastify: FastifyInstance,
+  user: UserWithoutPassword
+) {
+  if (!user || !user.id) {
+    throw fastify.httpErrors.badRequest("Invalid user");
+  }
+
+  return await fastify.minio.avatar.getAvatar(user.id);
+}
+
+export async function deleteAvatar(
+  fastify: FastifyInstance,
+  user: UserWithoutPassword
+) {
+  if (!user || !user.id) {
+    throw fastify.httpErrors.badRequest("Invalid user");
+  }
+
+  await fastify.minio.avatar.getAvatar(user.id);
+
+  return await fastify.minio.avatar.deleteAvatar(user.id);
 }

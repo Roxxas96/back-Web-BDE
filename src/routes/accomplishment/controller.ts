@@ -1,5 +1,6 @@
 import { Accomplishment, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
+import internal = require("stream");
 
 //Get an accomplishment by Id
 export async function getAccomplishment(
@@ -20,9 +21,7 @@ export async function getAccomplishment(
     throw fastify.httpErrors.notFound("Accomplishment not found");
   }
 
-  const proof = await fastify.minio.proof.getProof(accomplishmentId);
-
-  return { accomplishment, proof };
+  return accomplishment;
 }
 
 //Get accomplishments, if admin (ie. no userId provided) return all accomplishments in DB, if basic user (ie. userId provided) only return the related ones
@@ -56,7 +55,6 @@ export async function createAccomplishment(
   fastify: FastifyInstance,
   userId: number,
   challengeId: number,
-  proof: Buffer,
   comment?: string
 ) {
   //Check for userId
@@ -110,14 +108,11 @@ export async function createAccomplishment(
     );
   }
 
-  const accomplishmentId =
-    await fastify.prisma.accomplishment.createAccomplishment(
-      user.id,
-      challenge.id,
-      comment
-    );
-
-  await fastify.minio.proof.putProof(proof, accomplishmentId);
+  await fastify.prisma.accomplishment.createAccomplishment(
+    user.id,
+    challenge.id,
+    comment
+  );
 }
 
 /*Update the provided accomplishment, the reason why we need to fetch the accomplishment before updating
@@ -126,15 +121,14 @@ export async function updateAccomplishment(
   fastify: FastifyInstance,
   accomplishment: Accomplishment,
   comment?: string,
-  validation?: Validation,
-  proof?: Buffer
+  validation?: Validation
 ) {
   //Check for accomplishmendId
   if (!accomplishment.id) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
-  if (validation && (comment || proof)) {
+  if (validation && comment) {
     throw fastify.httpErrors.badRequest(
       "Can't modify both info and validation state at the same time"
     );
@@ -163,11 +157,6 @@ export async function updateAccomplishment(
     }
   }
 
-  //If a proof was provided, replace the actual in the bucker by this one
-  if (proof) {
-    fastify.minio.proof.putProof(proof, accomplishment.id);
-  }
-
   await fastify.prisma.accomplishment.updateAccomplishment(
     accomplishment.id,
     comment,
@@ -193,4 +182,44 @@ export async function deleteAccomplishment(
   }
 
   await fastify.prisma.accomplishment.deleteAccomplishment(accomplishment.id);
+}
+
+export async function updateProof(
+  fastify: FastifyInstance,
+  proof: internal.Readable,
+  accomplishment: Accomplishment
+) {
+  if (!accomplishment || !accomplishment.id) {
+    throw fastify.httpErrors.badRequest("Invalid accomplishment");
+  }
+
+  if (!proof) {
+    throw fastify.httpErrors.badRequest("Invalid proof");
+  }
+
+  await fastify.minio.proof.putProof(proof, accomplishment.id);
+}
+
+export async function getProof(
+  fastify: FastifyInstance,
+  accomplishment: Accomplishment
+) {
+  if (!accomplishment || !accomplishment.id) {
+    throw fastify.httpErrors.badRequest("Invalid accomplishment");
+  }
+
+  return await fastify.minio.proof.getProof(accomplishment.id);
+}
+
+export async function deleteProof(
+  fastify: FastifyInstance,
+  accomplishment: Accomplishment
+) {
+  if (!accomplishment || !accomplishment.id) {
+    throw fastify.httpErrors.badRequest("Invalid accomplishment");
+  }
+
+  await fastify.minio.proof.getProof(accomplishment.id);
+
+  return await fastify.minio.proof.deleteProof(accomplishment.id);
 }

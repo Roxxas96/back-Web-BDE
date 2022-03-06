@@ -16,7 +16,5 @@ export default fp<FastifyMultipartOptions>(async (fastify, opts) => {
       files: 1, // Max number of file fields
       headerPairs: 2000, // Max number of header key=>value pairs
     },
-    attachFieldsToBody: true,
-    sharedSchemaId: "multipartSharedSchema",
   });
 });

@@ -19,8 +19,8 @@ export interface UpdateUserInfo {
 
 //Privacy fiendly infos un users
 export interface UserInfoMinimal {
-  pseudo: string;
   id: number;
+  pseudo: string;
 }
 
 export interface UserWithoutPassword {
@@ -53,6 +53,7 @@ export const CreateUserSchema = {
 export const UpdateUserSchema = {
   type: "object",
   description: "User metadata",
+  required: ["password"],
   properties: {
     name: { type: "string" },
     surname: { type: "string" },
