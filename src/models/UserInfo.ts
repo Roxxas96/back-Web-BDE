@@ -6,6 +6,7 @@ export interface CreateUserInfo {
   surname?: string;
   pseudo?: string;
   privilege?: number;
+  wallet?: number;
 }
 //Metadata for users
 export interface UpdateUserInfo {
@@ -15,6 +16,7 @@ export interface UpdateUserInfo {
   surname?: string;
   pseudo?: string;
   privilege?: number;
+  wallet?: number;
 }
 
 //Privacy fiendly infos un users
@@ -45,6 +47,7 @@ export const CreateUserSchema = {
     email: { type: "string", format: "email" },
     password: { type: "string" },
     privilege: { type: "number" },
+    wallet: { type: "number" },
   },
   additionalProperties: false,
 };
@@ -61,6 +64,7 @@ export const UpdateUserSchema = {
     email: { type: "string", format: "email" },
     password: { type: "string" },
     privilege: { type: "number" },
+    wallet: { type: "number" },
   },
   additionalProperties: false,
 };

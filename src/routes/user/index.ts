@@ -128,10 +128,10 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async function (request, reply) {
       let userInfo = request.body;
 
-      if (userInfo.privilege) {
+      if (userInfo.privilege || userInfo.wallet) {
         const userId = await fastify.auth.authenticate(request.headers);
 
-        await fastify.auth.authorize(userId, 2);
+        await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
       }
 
       await createUser(fastify, userInfo);
@@ -174,8 +174,8 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       } else {
         const userId = await fastify.auth.authenticate(request.headers);
 
-        if (userInfo.privilege) {
-          await fastify.auth.authorize(userId, 2);
+        if (userInfo.privilege || userInfo.wallet) {
+          await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
         }
 
         await modifyUserInfo(fastify, userId, userInfo);
@@ -211,8 +211,12 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const userId = await fastify.auth.authenticate(request.headers);
 
-      if (userId != request.params.id || userInfo.privilege) {
-        await fastify.auth.authorize(userId, 2);
+      if (
+        request.params.id !== userId ||
+        userInfo.privilege ||
+        userInfo.wallet
+      ) {
+        await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
       }
 
       await modifyUserInfo(fastify, userId, userInfo);
