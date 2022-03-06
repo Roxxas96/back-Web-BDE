@@ -1,9 +1,10 @@
 import { FastifyInstance } from "fastify";
 import * as Minio from "minio";
+import internal = require("stream");
 
 export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
   return {
-    putAvatar: async function (avatar: Buffer, userId: number) {
+    putAvatar: async function (avatar: internal.Readable, userId: number) {
       try {
         await client.putObject("avatars", `${userId}`, avatar);
       } catch (err) {

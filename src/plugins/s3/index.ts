@@ -68,8 +68,8 @@ declare module "fastify" {
         deleteProof: (accomplishmentId: number) => Promise<void>;
       };
       avatar: {
-        putAvatar: (avatar: Buffer, userId: number) => Promise<void>;
-        getAvatar: (userId: number) => Promise<Buffer>;
+        putAvatar: (avatar: internal.Readable, userId: number) => Promise<void>;
+        getAvatar: (userId: number) => Promise<internal.Readable>;
         deleteAvatar: (userId: number) => Promise<void>;
       };
     };

@@ -1,5 +1,6 @@
 //Import Prisma ORM Types
 import { FastifyPluginAsync } from "fastify";
+import internal = require("stream");
 
 //Import Models
 import {
@@ -21,6 +22,9 @@ import {
   getMe,
   recoverPassword,
   modifyUserPasswor,
+  updateAvatar,
+  getAvatar,
+  deleteAvatar,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -265,6 +269,105 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       reply
         .status(200)
         .send({ message: `A mail has been sent to ${request.body.email}` });
+    }
+  );
+
+  fastify.put<{
+    Querystring: { userId: number };
+    Reply: { message: string };
+  }>(
+    "/avatar",
+    {
+      schema: {
+        tags: ["user"],
+        description: "Upload an avatar for the designated user",
+        consumes: ["multipart/form-data"],
+        querystring: {
+          type: "object",
+          properties: {
+            userId: {
+              type: "number",
+              description: "Id of the user",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      const user = await getUser(fastify, request.query.userId);
+
+      if (user.id !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
+
+      await updateAvatar(fastify, (await request.file()).file, user);
+
+      reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get<{
+    Querystring: { userId: number };
+    Reply: internal.Readable;
+  }>(
+    "/avatar",
+    {
+      schema: {
+        tags: ["user"],
+        description: "Get the avatar of the designated user",
+        produces: ["application/octet-stream"],
+        querystring: {
+          type: "object",
+          properties: {
+            userId: {
+              type: "number",
+              description: "Id of the user",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const user = await getUser(fastify, request.query.userId);
+
+      const avatar = await getAvatar(fastify, user);
+
+      reply.status(200).send(avatar);
+    }
+  );
+
+  fastify.delete<{
+    Querystring: { userId: number };
+    Reply: { message: string };
+  }>(
+    "/avatar",
+    {
+      schema: {
+        tags: ["user"],
+        description: "Delete the avatar of the designated user",
+        querystring: {
+          type: "object",
+          properties: {
+            userId: {
+              type: "number",
+              description: "Id of the user",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const user = await getUser(fastify, request.query.userId);
+
+      await deleteAvatar(fastify, user);
+
+      reply.status(200).send({ message: "Success" });
     }
   );
 };

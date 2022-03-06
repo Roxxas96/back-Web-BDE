@@ -19,8 +19,8 @@ export interface UpdateUserInfo {
 
 //Privacy fiendly infos un users
 export interface UserInfoMinimal {
-  pseudo: string;
   id: number;
+  pseudo: string;
 }
 
 export interface UserWithoutPassword {
