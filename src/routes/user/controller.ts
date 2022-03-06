@@ -24,11 +24,6 @@ export async function modifyUserInfo(
     throw fastify.httpErrors.badRequest("No user info provided");
   }
 
-  //Check user password
-  if (!userInfo.password) {
-    throw fastify.httpErrors.badRequest("No password provided");
-  }
-
   //Check if mail match synthax
   if (
     userInfo.email &&
@@ -56,6 +51,7 @@ export async function modifyUserInfo(
     surname: userInfo.surname,
     pseudo: userInfo.pseudo,
     privilege: userInfo.privilege,
+    wallet: userInfo.wallet,
   });
 }
 
