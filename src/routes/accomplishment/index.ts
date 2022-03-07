@@ -126,9 +126,9 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.put<{
     Body: {
-      comment?: { value: string };
-      challengeId: { value: number };
+      comment?: string;
     };
+    Querystring: { challengeId: number };
     Reply: { message: string; accomplishmentId: number };
   }>(
     "/",
@@ -164,8 +164,8 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       const createdAccomplishment = await createAccomplishment(
         fastify,
         userId,
-        request.body.challengeId.value,
-        request.body.comment?.value
+        request.query.challengeId,
+        request.body.comment
       );
 
       return reply.status(201).send({
@@ -177,8 +177,8 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   fastify.patch<{
     Params: { id: number };
     Body: {
-      comment?: { value: string };
-      status?: { value: "ACCEPTED" | "REFUSED" };
+      comment?: string;
+      status?: "ACCEPTED" | "REFUSED";
     };
     Reply: { message: string; accomplishmentId: number };
   }>(
@@ -234,8 +234,8 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       const updatedAccomplishment = await updateAccomplishment(
         fastify,
         accomplishment,
-        request.body.comment?.value,
-        request.body.status?.value
+        request.body.comment,
+        request.body.status
       );
 
       return reply.status(201).send({
