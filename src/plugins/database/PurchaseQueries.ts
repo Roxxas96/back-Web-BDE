@@ -13,9 +13,8 @@ export function purchaseQueries(
       userId?: number,
       goodiesId?: number
     ) {
-      let purchase;
       try {
-        purchase = await client.purchase.findMany({
+        return await client.purchase.findMany({
           where: { userId, goodiesId },
           take: limit,
           skip: offset,
@@ -26,14 +25,12 @@ export function purchaseQueries(
           "Database Fetch Error on Table Purchase"
         );
       }
-      return purchase;
     },
 
     //Get a purchase by Id
     getPurchase: async function (purchaseId: number) {
-      let purchase;
       try {
-        purchase = await client.purchase.findUnique({
+        return await client.purchase.findUnique({
           where: { id: purchaseId },
         });
       } catch (err) {
@@ -42,13 +39,12 @@ export function purchaseQueries(
           "Database Fetch Error on Table Purchase"
         );
       }
-      return purchase;
     },
 
     //Create a purchase
     createPurchase: async function (userId: number, goodiesId: number) {
       try {
-        await client.purchase.create({
+        return await client.purchase.create({
           data: { userId: userId, goodiesId: goodiesId },
         });
       } catch (err) {
@@ -70,7 +66,7 @@ export function purchaseQueries(
     //Delete a purchase
     deletePurchase: async function (purchaseId: number) {
       try {
-        await client.purchase.delete({ where: { id: purchaseId } });
+        return await client.purchase.delete({ where: { id: purchaseId } });
       } catch (err) {
         if (err instanceof Error) {
           if (err.message.includes("Record to delete does not exist")) {

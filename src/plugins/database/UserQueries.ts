@@ -6,9 +6,8 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all users in DB
     getManyUser: async function (limit: number, offset?: number) {
-      let User;
       try {
-        User = await client.user.findMany({
+        return await client.user.findMany({
           take: limit,
           skip: offset,
         });
@@ -18,7 +17,6 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
           "Database Fetch Error on Table User"
         );
       }
-      return User;
     },
 
     //Get user by Id or by email
@@ -27,9 +25,8 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
       email?: string,
       recoverToken?: string
     ) {
-      let user;
       try {
-        user = await client.user.findUnique({
+        return await client.user.findUnique({
           where: { id: userId, email, recoverToken },
         });
       } catch (err) {
@@ -38,13 +35,12 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
           "Database Fetch Error on Table User"
         );
       }
-      return user;
     },
 
     //Create user
     createUser: async function (userInfo: CreateUserInfo) {
       try {
-        await client.user.create({
+        return await client.user.create({
           data: userInfo,
         });
       } catch (err) {
@@ -80,7 +76,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
       }
     ) {
       try {
-        await client.user.update({
+        return await client.user.update({
           where: { id: userId },
           data: userInfo,
         });
@@ -104,7 +100,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     //Delete user by Id
     deleteUser: async function (userId: number) {
       try {
-        await fastify.prisma.client.user.delete({
+        return await fastify.prisma.client.user.delete({
           where: { id: userId },
         });
       } catch (err) {

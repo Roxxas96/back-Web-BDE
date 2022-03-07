@@ -109,9 +109,9 @@ declare module "fastify" {
             recoverToken?: string | null;
             recoverTokenExpiration?: Date | null;
           }
-        ) => Promise<void>;
-        createUser: (userInfo: CreateUserInfo) => Promise<void>;
-        deleteUser: (userId: number) => Promise<void>;
+        ) => Promise<User>;
+        createUser: (userInfo: CreateUserInfo) => Promise<User>;
+        deleteUser: (userId: number) => Promise<User>;
         getUser: (
           userId?: number,
           email?: string,
@@ -121,8 +121,8 @@ declare module "fastify" {
       };
 
       session: {
-        deleteSession: (sessionId?: number, token?: string) => Promise<void>;
-        createSession: (token: string, userId: number) => Promise<void>;
+        deleteSession: (sessionId?: number, token?: string) => Promise<Session>;
+        createSession: (token: string, userId: number) => Promise<Session>;
         getSession: (sessionId?: number, jwt?: string) => Promise<Session>;
         getManySession: (
           limit: number,
@@ -135,12 +135,12 @@ declare module "fastify" {
         updateChallenge: (
           challengeInfo: ChallengeInfo,
           challengeId: number
-        ) => Promise<void>;
-        deleteChallenge: (challengeId: number) => Promise<void>;
+        ) => Promise<Challenge>;
+        deleteChallenge: (challengeId: number) => Promise<Challenge>;
         createChallenge: (
           challengeInfo: ChallengeInfo,
           creatorId: number
-        ) => Promise<void>;
+        ) => Promise<Challenge>;
         getChallenge: (challengeId: number) => Promise<Challenge>;
         getManyChallenge: (
           limit: number,
@@ -153,13 +153,13 @@ declare module "fastify" {
           accomplishmentId: number,
           comment?: string,
           validation?: Validation
-        ) => Promise<void>;
-        deleteAccomplishment: (accomplishmentId: number) => Promise<void>;
+        ) => Promise<Accomplishment>;
+        deleteAccomplishment: (accomplishmentId: number) => Promise<Accomplishment>;
         createAccomplishment: (
           userId: number,
           challengeId: number,
           comment?: string
-        ) => Promise<number>;
+        ) => Promise<Accomplishment>;
         getAccomplishment: (
           accomplishmentId: number
         ) => Promise<Accomplishment>;
@@ -178,12 +178,12 @@ declare module "fastify" {
         createGoodies: (
           goodiesInfo: GoodiesInfo,
           creatorId: number
-        ) => Promise<void>;
+        ) => Promise<Goodies>;
         updateGoodies: (
           goodiesInfo: GoodiesInfo,
           goodiesId: number
-        ) => Promise<void>;
-        deleteGoodies: (goodiesId: number) => Promise<void>;
+        ) => Promise<Goodies>;
+        deleteGoodies: (goodiesId: number) => Promise<Goodies>;
       };
 
       purchase: {
@@ -194,8 +194,8 @@ declare module "fastify" {
           userId?: number,
           goodiesId?: number
         ) => Promise<Purchase[]>;
-        createPurchase: (userId: number, goodiesId: number) => Promise<void>;
-        deletePurchase: (purchaseId: number) => Promise<void>;
+        createPurchase: (userId: number, goodiesId: number) => Promise<Purchase>;
+        deletePurchase: (purchaseId: number) => Promise<Purchase>;
       };
     };
   }

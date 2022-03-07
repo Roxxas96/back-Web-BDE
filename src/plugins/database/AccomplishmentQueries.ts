@@ -14,9 +14,8 @@ export function accomplishmentQueries(
       validation?: Validation,
       challengeId?: number
     ) {
-      let accomplishment;
       try {
-        accomplishment = await client.accomplishment.findMany({
+        return await client.accomplishment.findMany({
           where: { userId, validation, challengeId },
           take: limit,
           skip: offset,
@@ -27,14 +26,12 @@ export function accomplishmentQueries(
           "Database Fetch Error on Table Accomplishment"
         );
       }
-      return accomplishment;
     },
 
     //Get an accomplishment by Id
     getAccomplishment: async function (accomplishmentId: number) {
-      let accomplishment;
       try {
-        accomplishment = await client.accomplishment.findUnique({
+        return await client.accomplishment.findUnique({
           where: { id: accomplishmentId },
         });
       } catch (err) {
@@ -43,7 +40,6 @@ export function accomplishmentQueries(
           "Database Fetch Error on Table Accomplishment"
         );
       }
-      return accomplishment;
     },
 
     //Create an accomplishment
@@ -53,15 +49,13 @@ export function accomplishmentQueries(
       comment?: string
     ) {
       try {
-        return (
-          await client.accomplishment.create({
-            data: {
-              comment,
-              userId: userId,
-              challengeId: challengeId,
-            },
-          })
-        ).id;
+        return await client.accomplishment.create({
+          data: {
+            comment,
+            userId: userId,
+            challengeId: challengeId,
+          },
+        });
       } catch (err) {
         if (err instanceof Error) {
           if (
@@ -86,7 +80,7 @@ export function accomplishmentQueries(
       validation?: Validation
     ) {
       try {
-        await client.accomplishment.update({
+        return await client.accomplishment.update({
           where: { id: accomplishmentId },
           data: { comment, validation },
         });
@@ -116,7 +110,7 @@ export function accomplishmentQueries(
     //Delete an accomplishment by Id
     deleteAccomplishment: async function (accomplishmentId: number) {
       try {
-        await client.accomplishment.delete({
+        return await client.accomplishment.delete({
           where: { id: accomplishmentId },
         });
       } catch (err) {

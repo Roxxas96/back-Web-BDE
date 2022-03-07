@@ -6,9 +6,8 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all goodies in DB
     getManyGoodies: async function (limit: number, offset?: number) {
-      let goodies;
       try {
-        goodies = await client.goodies.findMany({
+        return await client.goodies.findMany({
           take: limit,
           skip: offset,
         });
@@ -18,14 +17,12 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
           "Database Fetch Error on Table Goodies"
         );
       }
-      return goodies;
     },
 
     //Get a goodies by Id
     getGoodies: async function (goodiesId: number) {
-      let goodies;
       try {
-        goodies = await client.goodies.findUnique({
+        return await client.goodies.findUnique({
           where: { id: goodiesId },
         });
       } catch (err) {
@@ -34,7 +31,6 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
           "Database Fetch Error on Table Goodies"
         );
       }
-      return goodies;
     },
 
     //Create a goodies
@@ -43,7 +39,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       creatorId: number
     ) {
       try {
-        await client.goodies.create({
+        return await client.goodies.create({
           data: { ...goodiesInfo, creatorId: creatorId },
         });
       } catch (err) {
@@ -60,7 +56,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       goodiesId: number
     ) {
       try {
-        await client.goodies.update({
+        return await client.goodies.update({
           where: { id: goodiesId },
           data: goodiesInfo,
         });
@@ -75,7 +71,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
     //Delete a goodies by Id
     deleteGoodies: async function (goodiesId: number) {
       try {
-        await client.goodies.delete({ where: { id: goodiesId } });
+        return await client.goodies.delete({ where: { id: goodiesId } });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
