@@ -9,7 +9,7 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
       accomplishmentId: number
     ) {
       try {
-        await client.putObject("proofs", `${accomplishmentId}`, proof);
+        return await client.putObject("proofs", `${accomplishmentId}`, proof);
       } catch (err) {
         fastify.log.error(err);
 
@@ -17,10 +17,10 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
       }
     },
     getProof: async function (accomplishmentId: number) {
-      let proof;
       try {
-        proof = await client.getObject("proofs", `${accomplishmentId}`);
+        return await client.getObject("proofs", `${accomplishmentId}`);
       } catch (err) {
+        //TODO repace with a prefetch
         if (
           err instanceof Error &&
           err.message.includes("The specified key does not exist")
@@ -32,11 +32,10 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
 
         throw fastify.httpErrors.internalServerError("Proof download failed");
       }
-      return proof;
     },
     deleteProof: async function (accomplishmentId: number) {
       try {
-        await client.removeObject("proofs", `${accomplishmentId})`);
+        return await client.removeObject("proofs", `${accomplishmentId})`);
       } catch (err) {
         fastify.log.error(err);
 
