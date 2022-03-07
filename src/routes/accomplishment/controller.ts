@@ -108,7 +108,7 @@ export async function createAccomplishment(
     );
   }
 
-  await fastify.prisma.accomplishment.createAccomplishment(
+  return await fastify.prisma.accomplishment.createAccomplishment(
     user.id,
     challenge.id,
     comment
@@ -157,7 +157,7 @@ export async function updateAccomplishment(
     }
   }
 
-  await fastify.prisma.accomplishment.updateAccomplishment(
+  return await fastify.prisma.accomplishment.updateAccomplishment(
     accomplishment.id,
     comment,
     validation
@@ -181,7 +181,9 @@ export async function deleteAccomplishment(
     );
   }
 
-  await fastify.prisma.accomplishment.deleteAccomplishment(accomplishment.id);
+  return await fastify.prisma.accomplishment.deleteAccomplishment(
+    accomplishment.id
+  );
 }
 
 export async function updateProof(
@@ -197,7 +199,7 @@ export async function updateProof(
     throw fastify.httpErrors.badRequest("Invalid proof");
   }
 
-  await fastify.minio.proof.putProof(proof, accomplishment.id);
+  return await fastify.minio.proof.putProof(proof, accomplishment.id);
 }
 
 export async function getProof(

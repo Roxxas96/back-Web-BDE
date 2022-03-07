@@ -129,7 +129,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       comment?: { value: string };
       challengeId: { value: number };
     };
-    Reply: { message: string };
+    Reply: { message: string; accomplishmentId: number };
   }>(
     "/",
     {
@@ -154,14 +154,19 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      await createAccomplishment(
+      const createdAccomplishment = await createAccomplishment(
         fastify,
         userId,
         request.body.challengeId.value,
         request.body.comment?.value
       );
 
-      return reply.status(201).send({ message: "Accomplishment created" });
+      return reply
+        .status(201)
+        .send({
+          message: "Accomplishment created",
+          accomplishmentId: createdAccomplishment.id,
+        });
     }
   );
   fastify.patch<{
@@ -170,7 +175,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       comment?: { value: string };
       status?: { value: "ACCEPTED" | "REFUSED" };
     };
-    Reply: { message: string };
+    Reply: { message: string; accomplishmentId: number };
   }>(
     "/:id",
     {
@@ -221,18 +226,26 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 1);
       }
 
-      await updateAccomplishment(
+      const updatedAccomplishment = await updateAccomplishment(
         fastify,
         accomplishment,
         request.body.comment?.value,
         request.body.status?.value
       );
 
-      return reply.status(201).send({ message: "Accomplishment updated" });
+      return reply
+        .status(201)
+        .send({
+          message: "Accomplishment updated",
+          accomplishmentId: updatedAccomplishment.id,
+        });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
+  fastify.delete<{
+    Params: { id: number };
+    Reply: { message: string; accomplishmentId: number };
+  }>(
     "/:id",
     {
       schema: {
@@ -263,9 +276,17 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteAccomplishment(fastify, accomplishment);
+      const deletedAccomplishment = await deleteAccomplishment(
+        fastify,
+        accomplishment
+      );
 
-      return reply.status(200).send({ message: "Accomplishment deleted" });
+      return reply
+        .status(200)
+        .send({
+          message: "Accomplishment deleted",
+          accomplishmentId: deletedAccomplishment.id,
+        });
     }
   );
 
