@@ -87,11 +87,10 @@ const purchaseRoute: FastifyPluginAsync = async (
         description: "Fetch a specific user's purchase",
         params: {
           type: "object",
-          description: "Id of the purchase to fetch",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the purchase to fetch" },
+          },
         },
       },
     },
@@ -109,7 +108,7 @@ const purchaseRoute: FastifyPluginAsync = async (
   );
 
   fastify.put<{
-    Body: { goodiesId: string };
+    Querystring: { goodiesId: number };
     Reply: { message: string; purchaseId: number };
   }>(
     "/",
@@ -117,13 +116,15 @@ const purchaseRoute: FastifyPluginAsync = async (
       schema: {
         tags: ["purchase"],
         description: "Create a purchase for the current user",
-        body: {
+        querystring: {
           type: "object",
-          description: "Id of the goodies to buy",
-          properties: {
-            goodiesId: { type: "number" },
-          },
           required: ["goodiesId"],
+          properties: {
+            goodiesId: {
+              type: "number",
+              description: "Id of the goodies to buy",
+            },
+          },
         },
       },
     },
@@ -133,7 +134,7 @@ const purchaseRoute: FastifyPluginAsync = async (
       const createdPurchase = await createPurchase(
         fastify,
         userId,
-        parseInt(request.body.goodiesId)
+        request.query.goodiesId
       );
 
       return reply
@@ -153,11 +154,10 @@ const purchaseRoute: FastifyPluginAsync = async (
         description: "Delete a purchase (ie. refund the user)",
         params: {
           type: "object",
-          description: "Id of the purchase to delete",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the purchase to delete" },
+          },
         },
       },
     },

@@ -71,11 +71,10 @@ const goodiesRoute: FastifyPluginAsync = async (
         description: "Get a specific goodies info",
         params: {
           type: "object",
-          description: "Id of the goodies to fetch",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the goodies to fetch" },
+          },
         },
       },
     },
@@ -128,11 +127,10 @@ const goodiesRoute: FastifyPluginAsync = async (
         body: GoodiesSchema,
         params: {
           type: "object",
-          description: "Id of the goodies to update",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the goodies to update" },
+          },
         },
       },
     },
@@ -166,11 +164,10 @@ const goodiesRoute: FastifyPluginAsync = async (
         description: "Delete a specific goodies",
         params: {
           type: "object",
-          description: "Id of the goodies to delte",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the goodies to delte" },
+          },
         },
       },
     },

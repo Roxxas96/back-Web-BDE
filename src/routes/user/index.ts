@@ -269,27 +269,30 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     }
   );
 
-  fastify.post<{ Body: { email: string }; Reply: { message: string } }>(
+  fastify.post<{ Querystring: { email: string }; Reply: { message: string } }>(
     "/recover",
     {
       schema: {
         tags: ["user"],
         description: "Send a mail to recover password",
-        body: {
+        querystring: {
           type: "object",
           properties: {
-            email: { type: "string" },
+            email: {
+              type: "string",
+              description: "email to which the recover request will be sent",
+            },
           },
           required: ["email"],
         },
       },
     },
     async function (request, reply) {
-      await recoverPassword(fastify, request.body.email);
+      await recoverPassword(fastify, request.query.email);
 
       reply
         .status(200)
-        .send({ message: `A mail has been sent to ${request.body.email}` });
+        .send({ message: `A mail has been sent to ${request.query.email}` });
     }
   );
 

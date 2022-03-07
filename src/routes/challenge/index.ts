@@ -70,11 +70,10 @@ const challengeRoute: FastifyPluginAsync = async (
         description: "Fetch info on a specific challenge",
         params: {
           type: "object",
-          description: "Id of the challenge to fetch",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the challenge to fetch" },
+          },
         },
       },
     },
@@ -111,12 +110,10 @@ const challengeRoute: FastifyPluginAsync = async (
         userId
       );
 
-      return reply
-        .status(201)
-        .send({
-          message: "Challenge created",
-          challengeId: createdChallenge.id,
-        });
+      return reply.status(201).send({
+        message: "Challenge created",
+        challengeId: createdChallenge.id,
+      });
     }
   );
   fastify.patch<{
@@ -131,11 +128,13 @@ const challengeRoute: FastifyPluginAsync = async (
         description: "Update a challenge with the provided info",
         params: {
           type: "object",
-          description: "Id of the challenge to update",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: {
+              type: "number",
+              description: "Id of the challenge to update",
+            },
+          },
         },
         body: ChallengeSchema,
       },
@@ -153,12 +152,10 @@ const challengeRoute: FastifyPluginAsync = async (
         challengeInfo
       );
 
-      return reply
-        .status(200)
-        .send({
-          message: "Challenge updated",
-          challengeId: updatedChallenge.id,
-        });
+      return reply.status(200).send({
+        message: "Challenge updated",
+        challengeId: updatedChallenge.id,
+      });
     }
   );
   fastify.delete<{
@@ -172,11 +169,13 @@ const challengeRoute: FastifyPluginAsync = async (
         description: "Delete a specific challenge",
         params: {
           type: "object",
-          description: "Id of the challenge to delete",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: {
+              type: "number",
+              description: "Id of the challenge to delete",
+            },
+          },
         },
       },
     },
@@ -190,12 +189,10 @@ const challengeRoute: FastifyPluginAsync = async (
         request.params.id
       );
 
-      return reply
-        .status(200)
-        .send({
-          message: "Challenge deleted",
-          challengeId: deletedChallenge.id,
-        });
+      return reply.status(200).send({
+        message: "Challenge deleted",
+        challengeId: deletedChallenge.id,
+      });
     }
   );
 };

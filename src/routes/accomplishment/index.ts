@@ -98,13 +98,13 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Fetch info on a specific user's accomplishment",
         params: {
           type: "object",
+          required: ["id"],
           properties: {
             id: {
               type: "number",
               description: "Id of the accomplishment to fetch",
             },
           },
-          required: ["id"],
         },
       },
     },
@@ -135,14 +135,21 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     {
       schema: {
         tags: ["accomplishment"],
+        description:
+          "Create an accomplishment (mad by the user) referencing the specified challenge",
         body: {
           type: "object",
-          required: ["challengeId"],
           properties: {
             comment: {
               type: "string",
               description: "Optional comment in addition to the proof",
             },
+          },
+        },
+        querystring: {
+          type: "object",
+          required: ["challengeId"],
+          properties: {
             challengeId: {
               type: "number",
               description: "Id of the challenge",
@@ -161,12 +168,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         request.body.comment?.value
       );
 
-      return reply
-        .status(201)
-        .send({
-          message: "Accomplishment created",
-          accomplishmentId: createdAccomplishment.id,
-        });
+      return reply.status(201).send({
+        message: "Accomplishment created",
+        accomplishmentId: createdAccomplishment.id,
+      });
     }
   );
   fastify.patch<{
@@ -184,13 +189,13 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Update info related to a specific user's accomplishment",
         params: {
           type: "object",
+          required: ["id"],
           properties: {
             id: {
               type: "number",
               description: "Id of the accomplishment to update",
             },
           },
-          required: ["id"],
         },
         body: {
           type: "object",
@@ -233,12 +238,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         request.body.status?.value
       );
 
-      return reply
-        .status(201)
-        .send({
-          message: "Accomplishment updated",
-          accomplishmentId: updatedAccomplishment.id,
-        });
+      return reply.status(201).send({
+        message: "Accomplishment updated",
+        accomplishmentId: updatedAccomplishment.id,
+      });
     }
   );
 
@@ -253,13 +256,13 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Delete a specific user's accomplishment",
         params: {
           type: "object",
+          required: ["id"],
           properties: {
             id: {
               type: "number",
               description: "Id of the accomplishment to delete",
             },
           },
-          required: ["id"],
         },
       },
     },
@@ -281,12 +284,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         accomplishment
       );
 
-      return reply
-        .status(200)
-        .send({
-          message: "Accomplishment deleted",
-          accomplishmentId: deletedAccomplishment.id,
-        });
+      return reply.status(200).send({
+        message: "Accomplishment deleted",
+        accomplishmentId: deletedAccomplishment.id,
+      });
     }
   );
 
@@ -302,6 +303,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         consumes: ["multipart/form-data"],
         querystring: {
           type: "object",
+          required: ["accomplishmentId"],
           properties: {
             accomplishmentId: {
               type: "number",
@@ -341,6 +343,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         produces: ["application/octet-stream"],
         querystring: {
           type: "object",
+          required: ["accomplishmentId"],
           properties: {
             accomplishmentId: {
               type: "number",
@@ -375,6 +378,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         description: "Delete the proof of the designated accomplishment",
         querystring: {
           type: "object",
+          required: ["accomplishmentId"],
           properties: {
             accomplishmentId: {
               type: "number",

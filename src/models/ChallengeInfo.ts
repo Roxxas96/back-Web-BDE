@@ -17,7 +17,6 @@ export interface ChallengeInfoMinimal {
 export const ChallengeSchema = {
   type: "object",
   description: "Challenge metadata",
-
   properties: {
     name: { type: "string" },
     description: { type: "string" },
