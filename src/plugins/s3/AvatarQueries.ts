@@ -6,7 +6,7 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
   return {
     putAvatar: async function (avatar: internal.Readable, userId: number) {
       try {
-        await client.putObject("avatars", `${userId}`, avatar);
+        return await client.putObject("avatars", `${userId}`, avatar);
       } catch (err) {
         fastify.log.error(err);
 
@@ -14,9 +14,8 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
       }
     },
     getAvatar: async function (userId: number) {
-      let avatar;
       try {
-        avatar = await client.getObject("avatars", `${userId}`);
+        return await client.getObject("avatars", `${userId}`);
       } catch (err) {
         if (
           err instanceof Error &&
@@ -29,11 +28,10 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
 
         throw fastify.httpErrors.internalServerError("Avatar download failed");
       }
-      return avatar;
     },
     deleteAvatar: async function (userId: number) {
       try {
-        await client.removeObject("avatars", `${userId}`);
+        return await client.removeObject("avatars", `${userId}`);
       } catch (err) {
         fastify.log.error(err);
 

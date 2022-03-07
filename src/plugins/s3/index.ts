@@ -63,12 +63,15 @@ declare module "fastify" {
         putProof: (
           proof: internal.Readable,
           accomplishmentId: number
-        ) => Promise<void>;
+        ) => Promise<Minio.UploadedObjectInfo>;
         getProof: (accomplishmentId: number) => Promise<internal.Readable>;
         deleteProof: (accomplishmentId: number) => Promise<void>;
       };
       avatar: {
-        putAvatar: (avatar: internal.Readable, userId: number) => Promise<void>;
+        putAvatar: (
+          avatar: internal.Readable,
+          userId: number
+        ) => Promise<Minio.UploadedObjectInfo>;
         getAvatar: (userId: number) => Promise<internal.Readable>;
         deleteAvatar: (userId: number) => Promise<void>;
       };

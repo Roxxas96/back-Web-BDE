@@ -9,9 +9,8 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       offset?: number,
       userId?: number
     ) {
-      let Session;
       try {
-        Session = await client.session.findMany({
+        return await client.session.findMany({
           where: { userId },
           take: limit,
           skip: offset,
@@ -19,38 +18,35 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
-      return Session;
     },
 
     //Get a session by Id or by JWT
     getSession: async function (sessionId?: number, jwt?: string) {
-      let session;
       try {
-        session = await client.session.findUnique({
+        return await client.session.findUnique({
           where: { id: sessionId, jwt },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
-      return session;
     },
 
     //Create session
     createSession: async function (token: string, userId: number) {
       try {
-        await client.session.create({
+        return await client.session.create({
           data: { jwt: token, userId: userId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -58,11 +54,11 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
     //Delete session by Id
     deleteSession: async function (sessionId?: number, jwt?: string) {
       try {
-        await client.session.delete({ where: { jwt, id: sessionId } });
+        return await client.session.delete({ where: { jwt, id: sessionId } });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
     },

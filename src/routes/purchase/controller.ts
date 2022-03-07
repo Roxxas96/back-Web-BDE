@@ -95,7 +95,7 @@ export async function createPurchase(
     wallet: user.wallet - goodies.price,
   });
 
-  await fastify.prisma.purchase.createPurchase(user.id, goodies.id);
+  return await fastify.prisma.purchase.createPurchase(user.id, goodies.id);
 }
 
 //Delete  purchase (ie. refund) by id
@@ -127,5 +127,5 @@ export async function deletePurchase(
     }
   }
 
-  await fastify.prisma.purchase.deletePurchase(purchaseId);
+  return await fastify.prisma.purchase.deletePurchase(purchaseId);
 }

@@ -45,7 +45,7 @@ export async function modifyUserInfo(
   }
 
   //Update user in DB
-  await fastify.prisma.user.updateUser(user.id, userInfo);
+  return await fastify.prisma.user.updateUser(user.id, userInfo);
 }
 
 //Create user with provided info
@@ -94,7 +94,7 @@ export async function createUser(
   }
 
   //Create user in DB
-  await fastify.prisma.user.createUser({
+  return await fastify.prisma.user.createUser({
     ...userInfo,
     password: hashedPassword,
   });
@@ -181,7 +181,7 @@ export async function deleteUser(fastify: FastifyInstance, userId: number) {
     throw fastify.httpErrors.notFound("User not found");
   }
 
-  await fastify.prisma.user.deleteUser(userId);
+  return await fastify.prisma.user.deleteUser(userId);
 }
 
 export async function recoverPassword(fastify: FastifyInstance, email: string) {
@@ -269,7 +269,7 @@ export async function modifyUserPasswor(
     throw fastify.httpErrors.internalServerError("Password hash Error");
   }
 
-  await fastify.prisma.user.updateUser(user.id, {
+  return await fastify.prisma.user.updateUser(user.id, {
     password: hashedPassword,
     recoverToken: null,
     recoverTokenExpiration: null,
@@ -289,7 +289,7 @@ export async function updateAvatar(
     throw fastify.httpErrors.badRequest("Invalid avatar");
   }
 
-  await fastify.minio.avatar.putAvatar(avatar, user.id);
+  return await fastify.minio.avatar.putAvatar(avatar, user.id);
 }
 
 export async function getAvatar(

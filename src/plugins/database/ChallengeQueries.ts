@@ -9,35 +9,31 @@ export function challengeQueries(
   return {
     //Get all challenges in DB
     getManyChallenge: async function (limit: number, offset?: number) {
-      let challenge;
       try {
-        challenge = await client.challenge.findMany({
+        return await client.challenge.findMany({
           take: limit,
           skip: offset,
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Challenge"
+          "There was an error with the Database, please try again"
         );
       }
-      return challenge;
     },
 
     //Get a challenge by Id
     getChallenge: async function (challengeId: number) {
-      let challenge;
       try {
-        challenge = await client.challenge.findUnique({
+        return await client.challenge.findUnique({
           where: { id: challengeId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Challenge"
+          "There was an error with the Database, please try again"
         );
       }
-      return challenge;
     },
 
     //Create a challenge
@@ -46,23 +42,13 @@ export function challengeQueries(
       creatorId: number
     ) {
       try {
-        await client.challenge.create({
+        return await client.challenge.create({
           data: { ...challengeInfo, creatorId: creatorId },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (
-            err.message.includes(
-              'violates check constraint \\"Challenge_reward_check\\"'
-            )
-          ) {
-            throw fastify.httpErrors.badRequest("Reward must be positive");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Challenge"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -73,27 +59,14 @@ export function challengeQueries(
       challengeId: number
     ) {
       try {
-        await client.challenge.update({
+        return await client.challenge.update({
           where: { id: challengeId },
           data: challengeInfo,
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to update not found")) {
-            throw fastify.httpErrors.notFound("Challenge not found");
-          }
-          if (
-            err.message.includes(
-              'violates check constraint \\"Challenge_reward_check\\"'
-            )
-          ) {
-            throw fastify.httpErrors.badRequest("Reward must be positive");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table Challenge"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -101,17 +74,11 @@ export function challengeQueries(
     //Delete a challenge by Id
     deleteChallenge: async function (challengeId: number) {
       try {
-        await client.challenge.delete({ where: { id: challengeId } });
+        return await client.challenge.delete({ where: { id: challengeId } });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("Challenge not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Challenge"
+          "There was an error with the Database, please try again"
         );
       }
     },

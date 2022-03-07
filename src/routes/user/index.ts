@@ -115,7 +115,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.put<{
     Body: CreateUserInfo;
-    Reply: { message: string };
+    Reply: { message: string; userId: number };
   }>(
     "/",
     {
@@ -134,15 +134,17 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
       }
 
-      await createUser(fastify, userInfo);
+      const createdUser = await createUser(fastify, userInfo);
 
-      return reply.status(201).send({ message: "User created" });
+      return reply
+        .status(201)
+        .send({ message: "User created", userId: createdUser.id });
     }
   );
 
   fastify.patch<{
     Body: UpdateUserInfo;
-    Reply: { message: string };
+    Reply: { message: string; userId: number };
     Querystring: { recoverToken?: string };
   }>(
     "/",
@@ -165,8 +167,10 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async function (request, reply) {
       const userInfo = request.body;
 
+      let modifiedUser;
+
       if (request.query.recoverToken && userInfo.password) {
-        await modifyUserPasswor(
+        modifiedUser = await modifyUserPasswor(
           fastify,
           userInfo.password,
           request.query.recoverToken
@@ -178,17 +182,19 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
           await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
         }
 
-        await modifyUserInfo(fastify, userId, userInfo);
+        modifiedUser = await modifyUserInfo(fastify, userId, userInfo);
       }
 
-      return reply.status(200).send({ message: "User updated" });
+      return reply
+        .status(200)
+        .send({ message: "User updated", userId: modifiedUser.id });
     }
   );
 
   fastify.patch<{
     Params: { id: number };
     Body: UpdateUserInfo;
-    Reply: { message: string };
+    Reply: { message: string; userId: number };
   }>(
     "/:id",
     {
@@ -219,13 +225,22 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         await fastify.auth.authorize(userId, userInfo.privilege ? 2 : 1);
       }
 
-      await modifyUserInfo(fastify, request.params.id, userInfo);
+      const modifiedUser = await modifyUserInfo(
+        fastify,
+        request.params.id,
+        userInfo
+      );
 
-      return reply.status(200).send({ message: "User updated" });
+      return reply
+        .status(200)
+        .send({ message: "User updated", userId: modifiedUser.id });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
+  fastify.delete<{
+    Params: { id: number };
+    Reply: { message: string; userId: number };
+  }>(
     "/:id",
     {
       schema: {
@@ -246,33 +261,38 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       await fastify.auth.authorize(userId, 2);
 
-      await deleteUser(fastify, request.params.id);
+      const deletedUser = await deleteUser(fastify, request.params.id);
 
-      return reply.status(200).send({ message: "User deleted" });
+      return reply
+        .status(200)
+        .send({ message: "User deleted", userId: deletedUser.id });
     }
   );
 
-  fastify.post<{ Body: { email: string }; Reply: { message: string } }>(
+  fastify.post<{ Querystring: { email: string }; Reply: { message: string } }>(
     "/recover",
     {
       schema: {
         tags: ["user"],
         description: "Send a mail to recover password",
-        body: {
+        querystring: {
           type: "object",
           properties: {
-            email: { type: "string" },
+            email: {
+              type: "string",
+              description: "email to which the recover request will be sent",
+            },
           },
           required: ["email"],
         },
       },
     },
     async function (request, reply) {
-      await recoverPassword(fastify, request.body.email);
+      await recoverPassword(fastify, request.query.email);
 
       reply
         .status(200)
-        .send({ message: `A mail has been sent to ${request.body.email}` });
+        .send({ message: `A mail has been sent to ${request.query.email}` });
     }
   );
 

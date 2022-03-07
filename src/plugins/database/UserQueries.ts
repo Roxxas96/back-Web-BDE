@@ -6,19 +6,17 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all users in DB
     getManyUser: async function (limit: number, offset?: number) {
-      let User;
       try {
-        User = await client.user.findMany({
+        return await client.user.findMany({
           take: limit,
           skip: offset,
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
-      return User;
     },
 
     //Get user by Id or by email
@@ -27,39 +25,28 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
       email?: string,
       recoverToken?: string
     ) {
-      let user;
       try {
-        user = await client.user.findUnique({
+        return await client.user.findUnique({
           where: { id: userId, email, recoverToken },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
-      return user;
     },
 
     //Create user
     createUser: async function (userInfo: CreateUserInfo) {
       try {
-        await client.user.create({
+        return await client.user.create({
           data: userInfo,
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Unique constraint failed")) {
-            throw fastify.httpErrors.conflict("User already exists");
-          }
-          if (/Argument .* for .* is missing/g) {
-            throw fastify.httpErrors.badRequest("Missing argument");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -80,23 +67,14 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
       }
     ) {
       try {
-        await client.user.update({
+        return await client.user.update({
           where: { id: userId },
           data: userInfo,
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Unique constraint failed")) {
-            throw fastify.httpErrors.conflict("User already exists");
-          }
-          if (err.message.includes("Record to update not found")) {
-            throw fastify.httpErrors.notFound("User not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -104,19 +82,13 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
     //Delete user by Id
     deleteUser: async function (userId: number) {
       try {
-        await fastify.prisma.client.user.delete({
+        return await fastify.prisma.client.user.delete({
           where: { id: userId },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("User not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },

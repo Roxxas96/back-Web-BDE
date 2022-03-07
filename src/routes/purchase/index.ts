@@ -87,11 +87,10 @@ const purchaseRoute: FastifyPluginAsync = async (
         description: "Fetch a specific user's purchase",
         params: {
           type: "object",
-          description: "Id of the purchase to fetch",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the purchase to fetch" },
+          },
         },
       },
     },
@@ -108,32 +107,46 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.put<{ Body: { goodiesId: string }; Reply: { message: string } }>(
+  fastify.put<{
+    Querystring: { goodiesId: number };
+    Reply: { message: string; purchaseId: number };
+  }>(
     "/",
     {
       schema: {
         tags: ["purchase"],
         description: "Create a purchase for the current user",
-        body: {
+        querystring: {
           type: "object",
-          description: "Id of the goodies to buy",
-          properties: {
-            goodiesId: { type: "number" },
-          },
           required: ["goodiesId"],
+          properties: {
+            goodiesId: {
+              type: "number",
+              description: "Id of the goodies to buy",
+            },
+          },
         },
       },
     },
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      await createPurchase(fastify, userId, parseInt(request.body.goodiesId));
+      const createdPurchase = await createPurchase(
+        fastify,
+        userId,
+        request.query.goodiesId
+      );
 
-      return reply.status(201).send({ message: "Purchase created" });
+      return reply
+        .status(201)
+        .send({ message: "Purchase created", purchaseId: createdPurchase.id });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
+  fastify.delete<{
+    Params: { id: number };
+    Reply: { message: string; purchaseId: number };
+  }>(
     "/:id",
     {
       schema: {
@@ -141,11 +154,10 @@ const purchaseRoute: FastifyPluginAsync = async (
         description: "Delete a purchase (ie. refund the user)",
         params: {
           type: "object",
-          description: "Id of the purchase to delete",
-          properties: {
-            id: { type: "number" },
-          },
           required: ["id"],
+          properties: {
+            id: { type: "number", description: "Id of the purchase to delete" },
+          },
         },
       },
     },
@@ -154,9 +166,11 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deletePurchase(fastify, request.params.id);
+      const deletedPurchase = await deletePurchase(fastify, request.params.id);
 
-      return reply.status(200).send({ message: "Purchase deleted" });
+      return reply
+        .status(200)
+        .send({ message: "Purchase deleted", purchaseId: deletedPurchase.id });
     }
   );
 };

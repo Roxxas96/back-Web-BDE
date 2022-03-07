@@ -14,9 +14,8 @@ export function accomplishmentQueries(
       validation?: Validation,
       challengeId?: number
     ) {
-      let accomplishment;
       try {
-        accomplishment = await client.accomplishment.findMany({
+        return await client.accomplishment.findMany({
           where: { userId, validation, challengeId },
           take: limit,
           skip: offset,
@@ -24,26 +23,23 @@ export function accomplishmentQueries(
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
-      return accomplishment;
     },
 
     //Get an accomplishment by Id
     getAccomplishment: async function (accomplishmentId: number) {
-      let accomplishment;
       try {
-        accomplishment = await client.accomplishment.findUnique({
+        return await client.accomplishment.findUnique({
           where: { id: accomplishmentId },
         });
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
-      return accomplishment;
     },
 
     //Create an accomplishment
@@ -53,28 +49,17 @@ export function accomplishmentQueries(
       comment?: string
     ) {
       try {
-        return (
-          await client.accomplishment.create({
-            data: {
-              comment,
-              userId: userId,
-              challengeId: challengeId,
-            },
-          })
-        ).id;
+        return await client.accomplishment.create({
+          data: {
+            comment,
+            userId: userId,
+            challengeId: challengeId,
+          },
+        });
       } catch (err) {
-        if (err instanceof Error) {
-          if (
-            err.message.includes(
-              "Foreign key constraint failed on the field: `accomplishmentChallenge (index)`"
-            )
-          ) {
-            throw fastify.httpErrors.badRequest("Invalid challenge id");
-          }
-        }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -86,29 +71,14 @@ export function accomplishmentQueries(
       validation?: Validation
     ) {
       try {
-        await client.accomplishment.update({
+        return await client.accomplishment.update({
           where: { id: accomplishmentId },
           data: { comment, validation },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to update not found")) {
-            throw fastify.httpErrors.notFound("Accomplishment not found");
-          }
-          if (
-            err.message.includes(
-              "Accomplishment has allready a validation state"
-            )
-          ) {
-            throw fastify.httpErrors.badRequest(
-              "Accomplishment was allready validated"
-            );
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -116,19 +86,13 @@ export function accomplishmentQueries(
     //Delete an accomplishment by Id
     deleteAccomplishment: async function (accomplishmentId: number) {
       try {
-        await client.accomplishment.delete({
+        return await client.accomplishment.delete({
           where: { id: accomplishmentId },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("Accomplishment not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
