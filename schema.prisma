@@ -72,7 +72,6 @@ model Goodies {
   buyLimit Int @default(1)
   stock Int @default(3)
   bought Int @default(0)
-  image String @default("")
   createdAt DateTime @default(now())
   creatorId Int?
   goodiesCreator User? @relation(fields: [creatorId], references: [id], onDelete: SetNull)

@@ -90,6 +90,16 @@ export async function createPurchase(
     );
   }
 
+  if (goodies.bought >= goodies.stock) {
+    throw fastify.httpErrors.badRequest("Out of stock for this goodies");
+  }
+
+  //Increase goodies bough amount
+  await fastify.prisma.goodies.updateGoodies(
+    { bought: goodies.bought + 1 },
+    goodies.id
+  );
+
   //Decrease user's wallet
   await fastify.prisma.user.updateUser(user.id, {
     wallet: user.wallet - goodies.price,

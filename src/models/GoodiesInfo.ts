@@ -4,8 +4,8 @@ export interface GoodiesInfo {
   description?: string;
   buyLimit?: number;
   stock?: number;
+  bought?: number;
   price?: number;
-  image?: string;
 }
 
 //Minimal format of goodies info
