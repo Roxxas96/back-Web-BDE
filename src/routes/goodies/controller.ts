@@ -71,7 +71,7 @@ export async function createGoodies(
     throw fastify.httpErrors.badRequest("Creator not found");
   }
 
-  await fastify.prisma.goodies.createGoodies(goodiesInfo, creator.id);
+  return await fastify.prisma.goodies.createGoodies(goodiesInfo, creator.id);
 }
 
 //Update goodies with provided info by id
@@ -101,7 +101,7 @@ export async function updateGoodies(
     throw fastify.httpErrors.notFound("Goodies nor found");
   }
 
-  await fastify.prisma.goodies.updateGoodies(goodiesInfo, goodies.id);
+  return await fastify.prisma.goodies.updateGoodies(goodiesInfo, goodies.id);
 }
 
 //Delete goodies by id
@@ -120,5 +120,5 @@ export async function deleteGoodies(
     throw fastify.httpErrors.notFound("Goodies not found");
   }
 
-  await fastify.prisma.goodies.deleteGoodies(goodies.id);
+  return await fastify.prisma.goodies.deleteGoodies(goodies.id);
 }

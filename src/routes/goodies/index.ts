@@ -88,7 +88,10 @@ const goodiesRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.put<{ Body: GoodiesInfo; Reply: { message: string } }>(
+  fastify.put<{
+    Body: GoodiesInfo;
+    Reply: { message: string; goodiesId: number };
+  }>(
     "/",
     {
       schema: {
@@ -104,16 +107,18 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await createGoodies(fastify, goodiesInfo, userId);
+      const createdGoodies = await createGoodies(fastify, goodiesInfo, userId);
 
-      return reply.status(201).send({ message: "Goodies created" });
+      return reply
+        .status(201)
+        .send({ message: "Goodies created", goodiesId: createdGoodies.id });
     }
   );
 
   fastify.patch<{
     Body: GoodiesInfo;
     Params: { id: number };
-    Reply: { message: string };
+    Reply: { message: string; goodiesId: number };
   }>(
     "/:id",
     {
@@ -138,13 +143,22 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await updateGoodies(fastify, goodiesInfo, request.params.id);
+      const updatedGoodies = await updateGoodies(
+        fastify,
+        goodiesInfo,
+        request.params.id
+      );
 
-      return reply.status(201).send({ message: "Goodies updated" });
+      return reply
+        .status(201)
+        .send({ message: "Goodies updated", goodiesId: updatedGoodies.id });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
+  fastify.delete<{
+    Params: { id: number };
+    Reply: { message: string; goodiesId: number };
+  }>(
     "/:id",
     {
       schema: {
@@ -165,9 +179,11 @@ const goodiesRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deleteGoodies(fastify, request.params.id);
+      const deletedGoodies = await deleteGoodies(fastify, request.params.id);
 
-      return reply.status(200).send({ message: "Goodies deleted" });
+      return reply
+        .status(200)
+        .send({ message: "Goodies deleted", goodiesId: deletedGoodies.id });
     }
   );
 };
