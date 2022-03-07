@@ -108,7 +108,10 @@ const purchaseRoute: FastifyPluginAsync = async (
     }
   );
 
-  fastify.put<{ Body: { goodiesId: string }; Reply: { message: string } }>(
+  fastify.put<{
+    Body: { goodiesId: string };
+    Reply: { message: string; purchaseId: number };
+  }>(
     "/",
     {
       schema: {
@@ -127,13 +130,22 @@ const purchaseRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      await createPurchase(fastify, userId, parseInt(request.body.goodiesId));
+      const createdPurchase = await createPurchase(
+        fastify,
+        userId,
+        parseInt(request.body.goodiesId)
+      );
 
-      return reply.status(201).send({ message: "Purchase created" });
+      return reply
+        .status(201)
+        .send({ message: "Purchase created", purchaseId: createdPurchase.id });
     }
   );
 
-  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
+  fastify.delete<{
+    Params: { id: number };
+    Reply: { message: string; purchaseId: number };
+  }>(
     "/:id",
     {
       schema: {
@@ -154,9 +166,11 @@ const purchaseRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deletePurchase(fastify, request.params.id);
+      const deletedPurchase = await deletePurchase(fastify, request.params.id);
 
-      return reply.status(200).send({ message: "Purchase deleted" });
+      return reply
+        .status(200)
+        .send({ message: "Purchase deleted", purchaseId: deletedPurchase.id });
     }
   );
 };
