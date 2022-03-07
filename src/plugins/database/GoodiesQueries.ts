@@ -14,7 +14,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Goodies"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -28,7 +28,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Goodies"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -45,7 +45,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Goodies"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -63,7 +63,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table Goodies"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -75,7 +75,7 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Goodies"
+          "There was an error with the Database, please try again"
         );
       }
     },

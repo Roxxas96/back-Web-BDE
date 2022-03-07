@@ -14,7 +14,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -32,7 +32,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -44,18 +44,9 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
           data: userInfo,
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Unique constraint failed")) {
-            throw fastify.httpErrors.conflict("User already exists");
-          }
-          if (/Argument .* for .* is missing/g) {
-            throw fastify.httpErrors.badRequest("Missing argument");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -81,18 +72,9 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
           data: userInfo,
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Unique constraint failed")) {
-            throw fastify.httpErrors.conflict("User already exists");
-          }
-          if (err.message.includes("Record to update not found")) {
-            throw fastify.httpErrors.notFound("User not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -104,15 +86,9 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
           where: { id: userId },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("User not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table User"
+          "There was an error with the Database, please try again"
         );
       }
     },

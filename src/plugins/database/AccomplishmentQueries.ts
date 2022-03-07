@@ -23,7 +23,7 @@ export function accomplishmentQueries(
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -37,7 +37,7 @@ export function accomplishmentQueries(
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -57,18 +57,9 @@ export function accomplishmentQueries(
           },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (
-            err.message.includes(
-              "Foreign key constraint failed on the field: `accomplishmentChallenge (index)`"
-            )
-          ) {
-            throw fastify.httpErrors.badRequest("Invalid challenge id");
-          }
-        }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -85,24 +76,9 @@ export function accomplishmentQueries(
           data: { comment, validation },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to update not found")) {
-            throw fastify.httpErrors.notFound("Accomplishment not found");
-          }
-          if (
-            err.message.includes(
-              "Accomplishment has allready a validation state"
-            )
-          ) {
-            throw fastify.httpErrors.badRequest(
-              "Accomplishment was allready validated"
-            );
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Update Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -114,15 +90,9 @@ export function accomplishmentQueries(
           where: { id: accomplishmentId },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("Accomplishment not found");
-          }
-        }
-
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Accomplishment"
+          "There was an error with the Database, please try again"
         );
       }
     },

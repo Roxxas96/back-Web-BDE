@@ -22,7 +22,7 @@ export function purchaseQueries(
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Purchase"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -36,7 +36,7 @@ export function purchaseQueries(
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Purchase"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -48,17 +48,9 @@ export function purchaseQueries(
           data: { userId: userId, goodiesId: goodiesId },
         });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Not enought money in wallet")) {
-            throw fastify.httpErrors.badRequest("Not enought money in wallet");
-          }
-          if (err.message.includes("Limit reached")) {
-            throw fastify.httpErrors.badRequest("Purchase limit reached");
-          }
-        }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Purchase"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -68,14 +60,9 @@ export function purchaseQueries(
       try {
         return await client.purchase.delete({ where: { id: purchaseId } });
       } catch (err) {
-        if (err instanceof Error) {
-          if (err.message.includes("Record to delete does not exist")) {
-            throw fastify.httpErrors.notFound("Purchase not found");
-          }
-        }
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Purchase"
+          "There was an error with the Database, please try again"
         );
       }
     },

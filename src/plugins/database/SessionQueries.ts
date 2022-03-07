@@ -18,7 +18,7 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -32,7 +32,7 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Fetch Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -46,7 +46,7 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Create Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
     },
@@ -58,7 +58,7 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
       } catch (err) {
         fastify.log.error(err);
         throw fastify.httpErrors.internalServerError(
-          "Database Delete Error on Table Session"
+          "There was an error with the Database, please try again"
         );
       }
     },
