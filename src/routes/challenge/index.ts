@@ -88,7 +88,7 @@ const challengeRoute: FastifyPluginAsync = async (
   );
   fastify.put<{
     Body: ChallengeInfo;
-    Reply: { message: string };
+    Reply: { message: string; challengeId: number };
   }>(
     "/",
     {
@@ -105,15 +105,24 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await createChallenge(fastify, challengeInfo, userId);
+      const createdChallenge = await createChallenge(
+        fastify,
+        challengeInfo,
+        userId
+      );
 
-      return reply.status(201).send({ message: "Challenge created" });
+      return reply
+        .status(201)
+        .send({
+          message: "Challenge created",
+          challengeId: createdChallenge.id,
+        });
     }
   );
   fastify.patch<{
     Body: ChallengeInfo;
     Params: { id: number };
-    Reply: { message: string };
+    Reply: { message: string; challengeId: number };
   }>(
     "/:id",
     {
@@ -138,12 +147,24 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await updateChallenge(fastify, request.params.id, challengeInfo);
+      const updatedChallenge = await updateChallenge(
+        fastify,
+        request.params.id,
+        challengeInfo
+      );
 
-      return reply.status(200).send({ message: "Challenge updated" });
+      return reply
+        .status(200)
+        .send({
+          message: "Challenge updated",
+          challengeId: updatedChallenge.id,
+        });
     }
   );
-  fastify.delete<{ Params: { id: number }; Reply: { message: string } }>(
+  fastify.delete<{
+    Params: { id: number };
+    Reply: { message: string; challengeId: number };
+  }>(
     "/:id",
     {
       schema: {
@@ -164,9 +185,17 @@ const challengeRoute: FastifyPluginAsync = async (
 
       await fastify.auth.authorize(userId, 1);
 
-      await deleteChallenge(fastify, request.params.id);
+      const deletedChallenge = await deleteChallenge(
+        fastify,
+        request.params.id
+      );
 
-      return reply.status(200).send({ message: "Challenge deleted" });
+      return reply
+        .status(200)
+        .send({
+          message: "Challenge deleted",
+          challengeId: deletedChallenge.id,
+        });
     }
   );
 };
