@@ -35,7 +35,7 @@ export async function deleteSession(
   }
 
   //Delete Session in DB
-  await fastify.prisma.session.deleteSession(undefined, hashedToken);
+  return await fastify.prisma.session.deleteSession(undefined, hashedToken);
 }
 
 export async function createSession(
@@ -77,8 +77,8 @@ export async function createSession(
   await fastify.prisma.session.createSession(hashedToken, user.id);
 
   return {
-    token,
-  };
+    token
+  }
 }
 
 export async function getSession(fastify: FastifyInstance, sessionId: number) {
