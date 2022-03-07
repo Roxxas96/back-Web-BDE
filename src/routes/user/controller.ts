@@ -45,14 +45,7 @@ export async function modifyUserInfo(
   }
 
   //Update user in DB
-  await fastify.prisma.user.updateUser(user.id, {
-    email: userInfo.email,
-    name: userInfo.name,
-    surname: userInfo.surname,
-    pseudo: userInfo.pseudo,
-    privilege: userInfo.privilege,
-    wallet: userInfo.wallet,
-  });
+  await fastify.prisma.user.updateUser(user.id, userInfo);
 }
 
 //Create user with provided info
@@ -101,7 +94,10 @@ export async function createUser(
   }
 
   //Create user in DB
-  await fastify.prisma.user.createUser(userInfo);
+  await fastify.prisma.user.createUser({
+    ...userInfo,
+    password: hashedPassword,
+  });
 }
 
 //Get user by id
