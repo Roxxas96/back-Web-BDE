@@ -38,7 +38,6 @@ export async function getManyGoodies(
     return {
       name: val.name,
       price: val.price,
-      image: val.image,
       id: val.id,
     };
   });

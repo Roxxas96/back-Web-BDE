@@ -4,15 +4,14 @@ export interface GoodiesInfo {
   description?: string;
   buyLimit?: number;
   stock?: number;
+  bought?: number;
   price?: number;
-  image?: string;
 }
 
 //Minimal format of goodies info
 export interface GoodiesInfoMinimal {
   name: string;
   price: number;
-  image: string;
   id: number;
 }
 
@@ -24,7 +23,6 @@ export const GoodiesSchema = {
   properties: {
     name: { type: "string" },
     description: { type: "string" },
-    image: { type: "string" },
     price: { type: "number" },
     buyLimit: { type: "number" },
     stock: { type: "number" },
