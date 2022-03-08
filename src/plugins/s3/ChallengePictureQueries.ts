@@ -6,7 +6,7 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
   return {
     putChallengePicture: async function (challengePicture: internal.Readable, challengeId: number) {
       try {
-        return await client.putObject("challengePictures", `${challengeId}`, challengePicture);
+        return await client.putObject("challengepictures", `${challengeId}`, challengePicture);
       } catch (err) {
         fastify.log.error(err);
 
@@ -15,7 +15,7 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
     },
     getChallengePicture: async function (challengeId: number) {
       try {
-        return await client.getObject("challengePictures", `${challengeId}`);
+        return await client.getObject("challengepictures", `${challengeId}`);
       } catch (err) {
         if (
           err instanceof Error &&
@@ -31,7 +31,7 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
     },
     deleteChallengePicture: async function (challengeId: number) {
       try {
-        return await client.removeObject("challengePictures", `${challengeId}`);
+        return await client.removeObject("challengepictures", `${challengeId}`);
       } catch (err) {
         fastify.log.error(err);
 

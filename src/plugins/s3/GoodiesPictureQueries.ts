@@ -6,7 +6,7 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
   return {
     putGoodiesPicture: async function (goodiesPicture: internal.Readable, goodiesId: number) {
       try {
-        return await client.putObject("goodiesPictures", `${goodiesId}`, goodiesPicture);
+        return await client.putObject("goodiespictures", `${goodiesId}`, goodiesPicture);
       } catch (err) {
         fastify.log.error(err);
 
@@ -15,7 +15,7 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
     },
     getGoodiesPicture: async function (goodiesId: number) {
       try {
-        return await client.getObject("goodiesPictures", `${goodiesId}`);
+        return await client.getObject("goodiespictures", `${goodiesId}`);
       } catch (err) {
         if (
           err instanceof Error &&
@@ -31,7 +31,7 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
     },
     deleteGoodiesPicture: async function (goodiesId: number) {
       try {
-        return await client.removeObject("goodiesPictures", `${goodiesId}`);
+        return await client.removeObject("goodiespictures", `${goodiesId}`);
       } catch (err) {
         fastify.log.error(err);
 
