@@ -1,9 +1,18 @@
 import { Challenge } from "@prisma/client";
 import { FastifyInstance } from "fastify";
+import internal = require("stream");
 import {
   ChallengeInfo,
   ChallengeInfoMinimal,
 } from "../../models/ChallengeInfo";
+
+//Convert UTC time depending on user's timezone
+function convertTime(challenge: Challenge) {
+  challenge.createdAt.setMinutes(
+    challenge.createdAt.getMinutes() - challenge.createdAt.getTimezoneOffset()
+  );
+  return challenge;
+}
 
 //Create challenge with provided info
 export async function createChallenge(
@@ -130,10 +139,42 @@ export async function getManyChallenge(
   });
 }
 
-//Convert UTC time depending on user's timezone
-function convertTime(challenge: Challenge) {
-  challenge.createdAt.setMinutes(
-    challenge.createdAt.getMinutes() - challenge.createdAt.getTimezoneOffset()
-  );
-  return challenge;
+export async function updateChallengePicture(
+  fastify: FastifyInstance,
+  challengePicture: internal.Readable,
+  challenge: Challenge
+) {
+  if (!challenge || !challenge.id) {
+    throw fastify.httpErrors.badRequest("Invalid challenge");
+  }
+
+  if (!challengePicture) {
+    throw fastify.httpErrors.badRequest("Invalid challengePicture");
+  }
+
+  return await fastify.minio.challengePicture.putChallengePicture(challengePicture, challenge.id);
+}
+
+export async function getChallengePicture(
+  fastify: FastifyInstance,
+  challenge: Challenge
+) {
+  if (!challenge || !challenge.id) {
+    throw fastify.httpErrors.badRequest("Invalid challenge");
+  }
+
+  return await fastify.minio.challengePicture.getChallengePicture(challenge.id);
+}
+
+export async function deleteChallengePicture(
+  fastify: FastifyInstance,
+  challenge: Challenge
+) {
+  if (!challenge || !challenge.id) {
+    throw fastify.httpErrors.badRequest("Invalid challenge");
+  }
+
+  await fastify.minio.challengePicture.getChallengePicture(challenge.id);
+
+  return await fastify.minio.challengePicture.deleteChallengePicture(challenge.id);
 }

@@ -2,6 +2,7 @@
 import { Challenge } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
+import internal = require("stream");
 
 //Impor Models
 import {
@@ -14,9 +15,12 @@ import {
 import {
   createChallenge,
   deleteChallenge,
+  deleteChallengePicture,
   getChallenge,
+  getChallengePicture,
   getManyChallenge,
   updateChallenge,
+  updateChallengePicture,
 } from "./controller";
 
 const challengeRoute: FastifyPluginAsync = async (
@@ -193,6 +197,117 @@ const challengeRoute: FastifyPluginAsync = async (
         message: "Challenge deleted",
         challengeId: deletedChallenge.id,
       });
+    }
+  );
+
+  fastify.put<{
+    Querystring: { challengeId: number };
+    Reply: { message: string };
+  }>(
+    "/picture",
+    {
+      schema: {
+        tags: ["challenge"],
+        description: "Upload a challenge picture for the designated challenge",
+        consumes: ["multipart/form-data"],
+        querystring: {
+          type: "object",
+          required: ["challengeId"],
+          properties: {
+            challengeId: {
+              type: "number",
+              description: "Id of the challenge",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      const challenge = await getChallenge(
+        fastify,
+        request.query.challengeId
+      );
+
+      if (challenge.creatorId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
+
+      await updateChallengePicture(fastify, (await request.file()).file, challenge);
+
+      reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get<{
+    Querystring: { challengeId: number };
+    Reply: internal.Readable;
+  }>(
+    "/picture",
+    {
+      schema: {
+        tags: ["challenge"],
+        description: "Get the challenge picture of the designated challenge",
+        produces: ["application/octet-stream"],
+        querystring: {
+          type: "object",
+          required: ["challengeId"],
+          properties: {
+            challengeId: {
+              type: "number",
+              description: "Id of the challenge",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const challenge = await getChallenge(
+        fastify,
+        request.query.challengeId
+      );
+
+      const challengePicture = await getChallengePicture(fastify, challenge);
+
+      reply.status(200).send(challengePicture);
+    }
+  );
+
+  fastify.delete<{
+    Querystring: { challengeId: number };
+    Reply: { message: string };
+  }>(
+    "/picture",
+    {
+      schema: {
+        tags: ["challenge"],
+        description: "Delete the challenge picture of the designated challenge",
+        querystring: {
+          type: "object",
+          required: ["challengeId"],
+          properties: {
+            challengeId: {
+              type: "number",
+              description: "Id of the challenge",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const challenge = await getChallenge(
+        fastify,
+        request.query.challengeId
+      );
+
+      await deleteChallengePicture(fastify, challenge);
+
+      reply.status(200).send({ message: "Success" });
     }
   );
 };
