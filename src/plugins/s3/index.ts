@@ -2,6 +2,8 @@ import fp from "fastify-plugin";
 import * as Minio from "minio";
 import internal = require("stream");
 import { AvatarQueries } from "./AvatarQueries";
+import { ChallengePictureQueries } from "./ChallengePictureQueries";
+import { GoodiesPictureQueries } from "./GoodiesPictureQueries";
 import { ProofQueries } from "./ProofQueries";
 
 export interface MinioPluginOptions {
@@ -49,6 +51,8 @@ export default fp<MinioPluginOptions>(async (fastify, opts) => {
     client: client,
     proof: ProofQueries(fastify, client),
     avatar: AvatarQueries(fastify, client),
+    challengePicture: ChallengePictureQueries(fastify, client),
+    goodiesPicture: GoodiesPictureQueries(fastify, client)
   };
 
   fastify.decorate("minio", minio);
@@ -75,6 +79,22 @@ declare module "fastify" {
         getAvatar: (userId: number) => Promise<internal.Readable>;
         deleteAvatar: (userId: number) => Promise<void>;
       };
+      challengePicture: {
+        putChallengePicture: (
+          challengePicture: internal.Readable,
+          challengeId: number
+        ) => Promise<Minio.UploadedObjectInfo>;
+        getChallengePicture: (challengeId: number) => Promise<internal.Readable>;
+        deleteChallengePicture: (challengeId: number) => Promise<void>;
+      };
+      goodiesPicture: {
+        putGoodiesPicture: (
+          goodiesPicture: internal.Readable,
+          goodiesId: number
+        ) => Promise<Minio.UploadedObjectInfo>;
+        getGoodiesPicture: (goodiesId: number) => Promise<internal.Readable>;
+        deleteGoodiesPicture: (goodiesId: number) => Promise<void>;
+      }
     };
   }
 }
