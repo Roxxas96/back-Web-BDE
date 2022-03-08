@@ -2,6 +2,7 @@
 import { Goodies } from "@prisma/client";
 
 import { FastifyPluginAsync } from "fastify";
+import internal = require("stream");
 
 //Import Models
 import {
@@ -14,9 +15,12 @@ import {
 import {
   createGoodies,
   deleteGoodies,
+  deleteGoodiesPicture,
   getGoodies,
+  getGoodiesPicture,
   getManyGoodies,
   updateGoodies,
+  updateGoodiesPicture,
 } from "./controller";
 
 const goodiesRoute: FastifyPluginAsync = async (
@@ -181,6 +185,117 @@ const goodiesRoute: FastifyPluginAsync = async (
       return reply
         .status(200)
         .send({ message: "Goodies deleted", goodiesId: deletedGoodies.id });
+    }
+  );
+
+  fastify.put<{
+    Querystring: { goodiesId: number };
+    Reply: { message: string };
+  }>(
+    "/picture",
+    {
+      schema: {
+        tags: ["goodies"],
+        description: "Upload a goodies picture for the designated goodies",
+        consumes: ["multipart/form-data"],
+        querystring: {
+          type: "object",
+          required: ["goodiesId"],
+          properties: {
+            goodiesId: {
+              type: "number",
+              description: "Id of the goodies",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      const goodies = await getGoodies(
+        fastify,
+        request.query.goodiesId
+      );
+
+      if (goodies.creatorId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
+
+      await updateGoodiesPicture(fastify, (await request.file()).file, goodies);
+
+      reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get<{
+    Querystring: { goodiesId: number };
+    Reply: internal.Readable;
+  }>(
+    "/picture",
+    {
+      schema: {
+        tags: ["goodies"],
+        description: "Get the goodies picture of the designated goodies",
+        produces: ["application/octet-stream"],
+        querystring: {
+          type: "object",
+          required: ["goodiesId"],
+          properties: {
+            goodiesId: {
+              type: "number",
+              description: "Id of the goodies",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const goodies = await getGoodies(
+        fastify,
+        request.query.goodiesId
+      );
+
+      const goodiesPicture = await getGoodiesPicture(fastify, goodies);
+
+      reply.status(200).send(goodiesPicture);
+    }
+  );
+
+  fastify.delete<{
+    Querystring: { goodiesId: number };
+    Reply: { message: string };
+  }>(
+    "/picture",
+    {
+      schema: {
+        tags: ["goodies"],
+        description: "Delete the goodies picture of the designated goodies",
+        querystring: {
+          type: "object",
+          required: ["goodiesId"],
+          properties: {
+            goodiesId: {
+              type: "number",
+              description: "Id of the goodies",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      await fastify.auth.authenticate(request.headers);
+
+      const goodies = await getGoodies(
+        fastify,
+        request.query.goodiesId
+      );
+
+      await deleteGoodiesPicture(fastify, goodies);
+
+      reply.status(200).send({ message: "Success" });
     }
   );
 };

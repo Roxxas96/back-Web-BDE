@@ -1,4 +1,6 @@
+import { Goodies } from "@prisma/client";
 import { FastifyInstance } from "fastify";
+import internal = require("stream");
 import { GoodiesInfo, GoodiesInfoMinimal } from "../../models/GoodiesInfo";
 
 //Get Goodies by id
@@ -120,4 +122,44 @@ export async function deleteGoodies(
   }
 
   return await fastify.prisma.goodies.deleteGoodies(goodies.id);
+}
+
+export async function updateGoodiesPicture(
+  fastify: FastifyInstance,
+  goodiesPicture: internal.Readable,
+  goodies: Goodies
+) {
+  if (!goodies || !goodies.id) {
+    throw fastify.httpErrors.badRequest("Invalid goodies");
+  }
+
+  if (!goodiesPicture) {
+    throw fastify.httpErrors.badRequest("Invalid goodies picture");
+  }
+
+  return await fastify.minio.goodiesPicture.putGoodiesPicture(goodiesPicture, goodies.id);
+}
+
+export async function getGoodiesPicture(
+  fastify: FastifyInstance,
+  goodies: Goodies
+) {
+  if (!goodies || !goodies.id) {
+    throw fastify.httpErrors.badRequest("Invalid goodies");
+  }
+
+  return await fastify.minio.goodiesPicture.getGoodiesPicture(goodies.id);
+}
+
+export async function deleteGoodiesPicture(
+  fastify: FastifyInstance,
+  goodies: Goodies
+) {
+  if (!goodies || !goodies.id) {
+    throw fastify.httpErrors.badRequest("Invalid goodies");
+  }
+
+  await fastify.minio.goodiesPicture.getGoodiesPicture(goodies.id);
+
+  return await fastify.minio.goodiesPicture.deleteGoodiesPicture(goodies.id);
 }
