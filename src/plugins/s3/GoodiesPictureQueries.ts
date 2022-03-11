@@ -2,15 +2,27 @@ import { FastifyInstance } from "fastify";
 import * as Minio from "minio";
 import internal = require("stream");
 
-export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Client) {
+export function GoodiesPictureQueries(
+  fastify: FastifyInstance,
+  client: Minio.Client
+) {
   return {
-    putGoodiesPicture: async function (goodiesPicture: internal.Readable, goodiesId: number) {
+    putGoodiesPicture: async function (
+      goodiesPicture: internal.Readable,
+      goodiesId: number
+    ) {
       try {
-        return await client.putObject("goodiespictures", `${goodiesId}`, goodiesPicture);
+        return await client.putObject(
+          "goodiespictures",
+          `${goodiesId}`,
+          goodiesPicture
+        );
       } catch (err) {
         fastify.log.error(err);
 
-        throw fastify.httpErrors.internalServerError("Goodies Picture upload failed");
+        throw fastify.httpErrors.internalServerError(
+          "Goodies Picture upload failed"
+        );
       }
     },
     getGoodiesPicture: async function (goodiesId: number) {
@@ -26,15 +38,24 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
 
         fastify.log.error(err);
 
-        throw fastify.httpErrors.internalServerError("Goodies Picture download failed");
+        throw fastify.httpErrors.internalServerError(
+          "Goodies Picture download failed"
+        );
       }
     },
-    getManyGoodiesPicture: async function (offset: number, limit: number) {
+    getManyGoodiesPicture: async function (limit: number, offset: number) {
       let allQueriesSucceded = true;
-      let goodiesPictures: internal.Readable[] = [];
+      let goodiesPictures: Array<{
+        goodiesPicture: internal.Readable;
+        name: string;
+      }> = [];
       for (let index = offset; index <= limit + offset; index++) {
         try {
-          goodiesPictures.push(await client.getObject("goodiesPictures", `${index}`));
+          const goodiesPicture = await client.getObject(
+            "goodiespictures",
+            `${index}`
+          );
+          goodiesPictures.push({ goodiesPicture, name: index.toString() });
         } catch (err) {
           if (
             !(
@@ -51,7 +72,7 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
           allQueriesSucceded = false;
         }
       }
-      return goodiesPictures;
+      return { goodiesPictures, allQueriesSucceded };
     },
     deleteGoodiesPicture: async function (goodiesId: number) {
       try {
@@ -59,7 +80,9 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
       } catch (err) {
         fastify.log.error(err);
 
-        throw fastify.httpErrors.internalServerError("GoodiesPicture delete failed");
+        throw fastify.httpErrors.internalServerError(
+          "GoodiesPicture delete failed"
+        );
       }
     },
   };

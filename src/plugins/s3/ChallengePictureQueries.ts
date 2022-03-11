@@ -2,15 +2,27 @@ import { FastifyInstance } from "fastify";
 import * as Minio from "minio";
 import internal = require("stream");
 
-export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.Client) {
+export function ChallengePictureQueries(
+  fastify: FastifyInstance,
+  client: Minio.Client
+) {
   return {
-    putChallengePicture: async function (challengePicture: internal.Readable, challengeId: number) {
+    putChallengePicture: async function (
+      challengePicture: internal.Readable,
+      challengeId: number
+    ) {
       try {
-        return await client.putObject("challengepictures", `${challengeId}`, challengePicture);
+        return await client.putObject(
+          "challengepictures",
+          `${challengeId}`,
+          challengePicture
+        );
       } catch (err) {
         fastify.log.error(err);
 
-        throw fastify.httpErrors.internalServerError("Challenge Picture upload failed");
+        throw fastify.httpErrors.internalServerError(
+          "Challenge Picture upload failed"
+        );
       }
     },
     getChallengePicture: async function (challengeId: number) {
@@ -26,15 +38,24 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
 
         fastify.log.error(err);
 
-        throw fastify.httpErrors.internalServerError("Challenge Picture download failed");
+        throw fastify.httpErrors.internalServerError(
+          "Challenge Picture download failed"
+        );
       }
     },
-    getManyChallengePicture: async function (offset: number, limit: number) {
+    getManyChallengePicture: async function (limit: number, offset: number) {
       let allQueriesSucceded = true;
-      let challengePictures: internal.Readable[] = [];
+      let challengePictures: Array<{
+        challengePicture: internal.Readable;
+        name: string;
+      }> = [];
       for (let index = offset; index <= limit + offset; index++) {
         try {
-          challengePictures.push(await client.getObject("challengePictures", `${index}`));
+          const challengePicture = await client.getObject(
+            "challengepictures",
+            `${index}`
+          );
+          challengePictures.push({ challengePicture, name: index.toString() });
         } catch (err) {
           if (
             !(
@@ -51,7 +72,7 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
           allQueriesSucceded = false;
         }
       }
-      return challengePictures;
+      return { challengePictures, allQueriesSucceded };
     },
     deleteChallengePicture: async function (challengeId: number) {
       try {
@@ -59,7 +80,9 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
       } catch (err) {
         fastify.log.error(err);
 
-        throw fastify.httpErrors.internalServerError("ChallengePicture delete failed");
+        throw fastify.httpErrors.internalServerError(
+          "ChallengePicture delete failed"
+        );
       }
     },
   };

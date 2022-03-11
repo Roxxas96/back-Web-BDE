@@ -151,6 +151,14 @@ export async function getGoodiesPicture(
   return await fastify.minio.goodiesPicture.getGoodiesPicture(goodies.id);
 }
 
+export async function getManyGoodiesPicture(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
+  return await fastify.minio.goodiesPicture.getManyGoodiesPicture(limit || 100, offset || 0);
+}
+
 export async function deleteGoodiesPicture(
   fastify: FastifyInstance,
   goodies: Goodies

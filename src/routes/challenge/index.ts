@@ -1,5 +1,6 @@
 //Import Prisma ORM Types
 import { Challenge } from "@prisma/client";
+import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
 import internal = require("stream");
@@ -19,6 +20,7 @@ import {
   getChallenge,
   getChallengePicture,
   getManyChallenge,
+  getManyChallengePicture,
   updateChallenge,
   updateChallengePicture,
 } from "./controller";
@@ -225,24 +227,27 @@ const challengeRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const challenge = await getChallenge(
-        fastify,
-        request.query.challengeId
-      );
+      const challenge = await getChallenge(fastify, request.query.challengeId);
 
       if (challenge.creatorId !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateChallengePicture(fastify, (await request.file()).file, challenge);
+      await updateChallengePicture(
+        fastify,
+        (
+          await request.file()
+        ).file,
+        challenge
+      );
 
       reply.status(200).send({ message: "Success" });
     }
   );
 
   fastify.get<{
-    Querystring: { challengeId: number };
-    Reply: internal.Readable;
+    Querystring: { challengeId?: number; limit?: number; offset?: number };
+    Reply: internal.Readable | internal.Readable[];
   }>(
     "/picture",
     {
@@ -252,11 +257,18 @@ const challengeRoute: FastifyPluginAsync = async (
         produces: ["application/octet-stream"],
         querystring: {
           type: "object",
-          required: ["challengeId"],
           properties: {
             challengeId: {
               type: "number",
               description: "Id of the challenge",
+            },
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
             },
           },
         },
@@ -265,14 +277,30 @@ const challengeRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const challenge = await getChallenge(
-        fastify,
-        request.query.challengeId
-      );
+      if (request.query.challengeId) {
+        const accomplishment = await getChallenge(
+          fastify,
+          request.query.challengeId
+        );
 
-      const challengePicture = await getChallengePicture(fastify, challenge);
+        const proof = await getChallengePicture(fastify, accomplishment);
 
-      reply.status(200).send(challengePicture);
+        reply.status(200).send(proof);
+      } else {
+        const { challengePictures, allQueriesSucceded } =
+          await getManyChallengePicture(
+            fastify,
+            request.query.limit,
+            request.query.offset
+          );
+
+        const formData = new FormData();
+        challengePictures.forEach((val) =>
+          formData.append(`${val.name}`, val.challengePicture)
+        );
+
+        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+      }
     }
   );
 
@@ -300,10 +328,7 @@ const challengeRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const challenge = await getChallenge(
-        fastify,
-        request.query.challengeId
-      );
+      const challenge = await getChallenge(fastify, request.query.challengeId);
 
       await deleteChallengePicture(fastify, challenge);
 

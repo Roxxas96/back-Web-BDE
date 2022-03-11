@@ -29,12 +29,19 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
         throw fastify.httpErrors.internalServerError("Avatar download failed");
       }
     },
-    getManyAvatar: async function (offset: number, limit: number) {
+    getManyAvatar: async function (limit: number, offset: number) {
       let allQueriesSucceded = true;
-      let avatars: internal.Readable[] = [];
+      let challengePictures: Array<{
+        challengePicture: internal.Readable;
+        name: string;
+      }> = [];
       for (let index = offset; index <= limit + offset; index++) {
         try {
-          avatars.push(await client.getObject("avatars", `${index}`));
+          const challengePicture = await client.getObject(
+            "avatars",
+            `${index}`
+          );
+          challengePictures.push({ challengePicture, name: index.toString() });
         } catch (err) {
           if (
             !(
@@ -51,7 +58,7 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
           allQueriesSucceded = false;
         }
       }
-      return avatars;
+      return { challengePictures, allQueriesSucceded };
     },
     deleteAvatar: async function (userId: number) {
       try {

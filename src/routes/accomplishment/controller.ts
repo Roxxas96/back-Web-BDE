@@ -213,6 +213,14 @@ export async function getProof(
   return await fastify.minio.proof.getProof(accomplishment.id);
 }
 
+export async function getManyProof(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
+  return await fastify.minio.proof.getManyProof(limit || 100, offset || 0);
+}
+
 export async function deleteProof(
   fastify: FastifyInstance,
   accomplishment: Accomplishment

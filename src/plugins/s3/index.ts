@@ -69,7 +69,16 @@ declare module "fastify" {
           accomplishmentId: number
         ) => Promise<Minio.UploadedObjectInfo>;
         getProof: (accomplishmentId: number) => Promise<internal.Readable>;
-        getManyProof: (limit: number, offset: number) => Promise<internal.Readable[]>;
+        getManyProof: (
+          limit: number,
+          offset: number
+        ) => Promise<{
+          proofs: Array<{
+            proof: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteProof: (accomplishmentId: number) => Promise<void>;
       };
       avatar: {
@@ -78,7 +87,16 @@ declare module "fastify" {
           userId: number
         ) => Promise<Minio.UploadedObjectInfo>;
         getAvatar: (userId: number) => Promise<internal.Readable>;
-        getManyAvatar: (limit: number, offset: number) => Promise<internal.Readable[]>;
+        getManyAvatar: (
+          limit: number,
+          offset: number
+        ) => Promise<{
+          avatars: Array<{
+            avatar: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteAvatar: (userId: number) => Promise<void>;
       };
       challengePicture: {
@@ -89,7 +107,16 @@ declare module "fastify" {
         getChallengePicture: (
           challengeId: number
         ) => Promise<internal.Readable>;
-        getManyChallengePicture: (limit: number, offset: number) => Promise<internal.Readable[]>;
+        getManyChallengePicture: (
+          limit: number,
+          offset: number
+        ) => Promise<{
+          challengePictures: Array<{
+            challengePicture: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteChallengePicture: (challengeId: number) => Promise<void>;
       };
       goodiesPicture: {
@@ -98,7 +125,16 @@ declare module "fastify" {
           goodiesId: number
         ) => Promise<Minio.UploadedObjectInfo>;
         getGoodiesPicture: (goodiesId: number) => Promise<internal.Readable>;
-        getManyGoodiesPicture: (limit: number, offset: number) => Promise<internal.Readable[]>;
+        getManyGoodiesPicture: (
+          offset: number,
+          limit: number
+        ) => Promise<{
+          goodiesPictures: Array<{
+            goodiesPicture: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteGoodiesPicture: (goodiesId: number) => Promise<void>;
       };
     };

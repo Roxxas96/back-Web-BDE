@@ -41,7 +41,10 @@ export async function createChallenge(
     throw fastify.httpErrors.badRequest("Creator not found");
   }
 
-  return await fastify.prisma.challenge.createChallenge(challengeInfo, creator.id);
+  return await fastify.prisma.challenge.createChallenge(
+    challengeInfo,
+    creator.id
+  );
 }
 
 //Update challenge with provided info by id
@@ -71,7 +74,10 @@ export async function updateChallenge(
     throw fastify.httpErrors.notFound("Challenge not found");
   }
 
-  return await fastify.prisma.challenge.updateChallenge(challengeInfo, challenge.id);
+  return await fastify.prisma.challenge.updateChallenge(
+    challengeInfo,
+    challenge.id
+  );
 }
 
 //Delete challenge by id
@@ -152,7 +158,10 @@ export async function updateChallengePicture(
     throw fastify.httpErrors.badRequest("Invalid challengePicture");
   }
 
-  return await fastify.minio.challengePicture.putChallengePicture(challengePicture, challenge.id);
+  return await fastify.minio.challengePicture.putChallengePicture(
+    challengePicture,
+    challenge.id
+  );
 }
 
 export async function getChallengePicture(
@@ -166,6 +175,17 @@ export async function getChallengePicture(
   return await fastify.minio.challengePicture.getChallengePicture(challenge.id);
 }
 
+export async function getManyChallengePicture(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
+  return await fastify.minio.challengePicture.getManyChallengePicture(
+    limit || 100,
+    offset || 0
+  );
+}
+
 export async function deleteChallengePicture(
   fastify: FastifyInstance,
   challenge: Challenge
@@ -176,5 +196,7 @@ export async function deleteChallengePicture(
 
   await fastify.minio.challengePicture.getChallengePicture(challenge.id);
 
-  return await fastify.minio.challengePicture.deleteChallengePicture(challenge.id);
+  return await fastify.minio.challengePicture.deleteChallengePicture(
+    challenge.id
+  );
 }

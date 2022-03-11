@@ -33,12 +33,19 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
         throw fastify.httpErrors.internalServerError("Proof download failed");
       }
     },
-    getManyProof: async function (offset: number, limit: number) {
+    getManyProof: async function (limit: number, offset: number) {
       let allQueriesSucceded = true;
-      let proofs: internal.Readable[] = [];
+      let proofs: Array<{
+        proof: internal.Readable;
+        name: string;
+      }> = [];
       for (let index = offset; index <= limit + offset; index++) {
         try {
-          proofs.push(await client.getObject("proofs", `${index}`));
+          const proof = await client.getObject(
+            "proofs",
+            `${index}`
+          );
+          proofs.push({ proof, name: index.toString() });
         } catch (err) {
           if (
             !(
@@ -55,7 +62,7 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
           allQueriesSucceded = false;
         }
       }
-      return proofs;
+      return { proofs, allQueriesSucceded };
     },
     deleteProof: async function (accomplishmentId: number) {
       try {

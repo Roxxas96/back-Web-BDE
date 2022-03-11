@@ -1,6 +1,6 @@
 //Import Prisma ORM Types
 import { FastifyPluginAsync } from "fastify";
-import internal = require("stream");
+import * as FormData from "form-data";
 
 //Import Models
 import {
@@ -25,6 +25,7 @@ import {
   updateAvatar,
   getAvatar,
   deleteAvatar,
+  getManyAvatar,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -333,21 +334,29 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   );
 
   fastify.get<{
-    Querystring: { userId: number };
-    Reply: internal.Readable;
+    Querystring: { userId?: number; limit?: number; offset?: number };
   }>(
-    "/avatar",
+    "/picture",
     {
       schema: {
         tags: ["user"],
-        description: "Get the avatar of the designated user",
+        description: "Get the user picture of the designated user",
         produces: ["application/octet-stream"],
         querystring: {
           type: "object",
+          required: ["userId"],
           properties: {
             userId: {
               type: "number",
               description: "Id of the user",
+            },
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
             },
           },
         },
@@ -356,11 +365,24 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const user = await getUser(fastify, request.query.userId);
+      if (request.query.userId) {
+        const accomplishment = await getUser(fastify, request.query.userId);
 
-      const avatar = await getAvatar(fastify, user);
+        const proof = await getAvatar(fastify, accomplishment);
 
-      reply.status(200).send(avatar);
+        reply.status(200).send(proof);
+      } else {
+        const { avatars, allQueriesSucceded } = await getManyAvatar(
+          fastify,
+          request.query.limit,
+          request.query.offset
+        );
+
+        const formData = new FormData();
+        avatars.forEach((val) => formData.append(`${val.name}`, val.avatar));
+
+        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+      }
     }
   );
 
