@@ -3,7 +3,6 @@ import { Accomplishment, Validation } from "@prisma/client";
 import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
-import internal = require("stream");
 
 //Import controller functions
 import {
@@ -414,12 +413,16 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const accomplishment = await getAccomplishment(
         fastify,
         request.query.accomplishmentId
       );
+
+      if (accomplishment.userId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await deleteProof(fastify, accomplishment);
 

@@ -3,7 +3,6 @@ import { Goodies } from "@prisma/client";
 import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
-import internal = require("stream");
 
 //Import Models
 import {
@@ -314,9 +313,13 @@ const goodiesRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const goodies = await getGoodies(fastify, request.query.goodiesId);
+
+      if (goodies.creatorId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await deleteGoodiesPicture(fastify, goodies);
 

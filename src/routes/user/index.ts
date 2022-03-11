@@ -411,9 +411,13 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const user = await getUser(fastify, request.query.userId);
+
+      if (user.id !== request.query.userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await deleteAvatar(fastify, user);
 

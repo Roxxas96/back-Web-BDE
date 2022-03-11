@@ -3,7 +3,6 @@ import { Challenge } from "@prisma/client";
 import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
-import internal = require("stream");
 
 //Impor Models
 import {
@@ -332,9 +331,13 @@ const challengeRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const challenge = await getChallenge(fastify, request.query.challengeId);
+
+      if (challenge.creatorId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await deleteChallengePicture(fastify, challenge);
 
