@@ -29,6 +29,30 @@ export function GoodiesPictureQueries(fastify: FastifyInstance, client: Minio.Cl
         throw fastify.httpErrors.internalServerError("Goodies Picture download failed");
       }
     },
+    getManyGoodiesPicture: async function (offset: number, limit: number) {
+      let allQueriesSucceded = true;
+      let goodiesPictures: internal.Readable[] = [];
+      for (let index = offset; index <= limit + offset; index++) {
+        try {
+          goodiesPictures.push(await client.getObject("goodiesPictures", `${index}`));
+        } catch (err) {
+          if (
+            !(
+              err instanceof Error &&
+              err.message.includes("The specified key does not exist")
+            )
+          ) {
+            fastify.log.error(err);
+
+            throw fastify.httpErrors.internalServerError(
+              "GoodiesPicture download failed"
+            );
+          }
+          allQueriesSucceded = false;
+        }
+      }
+      return goodiesPictures;
+    },
     deleteGoodiesPicture: async function (goodiesId: number) {
       try {
         return await client.removeObject("goodiespictures", `${goodiesId}`);

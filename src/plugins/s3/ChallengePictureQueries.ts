@@ -29,6 +29,30 @@ export function ChallengePictureQueries(fastify: FastifyInstance, client: Minio.
         throw fastify.httpErrors.internalServerError("Challenge Picture download failed");
       }
     },
+    getManyChallengePicture: async function (offset: number, limit: number) {
+      let allQueriesSucceded = true;
+      let challengePictures: internal.Readable[] = [];
+      for (let index = offset; index <= limit + offset; index++) {
+        try {
+          challengePictures.push(await client.getObject("challengePictures", `${index}`));
+        } catch (err) {
+          if (
+            !(
+              err instanceof Error &&
+              err.message.includes("The specified key does not exist")
+            )
+          ) {
+            fastify.log.error(err);
+
+            throw fastify.httpErrors.internalServerError(
+              "ChallengePicture download failed"
+            );
+          }
+          allQueriesSucceded = false;
+        }
+      }
+      return challengePictures;
+    },
     deleteChallengePicture: async function (challengeId: number) {
       try {
         return await client.removeObject("challengepictures", `${challengeId}`);

@@ -33,6 +33,30 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
         throw fastify.httpErrors.internalServerError("Proof download failed");
       }
     },
+    getManyProof: async function (offset: number, limit: number) {
+      let allQueriesSucceded = true;
+      let proofs: internal.Readable[] = [];
+      for (let index = offset; index <= limit + offset; index++) {
+        try {
+          proofs.push(await client.getObject("proofs", `${index}`));
+        } catch (err) {
+          if (
+            !(
+              err instanceof Error &&
+              err.message.includes("The specified key does not exist")
+            )
+          ) {
+            fastify.log.error(err);
+
+            throw fastify.httpErrors.internalServerError(
+              "Proof download failed"
+            );
+          }
+          allQueriesSucceded = false;
+        }
+      }
+      return proofs;
+    },
     deleteProof: async function (accomplishmentId: number) {
       try {
         return await client.removeObject("proofs", `${accomplishmentId})`);

@@ -52,7 +52,7 @@ export default fp<MinioPluginOptions>(async (fastify, opts) => {
     proof: ProofQueries(fastify, client),
     avatar: AvatarQueries(fastify, client),
     challengePicture: ChallengePictureQueries(fastify, client),
-    goodiesPicture: GoodiesPictureQueries(fastify, client)
+    goodiesPicture: GoodiesPictureQueries(fastify, client),
   };
 
   fastify.decorate("minio", minio);
@@ -69,6 +69,7 @@ declare module "fastify" {
           accomplishmentId: number
         ) => Promise<Minio.UploadedObjectInfo>;
         getProof: (accomplishmentId: number) => Promise<internal.Readable>;
+        getManyProof: (limit: number, offset: number) => Promise<internal.Readable[]>;
         deleteProof: (accomplishmentId: number) => Promise<void>;
       };
       avatar: {
@@ -77,6 +78,7 @@ declare module "fastify" {
           userId: number
         ) => Promise<Minio.UploadedObjectInfo>;
         getAvatar: (userId: number) => Promise<internal.Readable>;
+        getManyAvatar: (limit: number, offset: number) => Promise<internal.Readable[]>;
         deleteAvatar: (userId: number) => Promise<void>;
       };
       challengePicture: {
@@ -84,7 +86,10 @@ declare module "fastify" {
           challengePicture: internal.Readable,
           challengeId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getChallengePicture: (challengeId: number) => Promise<internal.Readable>;
+        getChallengePicture: (
+          challengeId: number
+        ) => Promise<internal.Readable>;
+        getManyChallengePicture: (limit: number, offset: number) => Promise<internal.Readable[]>;
         deleteChallengePicture: (challengeId: number) => Promise<void>;
       };
       goodiesPicture: {
@@ -93,8 +98,9 @@ declare module "fastify" {
           goodiesId: number
         ) => Promise<Minio.UploadedObjectInfo>;
         getGoodiesPicture: (goodiesId: number) => Promise<internal.Readable>;
+        getManyGoodiesPicture: (limit: number, offset: number) => Promise<internal.Readable[]>;
         deleteGoodiesPicture: (goodiesId: number) => Promise<void>;
-      }
+      };
     };
   }
 }
