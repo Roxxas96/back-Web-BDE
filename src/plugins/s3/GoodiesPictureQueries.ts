@@ -27,7 +27,7 @@ export function GoodiesPictureQueries(
     },
     getGoodiesPicture: async function (goodiesId: number) {
       try {
-        return await client.getObject("goodiespictures", `${goodiesId}`);
+        return {goodiesPicture: await client.getObject("goodiespictures", `${goodiesId}`), name: goodiesId.toString()};
       } catch (err) {
         if (
           err instanceof Error &&

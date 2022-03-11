@@ -18,7 +18,10 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
     },
     getProof: async function (accomplishmentId: number) {
       try {
-        return await client.getObject("proofs", `${accomplishmentId}`);
+        return {
+          proof: await client.getObject("proofs", `${accomplishmentId}`),
+          name: accomplishmentId.toString(),
+        };
       } catch (err) {
         //TODO repace with a prefetch
         if (
@@ -41,10 +44,7 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
       }> = [];
       for (let index = offset; index <= limit + offset; index++) {
         try {
-          const proof = await client.getObject(
-            "proofs",
-            `${index}`
-          );
+          const proof = await client.getObject("proofs", `${index}`);
           proofs.push({ proof, name: index.toString() });
         } catch (err) {
           if (

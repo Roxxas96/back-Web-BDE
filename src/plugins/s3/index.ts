@@ -68,7 +68,10 @@ declare module "fastify" {
           proof: internal.Readable,
           accomplishmentId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getProof: (accomplishmentId: number) => Promise<internal.Readable>;
+        getProof: (accomplishmentId: number) => Promise<{
+          proof: internal.Readable;
+          name: string;
+        }>;
         getManyProof: (
           limit: number,
           offset: number
@@ -86,7 +89,10 @@ declare module "fastify" {
           avatar: internal.Readable,
           userId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getAvatar: (userId: number) => Promise<internal.Readable>;
+        getAvatar: (userId: number) => Promise<{
+          avatar: internal.Readable;
+          name: string;
+        }>;
         getManyAvatar: (
           limit: number,
           offset: number
@@ -104,9 +110,10 @@ declare module "fastify" {
           challengePicture: internal.Readable,
           challengeId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getChallengePicture: (
-          challengeId: number
-        ) => Promise<internal.Readable>;
+        getChallengePicture: (challengeId: number) => Promise<{
+          challengePicture: internal.Readable;
+          name: string;
+        }>;
         getManyChallengePicture: (
           limit: number,
           offset: number
@@ -124,7 +131,10 @@ declare module "fastify" {
           goodiesPicture: internal.Readable,
           goodiesId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getGoodiesPicture: (goodiesId: number) => Promise<internal.Readable>;
+        getGoodiesPicture: (goodiesId: number) => Promise<{
+          goodiesPicture: internal.Readable;
+          name: string;
+        }>;
         getManyGoodiesPicture: (
           offset: number,
           limit: number

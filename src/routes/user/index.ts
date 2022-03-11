@@ -335,13 +335,14 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.get<{
     Querystring: { userId?: number; limit?: number; offset?: number };
+    Reply: FormData;
   }>(
     "/picture",
     {
       schema: {
         tags: ["user"],
         description: "Get the user picture of the designated user",
-        produces: ["application/octet-stream"],
+        produces: ["multipart/form-data"],
         querystring: {
           type: "object",
           required: ["userId"],
@@ -368,9 +369,12 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       if (request.query.userId) {
         const accomplishment = await getUser(fastify, request.query.userId);
 
-        const proof = await getAvatar(fastify, accomplishment);
+        const { name, avatar } = await getAvatar(fastify, accomplishment);
 
-        reply.status(200).send(proof);
+        const formData = new FormData();
+        formData.append(name, avatar);
+
+        reply.status(200).send(formData);
       } else {
         const { avatars, allQueriesSucceded } = await getManyAvatar(
           fastify,

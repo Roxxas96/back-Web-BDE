@@ -335,14 +335,14 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Querystring: { accomplishmentId?: number; limit?: number; offset?: number };
-    Reply: internal.Readable | internal.Readable[];
+    Reply: FormData;
   }>(
     "/proof",
     {
       schema: {
         tags: ["accomplishment"],
         description: "Get the proof of the designated accomplishment",
-        produces: ["application/octet-stream"],
+        produces: ["multipart/form-data"],
         querystring: {
           type: "object",
           properties: {
@@ -371,9 +371,12 @@ const accomplishmentRoute: FastifyPluginAsync = async (
           request.query.accomplishmentId
         );
 
-        const proof = await getProof(fastify, accomplishment);
+        const { name, proof } = await getProof(fastify, accomplishment);
 
-        reply.status(200).send(proof);
+        const formData = new FormData();
+        formData.append(name, proof);
+
+        reply.status(200).send(formData);
       } else {
         const { proofs, allQueriesSucceded } = await getManyProof(
           fastify,

@@ -229,14 +229,14 @@ const goodiesRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Querystring: { goodiesId?: number; limit?: number; offset?: number };
-    Reply: internal.Readable | internal.Readable[];
+    Reply: FormData;
   }>(
     "/picture",
     {
       schema: {
         tags: ["goodies"],
         description: "Get the goodies picture of the designated goodies",
-        produces: ["application/octet-stream"],
+        produces: ["multipart/form-data"],
         querystring: {
           type: "object",
           properties: {
@@ -265,9 +265,15 @@ const goodiesRoute: FastifyPluginAsync = async (
           request.query.goodiesId
         );
 
-        const proof = await getGoodiesPicture(fastify, accomplishment);
+        const { name, goodiesPicture } = await getGoodiesPicture(
+          fastify,
+          accomplishment
+        );
 
-        reply.status(200).send(proof);
+        const formData = new FormData();
+        formData.append(name, goodiesPicture);
+
+        reply.status(200).send(formData);
       } else {
         const { goodiesPictures, allQueriesSucceded } =
           await getManyGoodiesPicture(
@@ -277,7 +283,9 @@ const goodiesRoute: FastifyPluginAsync = async (
           );
 
         const formData = new FormData();
-        goodiesPictures.forEach((val) => formData.append(`${val.name}`, val.goodiesPicture));
+        goodiesPictures.forEach((val) =>
+          formData.append(`${val.name}`, val.goodiesPicture)
+        );
 
         reply.status(allQueriesSucceded ? 200 : 206).send(formData);
       }

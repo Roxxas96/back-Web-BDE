@@ -247,14 +247,14 @@ const challengeRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Querystring: { challengeId?: number; limit?: number; offset?: number };
-    Reply: internal.Readable | internal.Readable[];
+    Reply: FormData;
   }>(
     "/picture",
     {
       schema: {
         tags: ["challenge"],
         description: "Get the challenge picture of the designated challenge",
-        produces: ["application/octet-stream"],
+        produces: ["multipart/form-data"],
         querystring: {
           type: "object",
           properties: {
@@ -283,9 +283,15 @@ const challengeRoute: FastifyPluginAsync = async (
           request.query.challengeId
         );
 
-        const proof = await getChallengePicture(fastify, accomplishment);
+        const { name, challengePicture } = await getChallengePicture(
+          fastify,
+          accomplishment
+        );
 
-        reply.status(200).send(proof);
+        const formData = new FormData();
+        formData.append(name, challengePicture);
+
+        reply.status(200).send(formData);
       } else {
         const { challengePictures, allQueriesSucceded } =
           await getManyChallengePicture(

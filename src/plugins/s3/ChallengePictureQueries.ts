@@ -27,7 +27,7 @@ export function ChallengePictureQueries(
     },
     getChallengePicture: async function (challengeId: number) {
       try {
-        return await client.getObject("challengepictures", `${challengeId}`);
+        return {challengePicture: await client.getObject("challengepictures", `${challengeId}`), name: challengeId.toString()};
       } catch (err) {
         if (
           err instanceof Error &&

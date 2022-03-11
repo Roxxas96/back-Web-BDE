@@ -15,7 +15,7 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
     },
     getAvatar: async function (userId: number) {
       try {
-        return await client.getObject("avatars", `${userId}`);
+        return {avatar: await client.getObject("avatars", `${userId}`), name: userId.toString()};
       } catch (err) {
         if (
           err instanceof Error &&
