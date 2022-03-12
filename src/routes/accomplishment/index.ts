@@ -1,8 +1,8 @@
 //Import Prisma ORM types
 import { Accomplishment, Validation } from "@prisma/client";
+import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
-import internal = require("stream");
 
 //Import controller functions
 import {
@@ -11,6 +11,7 @@ import {
   deleteProof,
   getAccomplishment,
   getManyAccomplishment,
+  getManyProof,
   getProof,
   updateAccomplishment,
   updateProof,
@@ -332,22 +333,29 @@ const accomplishmentRoute: FastifyPluginAsync = async (
   );
 
   fastify.get<{
-    Querystring: { accomplishmentId: number };
-    Reply: internal.Readable;
+    Querystring: { accomplishmentId?: number; limit?: number; offset?: number };
+    Reply: FormData;
   }>(
     "/proof",
     {
       schema: {
         tags: ["accomplishment"],
         description: "Get the proof of the designated accomplishment",
-        produces: ["application/octet-stream"],
+        produces: ["multipart/form-data"],
         querystring: {
           type: "object",
-          required: ["accomplishmentId"],
           properties: {
             accomplishmentId: {
               type: "number",
               description: "Id of the accomplishment",
+            },
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
             },
           },
         },
@@ -356,14 +364,30 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const accomplishment = await getAccomplishment(
-        fastify,
-        request.query.accomplishmentId
-      );
+      if (request.query.accomplishmentId) {
+        const accomplishment = await getAccomplishment(
+          fastify,
+          request.query.accomplishmentId
+        );
 
-      const proof = await getProof(fastify, accomplishment);
+        const { name, proof } = await getProof(fastify, accomplishment);
 
-      reply.status(200).send(proof);
+        const formData = new FormData();
+        formData.append(name, proof);
+
+        reply.status(200).send(formData);
+      } else {
+        const { proofs, allQueriesSucceded } = await getManyProof(
+          fastify,
+          request.query.limit,
+          request.query.offset
+        );
+
+        const formData = new FormData();
+        proofs.forEach((val) => formData.append(`${val.name}`, val.proof));
+
+        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+      }
     }
   );
 
@@ -389,12 +413,16 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
       const accomplishment = await getAccomplishment(
         fastify,
         request.query.accomplishmentId
       );
+
+      if (accomplishment.userId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await deleteProof(fastify, accomplishment);
 

@@ -1,8 +1,8 @@
 //Import Prisma ORM Types
 import { Goodies } from "@prisma/client";
+import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
-import internal = require("stream");
 
 //Import Models
 import {
@@ -19,6 +19,7 @@ import {
   getGoodies,
   getGoodiesPicture,
   getManyGoodies,
+  getManyGoodiesPicture,
   updateGoodies,
   updateGoodiesPicture,
 } from "./controller";
@@ -213,10 +214,7 @@ const goodiesRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const goodies = await getGoodies(
-        fastify,
-        request.query.goodiesId
-      );
+      const goodies = await getGoodies(fastify, request.query.goodiesId);
 
       if (goodies.creatorId !== userId) {
         await fastify.auth.authorize(userId, 2);
@@ -229,22 +227,29 @@ const goodiesRoute: FastifyPluginAsync = async (
   );
 
   fastify.get<{
-    Querystring: { goodiesId: number };
-    Reply: internal.Readable;
+    Querystring: { goodiesId?: number; limit?: number; offset?: number };
+    Reply: FormData;
   }>(
     "/picture",
     {
       schema: {
         tags: ["goodies"],
         description: "Get the goodies picture of the designated goodies",
-        produces: ["application/octet-stream"],
+        produces: ["multipart/form-data"],
         querystring: {
           type: "object",
-          required: ["goodiesId"],
           properties: {
             goodiesId: {
               type: "number",
               description: "Id of the goodies",
+            },
+            limit: {
+              type: "number",
+              description: "Number of elements to fetch",
+            },
+            offset: {
+              type: "number",
+              description: "Offset in element list from which fetch begins",
             },
           },
         },
@@ -253,14 +258,36 @@ const goodiesRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       await fastify.auth.authenticate(request.headers);
 
-      const goodies = await getGoodies(
-        fastify,
-        request.query.goodiesId
-      );
+      if (request.query.goodiesId) {
+        const accomplishment = await getGoodies(
+          fastify,
+          request.query.goodiesId
+        );
 
-      const goodiesPicture = await getGoodiesPicture(fastify, goodies);
+        const { name, goodiesPicture } = await getGoodiesPicture(
+          fastify,
+          accomplishment
+        );
 
-      reply.status(200).send(goodiesPicture);
+        const formData = new FormData();
+        formData.append(name, goodiesPicture);
+
+        reply.status(200).send(formData);
+      } else {
+        const { goodiesPictures, allQueriesSucceded } =
+          await getManyGoodiesPicture(
+            fastify,
+            request.query.limit,
+            request.query.offset
+          );
+
+        const formData = new FormData();
+        goodiesPictures.forEach((val) =>
+          formData.append(`${val.name}`, val.goodiesPicture)
+        );
+
+        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+      }
     }
   );
 
@@ -286,12 +313,13 @@ const goodiesRoute: FastifyPluginAsync = async (
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const userId = await fastify.auth.authenticate(request.headers);
 
-      const goodies = await getGoodies(
-        fastify,
-        request.query.goodiesId
-      );
+      const goodies = await getGoodies(fastify, request.query.goodiesId);
+
+      if (goodies.creatorId !== userId) {
+        await fastify.auth.authorize(userId, 2);
+      }
 
       await deleteGoodiesPicture(fastify, goodies);
 

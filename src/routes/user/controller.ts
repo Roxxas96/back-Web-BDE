@@ -303,6 +303,14 @@ export async function getAvatar(
   return await fastify.minio.avatar.getAvatar(user.id);
 }
 
+export async function getManyAvatar(
+  fastify: FastifyInstance,
+  limit?: number,
+  offset?: number
+) {
+  return await fastify.minio.avatar.getManyAvatar(limit || 100, offset || 0);
+}
+
 export async function deleteAvatar(
   fastify: FastifyInstance,
   user: UserWithoutPassword

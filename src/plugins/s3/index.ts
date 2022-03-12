@@ -52,7 +52,7 @@ export default fp<MinioPluginOptions>(async (fastify, opts) => {
     proof: ProofQueries(fastify, client),
     avatar: AvatarQueries(fastify, client),
     challengePicture: ChallengePictureQueries(fastify, client),
-    goodiesPicture: GoodiesPictureQueries(fastify, client)
+    goodiesPicture: GoodiesPictureQueries(fastify, client),
   };
 
   fastify.decorate("minio", minio);
@@ -68,7 +68,20 @@ declare module "fastify" {
           proof: internal.Readable,
           accomplishmentId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getProof: (accomplishmentId: number) => Promise<internal.Readable>;
+        getProof: (accomplishmentId: number) => Promise<{
+          proof: internal.Readable;
+          name: string;
+        }>;
+        getManyProof: (
+          limit: number,
+          offset: number
+        ) => Promise<{
+          proofs: Array<{
+            proof: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteProof: (accomplishmentId: number) => Promise<void>;
       };
       avatar: {
@@ -76,7 +89,20 @@ declare module "fastify" {
           avatar: internal.Readable,
           userId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getAvatar: (userId: number) => Promise<internal.Readable>;
+        getAvatar: (userId: number) => Promise<{
+          avatar: internal.Readable;
+          name: string;
+        }>;
+        getManyAvatar: (
+          limit: number,
+          offset: number
+        ) => Promise<{
+          avatars: Array<{
+            avatar: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteAvatar: (userId: number) => Promise<void>;
       };
       challengePicture: {
@@ -84,7 +110,20 @@ declare module "fastify" {
           challengePicture: internal.Readable,
           challengeId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getChallengePicture: (challengeId: number) => Promise<internal.Readable>;
+        getChallengePicture: (challengeId: number) => Promise<{
+          challengePicture: internal.Readable;
+          name: string;
+        }>;
+        getManyChallengePicture: (
+          limit: number,
+          offset: number
+        ) => Promise<{
+          challengePictures: Array<{
+            challengePicture: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteChallengePicture: (challengeId: number) => Promise<void>;
       };
       goodiesPicture: {
@@ -92,9 +131,22 @@ declare module "fastify" {
           goodiesPicture: internal.Readable,
           goodiesId: number
         ) => Promise<Minio.UploadedObjectInfo>;
-        getGoodiesPicture: (goodiesId: number) => Promise<internal.Readable>;
+        getGoodiesPicture: (goodiesId: number) => Promise<{
+          goodiesPicture: internal.Readable;
+          name: string;
+        }>;
+        getManyGoodiesPicture: (
+          offset: number,
+          limit: number
+        ) => Promise<{
+          goodiesPictures: Array<{
+            goodiesPicture: internal.Readable;
+            name: string;
+          }>;
+          allQueriesSucceded: boolean;
+        }>;
         deleteGoodiesPicture: (goodiesId: number) => Promise<void>;
-      }
+      };
     };
   }
 }

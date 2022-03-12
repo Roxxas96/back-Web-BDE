@@ -15,7 +15,7 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
     },
     getAvatar: async function (userId: number) {
       try {
-        return await client.getObject("avatars", `${userId}`);
+        return {avatar: await client.getObject("avatars", `${userId}`), name: userId.toString()};
       } catch (err) {
         if (
           err instanceof Error &&
@@ -28,6 +28,37 @@ export function AvatarQueries(fastify: FastifyInstance, client: Minio.Client) {
 
         throw fastify.httpErrors.internalServerError("Avatar download failed");
       }
+    },
+    getManyAvatar: async function (limit: number, offset: number) {
+      let allQueriesSucceded = true;
+      let challengePictures: Array<{
+        challengePicture: internal.Readable;
+        name: string;
+      }> = [];
+      for (let index = offset; index <= limit + offset; index++) {
+        try {
+          const challengePicture = await client.getObject(
+            "avatars",
+            `${index}`
+          );
+          challengePictures.push({ challengePicture, name: index.toString() });
+        } catch (err) {
+          if (
+            !(
+              err instanceof Error &&
+              err.message.includes("The specified key does not exist")
+            )
+          ) {
+            fastify.log.error(err);
+
+            throw fastify.httpErrors.internalServerError(
+              "Avatar download failed"
+            );
+          }
+          allQueriesSucceded = false;
+        }
+      }
+      return { challengePictures, allQueriesSucceded };
     },
     deleteAvatar: async function (userId: number) {
       try {
