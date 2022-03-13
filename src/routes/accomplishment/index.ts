@@ -375,7 +375,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         const formData = new FormData();
         formData.append(name, proof);
 
-        reply.status(200).send(formData);
+        reply
+          .status(200)
+          .header("content-type", formData.getHeaders())
+          .send(formData);
       } else {
         const { proofs, allQueriesSucceded } = await getManyProof(
           fastify,
@@ -386,7 +389,10 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         const formData = new FormData();
         proofs.forEach((val) => formData.append(`${val.name}`, val.proof));
 
-        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+        reply
+          .status(allQueriesSucceded ? 200 : 206)
+          .header("content-type", formData.getHeaders())
+          .send(formData);
       }
     }
   );

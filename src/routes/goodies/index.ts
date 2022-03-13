@@ -272,7 +272,10 @@ const goodiesRoute: FastifyPluginAsync = async (
         const formData = new FormData();
         formData.append(name, goodiesPicture);
 
-        reply.status(200).send(formData);
+        reply
+          .status(200)
+          .header("content-type", formData.getHeaders())
+          .send(formData);
       } else {
         const { goodiesPictures, allQueriesSucceded } =
           await getManyGoodiesPicture(
@@ -286,7 +289,10 @@ const goodiesRoute: FastifyPluginAsync = async (
           formData.append(`${val.name}`, val.goodiesPicture)
         );
 
-        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+        reply
+          .status(allQueriesSucceded ? 200 : 206)
+          .header("content-type", formData.getHeaders())
+          .send(formData);
       }
     }
   );

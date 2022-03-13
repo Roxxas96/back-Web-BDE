@@ -290,7 +290,10 @@ const challengeRoute: FastifyPluginAsync = async (
         const formData = new FormData();
         formData.append(name, challengePicture);
 
-        reply.status(200).send(formData);
+        reply
+          .status(200)
+          .header("content-type", formData.getHeaders())
+          .send(formData);
       } else {
         const { challengePictures, allQueriesSucceded } =
           await getManyChallengePicture(
@@ -304,7 +307,10 @@ const challengeRoute: FastifyPluginAsync = async (
           formData.append(`${val.name}`, val.challengePicture)
         );
 
-        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+        reply
+          .status(allQueriesSucceded ? 200 : 206)
+          .header("content-type", formData.getHeaders())
+          .send(formData);
       }
     }
   );
