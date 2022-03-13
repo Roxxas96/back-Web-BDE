@@ -374,7 +374,10 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         const formData = new FormData();
         formData.append(name, avatar);
 
-        reply.status(200).send(formData);
+        reply
+          .status(200)
+          .headers({ ...formData.getHeaders() })
+          .send(formData);
       } else {
         const { avatars, allQueriesSucceded } = await getManyAvatar(
           fastify,
@@ -385,7 +388,10 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         const formData = new FormData();
         avatars.forEach((val) => formData.append(`${val.name}`, val.avatar));
 
-        reply.status(allQueriesSucceded ? 200 : 206).send(formData);
+        reply
+          .status(allQueriesSucceded ? 200 : 206)
+          .headers({ ...formData.getHeaders() })
+          .send(formData);
       }
     }
   );
