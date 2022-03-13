@@ -108,6 +108,24 @@ export async function createPurchase(
   return await fastify.prisma.purchase.createPurchase(user.id, goodies.id);
 }
 
+export async function updatePurchase(
+  fastify: FastifyInstance,
+  purchaseId: number,
+  delivered: boolean
+) {
+  if (!purchaseId) {
+    throw fastify.httpErrors.badRequest("Invalid purchase id");
+  }
+
+  const purchase = await fastify.prisma.purchase.getPurchase(purchaseId);
+
+  if (!purchase) {
+    throw fastify.httpErrors.notFound("Purchase not found");
+  }
+
+  return await fastify.prisma.purchase.updatePurchase(purchaseId, delivered);
+}
+
 //Delete  purchase (ie. refund) by id
 export async function deletePurchase(
   fastify: FastifyInstance,

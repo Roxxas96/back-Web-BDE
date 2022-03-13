@@ -9,6 +9,7 @@ import {
   deletePurchase,
   getManyPurchase,
   getPurchase,
+  updatePurchase,
 } from "./controller";
 
 const purchaseRoute: FastifyPluginAsync = async (
@@ -140,6 +141,45 @@ const purchaseRoute: FastifyPluginAsync = async (
       return reply
         .status(201)
         .send({ message: "Purchase created", purchaseId: createdPurchase.id });
+    }
+  );
+
+  fastify.patch<{
+    Params: { id: number };
+    Body: { delivered: boolean };
+    Reply: { message: string };
+  }>(
+    "/:id",
+    {
+      schema: {
+        tags: ["purchase", "admin"],
+        description:
+          "Modify the the provided goodies, used to mark it as delivered",
+        body: {
+          type: "object",
+          properties: {
+            delivered: {
+              type: "boolean",
+              description: "Mark goodies as delivered or not",
+            },
+          },
+        },
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "number", description: "Id of the purchase to update" },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 1);
+
+      await updatePurchase(fastify, request.params.id, request.body.delivered);
+
+      reply.status(200).send({ message: "Success" });
     }
   );
 
