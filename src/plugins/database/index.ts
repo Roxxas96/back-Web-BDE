@@ -194,6 +194,7 @@ declare module "fastify" {
           userId?: number,
           goodiesId?: number
         ) => Promise<Purchase[]>;
+        updatePurchase: (purchaseId: number, delivered: boolean) => Promise<Purchase>;
         createPurchase: (userId: number, goodiesId: number) => Promise<Purchase>;
         deletePurchase: (purchaseId: number) => Promise<Purchase>;
       };

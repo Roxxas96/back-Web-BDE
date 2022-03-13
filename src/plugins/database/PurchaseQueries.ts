@@ -55,6 +55,20 @@ export function purchaseQueries(
       }
     },
 
+    updatePurchase: async function (purchaseId: number, delivered: boolean) {
+      try {
+        return await client.purchase.update({
+          where: { id: purchaseId },
+          data: { delivered },
+        });
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
+
     //Delete a purchase
     deletePurchase: async function (purchaseId: number) {
       try {
