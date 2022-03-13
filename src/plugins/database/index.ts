@@ -154,7 +154,9 @@ declare module "fastify" {
           comment?: string,
           validation?: Validation
         ) => Promise<Accomplishment>;
-        deleteAccomplishment: (accomplishmentId: number) => Promise<Accomplishment>;
+        deleteAccomplishment: (
+          accomplishmentId: number
+        ) => Promise<Accomplishment>;
         createAccomplishment: (
           userId: number,
           challengeId: number,
@@ -192,9 +194,17 @@ declare module "fastify" {
           limit?: number,
           offset?: number,
           userId?: number,
-          goodiesId?: number
+          goodiesId?: number,
+          delivered?: boolean
         ) => Promise<Purchase[]>;
-        createPurchase: (userId: number, goodiesId: number) => Promise<Purchase>;
+        updatePurchase: (
+          purchaseId: number,
+          delivered: boolean
+        ) => Promise<Purchase>;
+        createPurchase: (
+          userId: number,
+          goodiesId: number
+        ) => Promise<Purchase>;
         deletePurchase: (purchaseId: number) => Promise<Purchase>;
       };
     };

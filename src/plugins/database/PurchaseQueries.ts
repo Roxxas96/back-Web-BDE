@@ -11,11 +11,12 @@ export function purchaseQueries(
       limit?: number,
       offset?: number,
       userId?: number,
-      goodiesId?: number
+      goodiesId?: number,
+      delivered?: boolean
     ) {
       try {
         return await client.purchase.findMany({
-          where: { userId, goodiesId },
+          where: { userId, goodiesId, delivered },
           take: limit,
           skip: offset,
         });
@@ -46,6 +47,20 @@ export function purchaseQueries(
       try {
         return await client.purchase.create({
           data: { userId: userId, goodiesId: goodiesId },
+        });
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
+
+    updatePurchase: async function (purchaseId: number, delivered: boolean) {
+      try {
+        return await client.purchase.update({
+          where: { id: purchaseId },
+          data: { delivered },
         });
       } catch (err) {
         fastify.log.error(err);

@@ -9,6 +9,7 @@ import {
   deletePurchase,
   getManyPurchase,
   getPurchase,
+  updatePurchase,
 } from "./controller";
 
 const purchaseRoute: FastifyPluginAsync = async (
@@ -22,6 +23,7 @@ const purchaseRoute: FastifyPluginAsync = async (
       offset?: number;
       goodiesId?: number;
       userId?: number;
+      delivered?: boolean;
     };
   }>(
     "/",
@@ -48,6 +50,10 @@ const purchaseRoute: FastifyPluginAsync = async (
               type: "number",
               description: "Filter by user id",
             },
+            delivered: {
+              type: "boolean",
+              description: "Filter by delivered state",
+            },
           },
         },
       },
@@ -69,7 +75,8 @@ const purchaseRoute: FastifyPluginAsync = async (
         request.query.userId,
         request.query.goodiesId,
         request.query.limit,
-        request.query.offset
+        request.query.offset,
+        request.query.delivered
       );
 
       return reply.status(200).send({ message: "Success", purchases });
@@ -140,6 +147,51 @@ const purchaseRoute: FastifyPluginAsync = async (
       return reply
         .status(201)
         .send({ message: "Purchase created", purchaseId: createdPurchase.id });
+    }
+  );
+
+  fastify.patch<{
+    Params: { id: number };
+    Body: { delivered: boolean };
+    Reply: { message: string; purchaseId: number };
+  }>(
+    "/:id",
+    {
+      schema: {
+        tags: ["purchase", "admin"],
+        description:
+          "Modify the the provided goodies, used to mark it as delivered",
+        body: {
+          type: "object",
+          properties: {
+            delivered: {
+              type: "boolean",
+              description: "Mark goodies as delivered or not",
+            },
+          },
+        },
+        params: {
+          type: "object",
+          properties: {
+            id: { type: "number", description: "Id of the purchase to update" },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      await fastify.auth.authorize(userId, 1);
+
+      const updatedPurchase = await updatePurchase(
+        fastify,
+        request.params.id,
+        request.body.delivered
+      );
+
+      reply
+        .status(200)
+        .send({ message: "Success", purchaseId: updatedPurchase.id });
     }
   );
 

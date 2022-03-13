@@ -83,6 +83,7 @@ model Purchase {
   goodiesId Int?
   userId Int?
   createdAt DateTime @default(now())
+  delivered Boolean @default(false)
   purchaseCreator User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   purchaseGoodies Goodies? @relation(fields: [goodiesId], references: [id], onDelete: SetNull)
 }
