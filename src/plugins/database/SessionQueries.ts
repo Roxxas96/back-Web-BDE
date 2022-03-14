@@ -7,11 +7,12 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
     getManySession: async function (
       limit: number,
       offset?: number,
-      userId?: number
+      userId?: number,
+      sessionIds?: number[]
     ) {
       try {
         return await client.session.findMany({
-          where: { userId },
+          where: { userId, id: { in: sessionIds } },
           take: limit,
           skip: offset,
         });

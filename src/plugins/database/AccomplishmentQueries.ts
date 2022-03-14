@@ -12,11 +12,17 @@ export function accomplishmentQueries(
       offset?: number,
       userId?: number,
       validation?: Validation,
-      challengeId?: number
+      challengeId?: number,
+      accomplishmentIds?: number[]
     ) {
       try {
         return await client.accomplishment.findMany({
-          where: { userId, validation, challengeId },
+          where: {
+            userId,
+            validation,
+            challengeId,
+            id: { in: accomplishmentIds },
+          },
           take: limit,
           skip: offset,
         });

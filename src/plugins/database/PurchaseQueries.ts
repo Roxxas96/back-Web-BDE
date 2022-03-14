@@ -12,11 +12,12 @@ export function purchaseQueries(
       offset?: number,
       userId?: number,
       goodiesId?: number,
-      delivered?: boolean
+      delivered?: boolean,
+      purchaseIds?: number[]
     ) {
       try {
         return await client.purchase.findMany({
-          where: { userId, goodiesId, delivered },
+          where: { userId, goodiesId, delivered, id: { in: purchaseIds } },
           take: limit,
           skip: offset,
         });

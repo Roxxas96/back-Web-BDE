@@ -117,7 +117,11 @@ declare module "fastify" {
           email?: string,
           recoverToken?: string
         ) => Promise<User>;
-        getManyUser: (limit: number, offset?: number) => Promise<User[]>;
+        getManyUser: (
+          limit: number,
+          offset?: number,
+          userIds?: number[]
+        ) => Promise<User[]>;
       };
 
       session: {
@@ -127,7 +131,8 @@ declare module "fastify" {
         getManySession: (
           limit: number,
           offset?: number,
-          userId?: number
+          userId?: number,
+          sessionIds?: number[]
         ) => Promise<Session[]>;
       };
 
@@ -144,7 +149,8 @@ declare module "fastify" {
         getChallenge: (challengeId: number) => Promise<Challenge>;
         getManyChallenge: (
           limit: number,
-          offset?: number
+          offset?: number,
+          challengeIds?: number[]
         ) => Promise<Challenge[]>;
       };
 
@@ -170,13 +176,18 @@ declare module "fastify" {
           offset?: number,
           userId?: number,
           validation?: Validation,
-          challengeId?: number
+          challengeId?: number,
+          accomplishmentIds?: number[]
         ) => Promise<Accomplishment[]>;
       };
 
       goodies: {
         getGoodies: (goodiesId: number) => Promise<Goodies>;
-        getManyGoodies: (limit: number, offset?: number) => Promise<Goodies[]>;
+        getManyGoodies: (
+          limit: number,
+          offset?: number,
+          goodiesIds?: number[]
+        ) => Promise<Goodies[]>;
         createGoodies: (
           goodiesInfo: GoodiesInfo,
           creatorId: number
@@ -195,7 +206,8 @@ declare module "fastify" {
           offset?: number,
           userId?: number,
           goodiesId?: number,
-          delivered?: boolean
+          delivered?: boolean,
+          purchaseIds?: number[]
         ) => Promise<Purchase[]>;
         updatePurchase: (
           purchaseId: number,
