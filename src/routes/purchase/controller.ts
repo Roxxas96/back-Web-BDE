@@ -1,4 +1,6 @@
 import { FastifyInstance } from "fastify";
+import { GoodiesInfoMinimal } from "../../models/GoodiesInfo";
+import { UserInfoMinimal } from "../../models/UserInfo";
 
 //Get purchase by id
 export async function getPurchase(
@@ -17,7 +19,29 @@ export async function getPurchase(
     throw fastify.httpErrors.notFound("Purchase not found");
   }
 
-  return purchase;
+  const user = purchase.userId
+    ? await fastify.prisma.user.getUser(purchase.userId)
+    : undefined;
+
+  const goodies = purchase.goodiesId
+    ? await fastify.prisma.goodies.getGoodies(purchase.goodiesId)
+    : undefined;
+
+  return {
+    ...purchase,
+    goodies: goodies
+      ? ({
+          id: goodies.id,
+          name: goodies.name,
+          price: goodies.price,
+        } as GoodiesInfoMinimal)
+      : undefined,
+    user: user
+      ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
+      : undefined,
+    goodiesId: goodies ? undefined : purchase.goodiesId,
+    userId: user ? undefined : purchase.userId,
+  };
 }
 
 //Get all purchase concerning the user when userId is provided, or if admin (ie. no userId provided) get all purchases in DB
@@ -42,7 +66,33 @@ export async function getManyPurchase(
     throw fastify.httpErrors.notFound("No Purchase found");
   }
 
-  return purchases;
+  return await Promise.all(
+    purchases.map(async (purchase) => {
+      const user = purchase.userId
+        ? await fastify.prisma.user.getUser(purchase.userId)
+        : undefined;
+
+      const goodies = purchase.goodiesId
+        ? await fastify.prisma.goodies.getGoodies(purchase.goodiesId)
+        : undefined;
+
+      return {
+        ...purchase,
+        goodies: goodies
+          ? ({
+              id: goodies.id,
+              name: goodies.name,
+              price: goodies.price,
+            } as GoodiesInfoMinimal)
+          : undefined,
+        user: user
+          ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
+          : undefined,
+        goodiesId: goodies ? undefined : purchase.goodiesId,
+        userId: user ? undefined : purchase.userId,
+      };
+    })
+  );
 }
 
 //Create a purchase with provided info

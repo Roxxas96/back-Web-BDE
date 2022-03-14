@@ -1,6 +1,8 @@
 import { Accomplishment, Validation } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import internal = require("stream");
+import { ChallengeInfoMinimal } from "../../models/ChallengeInfo";
+import { UserInfoMinimal } from "../../models/UserInfo";
 
 //Get an accomplishment by Id
 export async function getAccomplishment(
@@ -21,7 +23,29 @@ export async function getAccomplishment(
     throw fastify.httpErrors.notFound("Accomplishment not found");
   }
 
-  return accomplishment;
+  const user = accomplishment.userId
+    ? await fastify.prisma.user.getUser(accomplishment.userId)
+    : undefined;
+
+  const challenge = accomplishment.challengeId
+    ? await fastify.prisma.challenge.getChallenge(accomplishment.challengeId)
+    : undefined;
+
+  return {
+    ...accomplishment,
+    user: user
+      ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
+      : undefined,
+    challenge: challenge
+      ? ({
+          id: challenge.id,
+          name: challenge.name,
+          reward: challenge.reward,
+        } as ChallengeInfoMinimal)
+      : undefined,
+    userId: user ? undefined : accomplishment.userId,
+    challengeId: challenge ? undefined : accomplishment.challengeId,
+  };
 }
 
 //Get accomplishments, if admin (ie. no userId provided) return all accomplishments in DB, if basic user (ie. userId provided) only return the related ones
@@ -47,7 +71,35 @@ export async function getManyAccomplishment(
     throw fastify.httpErrors.notFound("No Accomplishment found");
   }
 
-  return accomplishments;
+  return await Promise.all(
+    accomplishments.map(async (accomplishment) => {
+      const user = accomplishment.userId
+        ? await fastify.prisma.user.getUser(accomplishment.userId)
+        : undefined;
+
+      const challenge = accomplishment.challengeId
+        ? await fastify.prisma.challenge.getChallenge(
+            accomplishment.challengeId
+          )
+        : undefined;
+
+      return {
+        ...accomplishment,
+        user: user
+          ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
+          : undefined,
+        challenge: challenge
+          ? ({
+              id: challenge.id,
+              name: challenge.name,
+              reward: challenge.reward,
+            } as ChallengeInfoMinimal)
+          : undefined,
+        userId: user ? undefined : accomplishment.userId,
+        challengeId: challenge ? undefined : accomplishment.challengeId,
+      };
+    })
+  );
 }
 
 //Create an accomplishment for the current user
@@ -167,31 +219,32 @@ export async function updateAccomplishment(
 //Delete the provided accomplishment, if it has no validation state
 export async function deleteAccomplishment(
   fastify: FastifyInstance,
-  accomplishment: Accomplishment
+  accomplishmentId: number,
+  accomplishmentValidation: Validation
 ) {
   //Chack for accomplishmentId
-  if (!accomplishment.id) {
+  if (!accomplishmentId) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment id");
   }
 
   //Check if it has a validation state
-  if (accomplishment.validation !== "PENDING") {
+  if (accomplishmentValidation !== "PENDING") {
     throw fastify.httpErrors.badRequest(
       "Can't modify a validated accomplishment"
     );
   }
 
   return await fastify.prisma.accomplishment.deleteAccomplishment(
-    accomplishment.id
+    accomplishmentId
   );
 }
 
 export async function updateProof(
   fastify: FastifyInstance,
   proof: internal.Readable,
-  accomplishment: Accomplishment
+  accomplishmentId: number
 ) {
-  if (!accomplishment || !accomplishment.id) {
+  if (!accomplishmentId) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
   }
 
@@ -199,18 +252,18 @@ export async function updateProof(
     throw fastify.httpErrors.badRequest("Invalid proof");
   }
 
-  return await fastify.minio.proof.putProof(proof, accomplishment.id);
+  return await fastify.minio.proof.putProof(proof, accomplishmentId);
 }
 
 export async function getProof(
   fastify: FastifyInstance,
-  accomplishment: Accomplishment
+  accomplishmentId: number
 ) {
-  if (!accomplishment || !accomplishment.id) {
+  if (!accomplishmentId) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
   }
 
-  return await fastify.minio.proof.getProof(accomplishment.id);
+  return await fastify.minio.proof.getProof(accomplishmentId);
 }
 
 export async function getManyProof(
@@ -223,13 +276,13 @@ export async function getManyProof(
 
 export async function deleteProof(
   fastify: FastifyInstance,
-  accomplishment: Accomplishment
+  accomplishmentId: number
 ) {
-  if (!accomplishment || !accomplishment.id) {
+  if (!accomplishmentId) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
   }
 
-  await fastify.minio.proof.getProof(accomplishment.id);
+  await fastify.minio.proof.getProof(accomplishmentId);
 
-  return await fastify.minio.proof.deleteProof(accomplishment.id);
+  return await fastify.minio.proof.deleteProof(accomplishmentId);
 }

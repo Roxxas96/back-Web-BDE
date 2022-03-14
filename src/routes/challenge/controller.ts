@@ -1,17 +1,14 @@
-import { Challenge } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import internal = require("stream");
 import {
   ChallengeInfo,
-  ChallengeInfoMinimal,
 } from "../../models/ChallengeInfo";
+import { UserInfoMinimal } from "../../models/UserInfo";
 
 //Convert UTC time depending on user's timezone
-function convertTime(challenge: Challenge) {
-  challenge.createdAt.setMinutes(
-    challenge.createdAt.getMinutes() - challenge.createdAt.getTimezoneOffset()
-  );
-  return challenge;
+function convertTime(time: Date) {
+  time.setMinutes(time.getMinutes() - time.getTimezoneOffset());
+  return time;
 }
 
 //Create challenge with provided info
@@ -116,7 +113,18 @@ export async function getChallenge(
     throw fastify.httpErrors.notFound("Challenge not found");
   }
 
-  return convertTime(challenge);
+  const creator = challenge.creatorId
+    ? await fastify.prisma.user.getUser(challenge.creatorId)
+    : undefined;
+
+  return {
+    ...challenge,
+    createdAt: convertTime(challenge.createdAt),
+    creator: creator
+      ? ({ id: creator.id, pseudo: creator.pseudo } as UserInfoMinimal)
+      : undefined,
+    creatorId: creator ? undefined : challenge.creatorId,
+  };
 }
 
 //Get all challenge in DB
@@ -136,21 +144,30 @@ export async function getManyChallenge(
   }
 
   //We only return name and reward, other values are not needed
-  return challenges.map<ChallengeInfoMinimal>((val) => {
-    return {
-      name: val.name,
-      reward: val.reward,
-      id: val.id,
-    };
-  });
+  return await Promise.all(
+    challenges.map(async (challenge) => {
+      const creator = challenge.creatorId
+        ? await fastify.prisma.user.getUser(challenge.creatorId)
+        : undefined;
+
+      return {
+        ...challenge,
+        createdAt: convertTime(challenge.createdAt),
+        creator: creator
+          ? ({ id: creator.id, pseudo: creator.pseudo } as UserInfoMinimal)
+          : undefined,
+        creatorId: creator ? undefined : challenge.creatorId,
+      };
+    })
+  );
 }
 
 export async function updateChallengePicture(
   fastify: FastifyInstance,
   challengePicture: internal.Readable,
-  challenge: Challenge
+  challengeId: number
 ) {
-  if (!challenge || !challenge.id) {
+  if (!challengeId || !challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge");
   }
 
@@ -160,19 +177,19 @@ export async function updateChallengePicture(
 
   return await fastify.minio.challengePicture.putChallengePicture(
     challengePicture,
-    challenge.id
+    challengeId
   );
 }
 
 export async function getChallengePicture(
   fastify: FastifyInstance,
-  challenge: Challenge
+  challengeId: number
 ) {
-  if (!challenge || !challenge.id) {
+  if (!challengeId || !challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge");
   }
 
-  return await fastify.minio.challengePicture.getChallengePicture(challenge.id);
+  return await fastify.minio.challengePicture.getChallengePicture(challengeId);
 }
 
 export async function getManyChallengePicture(
@@ -188,15 +205,15 @@ export async function getManyChallengePicture(
 
 export async function deleteChallengePicture(
   fastify: FastifyInstance,
-  challenge: Challenge
+  challengeId: number
 ) {
-  if (!challenge || !challenge.id) {
+  if (!challengeId || !challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge");
   }
 
-  await fastify.minio.challengePicture.getChallengePicture(challenge.id);
+  await fastify.minio.challengePicture.getChallengePicture(challengeId);
 
   return await fastify.minio.challengePicture.deleteChallengePicture(
-    challenge.id
+    challengeId
   );
 }

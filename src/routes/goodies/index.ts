@@ -1,15 +1,10 @@
 //Import Prisma ORM Types
-import { Goodies } from "@prisma/client";
 import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
 
 //Import Models
-import {
-  GoodiesInfo,
-  GoodiesInfoMinimal,
-  GoodiesSchema,
-} from "../../models/GoodiesInfo";
+import { GoodiesInfo, GoodiesSchema } from "../../models/GoodiesInfo";
 
 //Import controller functions
 import {
@@ -29,7 +24,6 @@ const goodiesRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
-    Reply: { message: string; goodies: GoodiesInfoMinimal[] };
     Querystring: { limit?: number; offset?: number };
   }>(
     "/",
@@ -67,7 +61,6 @@ const goodiesRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Params: { id: number };
-    Reply: { message: string; goodies: Goodies };
   }>(
     "/:id",
     {
@@ -220,7 +213,13 @@ const goodiesRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateGoodiesPicture(fastify, (await request.file()).file, goodies);
+      await updateGoodiesPicture(
+        fastify,
+        (
+          await request.file()
+        ).file,
+        goodies.id
+      );
 
       reply.status(200).send({ message: "Success" });
     }
@@ -259,14 +258,11 @@ const goodiesRoute: FastifyPluginAsync = async (
       await fastify.auth.authenticate(request.headers);
 
       if (request.query.goodiesId) {
-        const accomplishment = await getGoodies(
-          fastify,
-          request.query.goodiesId
-        );
+        const goodies = await getGoodies(fastify, request.query.goodiesId);
 
         const { name, goodiesPicture } = await getGoodiesPicture(
           fastify,
-          accomplishment
+          goodies.id
         );
 
         const formData = new FormData();
@@ -327,7 +323,7 @@ const goodiesRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteGoodiesPicture(fastify, goodies);
+      await deleteGoodiesPicture(fastify, goodies.id);
 
       reply.status(200).send({ message: "Success" });
     }

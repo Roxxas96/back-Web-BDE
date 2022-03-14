@@ -1,7 +1,7 @@
-import { Goodies } from "@prisma/client";
 import { FastifyInstance } from "fastify";
 import internal = require("stream");
-import { GoodiesInfo, GoodiesInfoMinimal } from "../../models/GoodiesInfo";
+import { GoodiesInfo } from "../../models/GoodiesInfo";
+import { UserInfoMinimal } from "../../models/UserInfo";
 
 //Get Goodies by id
 export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
@@ -17,7 +17,17 @@ export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
     throw fastify.httpErrors.notFound("Goodies not found");
   }
 
-  return goodies;
+  const creator = goodies.creatorId
+    ? await fastify.prisma.user.getUser(goodies.creatorId)
+    : undefined;
+
+  return {
+    ...goodies,
+    creator: creator
+      ? ({ id: creator.id, pseudo: creator.pseudo } as UserInfoMinimal)
+      : undefined,
+    creatorId: creator ? undefined : goodies.creatorId,
+  };
 }
 
 //Get all goodies in DB
@@ -36,13 +46,23 @@ export async function getManyGoodies(
     throw fastify.httpErrors.notFound("No Goodies in DB");
   }
 
-  return goodies.map<GoodiesInfoMinimal>((val) => {
-    return {
-      name: val.name,
-      price: val.price,
-      id: val.id,
-    };
-  });
+  return await Promise.all(
+    goodies.map(async (goodies) => {
+      const creator = goodies.creatorId
+        ? await fastify.prisma.user.getUser(goodies.creatorId)
+        : undefined;
+
+      return {
+        id: goodies.id,
+        name: goodies.name,
+        price: goodies.price,
+        creator: creator
+          ? ({ id: creator.id, pseudo: creator.pseudo } as UserInfoMinimal)
+          : undefined,
+        creatorId: creator ? undefined : goodies.creatorId,
+      };
+    })
+  );
 }
 
 //Create goodies with provided info
@@ -127,9 +147,9 @@ export async function deleteGoodies(
 export async function updateGoodiesPicture(
   fastify: FastifyInstance,
   goodiesPicture: internal.Readable,
-  goodies: Goodies
+  goodiesId: number
 ) {
-  if (!goodies || !goodies.id) {
+  if (!goodiesId || !goodiesId) {
     throw fastify.httpErrors.badRequest("Invalid goodies");
   }
 
@@ -137,18 +157,21 @@ export async function updateGoodiesPicture(
     throw fastify.httpErrors.badRequest("Invalid goodies picture");
   }
 
-  return await fastify.minio.goodiesPicture.putGoodiesPicture(goodiesPicture, goodies.id);
+  return await fastify.minio.goodiesPicture.putGoodiesPicture(
+    goodiesPicture,
+    goodiesId
+  );
 }
 
 export async function getGoodiesPicture(
   fastify: FastifyInstance,
-  goodies: Goodies
+  goodiesId: number
 ) {
-  if (!goodies || !goodies.id) {
+  if (!goodiesId || !goodiesId) {
     throw fastify.httpErrors.badRequest("Invalid goodies");
   }
 
-  return await fastify.minio.goodiesPicture.getGoodiesPicture(goodies.id);
+  return await fastify.minio.goodiesPicture.getGoodiesPicture(goodiesId);
 }
 
 export async function getManyGoodiesPicture(
@@ -156,18 +179,21 @@ export async function getManyGoodiesPicture(
   limit?: number,
   offset?: number
 ) {
-  return await fastify.minio.goodiesPicture.getManyGoodiesPicture(limit || 100, offset || 0);
+  return await fastify.minio.goodiesPicture.getManyGoodiesPicture(
+    limit || 100,
+    offset || 0
+  );
 }
 
 export async function deleteGoodiesPicture(
   fastify: FastifyInstance,
-  goodies: Goodies
+  goodiesId: number
 ) {
-  if (!goodies || !goodies.id) {
+  if (!goodiesId || !goodiesId) {
     throw fastify.httpErrors.badRequest("Invalid goodies");
   }
 
-  await fastify.minio.goodiesPicture.getGoodiesPicture(goodies.id);
+  await fastify.minio.goodiesPicture.getGoodiesPicture(goodiesId);
 
-  return await fastify.minio.goodiesPicture.deleteGoodiesPicture(goodies.id);
+  return await fastify.minio.goodiesPicture.deleteGoodiesPicture(goodiesId);
 }

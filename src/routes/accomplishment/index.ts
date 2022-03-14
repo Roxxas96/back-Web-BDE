@@ -1,5 +1,5 @@
 //Import Prisma ORM types
-import { Accomplishment, Validation } from "@prisma/client";
+import { Validation } from "@prisma/client";
 import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
@@ -29,7 +29,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       userId?: number;
       status?: Validation;
     };
-    Reply: { message: string; accomplishments: Accomplishment[] };
   }>(
     "/",
     {
@@ -90,7 +89,6 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Params: { id: number };
-    Reply: { accomplishment: Accomplishment; message: string };
   }>(
     "/:id",
     {
@@ -217,7 +215,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     async function (request, reply) {
       const userId = await fastify.auth.authenticate(request.headers);
 
-      const accomplishment = await getAccomplishment(
+      const { user, challenge, ...accomplishment } = await getAccomplishment(
         fastify,
         request.params.id
       );
@@ -234,7 +232,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       const updatedAccomplishment = await updateAccomplishment(
         fastify,
-        accomplishment,
+        {
+          ...accomplishment,
+          userId: accomplishment.userId || null,
+          challengeId: accomplishment.challengeId || null,
+        },
         request.body.comment,
         request.body.status
       );
@@ -282,7 +284,8 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
       const deletedAccomplishment = await deleteAccomplishment(
         fastify,
-        accomplishment
+        accomplishment.id,
+        accomplishment.validation
       );
 
       return reply.status(200).send({
@@ -326,7 +329,13 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateProof(fastify, (await request.file()).file, accomplishment);
+      await updateProof(
+        fastify,
+        (
+          await request.file()
+        ).file,
+        accomplishment.id
+      );
 
       reply.status(200).send({ message: "Success" });
     }
@@ -370,7 +379,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
           request.query.accomplishmentId
         );
 
-        const { name, proof } = await getProof(fastify, accomplishment);
+        const { name, proof } = await getProof(fastify, accomplishment.id);
 
         const formData = new FormData();
         formData.append(name, proof);
@@ -430,7 +439,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteProof(fastify, accomplishment);
+      await deleteProof(fastify, accomplishment.id);
 
       reply.status(200).send({ message: "Success" });
     }

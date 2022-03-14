@@ -1,6 +1,4 @@
 //Import Prisma ORM Types
-import { Session } from "@prisma/client";
-
 import { FastifyPluginAsync } from "fastify";
 
 //Import controller functions
@@ -16,7 +14,6 @@ const sessionRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
-    Reply: { message: string; sessions: Session[] };
     Querystring: { limit?: number; offset?: number; userId?: number };
   }>(
     "/",
@@ -61,7 +58,6 @@ const sessionRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Params: { id: number };
-    Reply: { message: string; session: Session };
   }>(
     "/:id",
     {

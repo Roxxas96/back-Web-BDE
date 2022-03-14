@@ -5,6 +5,7 @@ import { IncomingHttpHeaders } from "http";
 import { comparePassword } from "../../utils/bcrypt";
 import { createJWT } from "../../utils/jwt";
 import { hashJWT } from "../../utils/crypto";
+import { UserInfoMinimal } from "../../models/UserInfo";
 
 export async function deleteSession(
   fastify: FastifyInstance,
@@ -94,7 +95,15 @@ export async function getSession(fastify: FastifyInstance, sessionId: number) {
     throw fastify.httpErrors.notFound("Session not found");
   }
 
-  return session;
+  const user = await fastify.prisma.user.getUser(session.userId);
+
+  return {
+    ...session,
+    user: user
+      ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
+      : undefined,
+    userId: user ? undefined : session.userId,
+  };
 }
 
 export async function getManySession(
@@ -114,5 +123,17 @@ export async function getManySession(
     throw fastify.httpErrors.notFound("No Session in DB");
   }
 
-  return sessions;
+  return await Promise.all(
+    sessions.map(async (session) => {
+      const user = await fastify.prisma.user.getUser(session.userId);
+
+      return {
+        ...session,
+        user: user
+          ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
+          : undefined,
+        userId: user ? undefined : session.userId,
+      };
+    })
+  );
 }
