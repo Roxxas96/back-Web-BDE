@@ -8,9 +8,14 @@ export function challengeQueries(
 ) {
   return {
     //Get all challenges in DB
-    getManyChallenge: async function (limit: number, offset?: number) {
+    getManyChallenge: async function (
+      limit: number,
+      offset?: number,
+      challengeIds?: number[]
+    ) {
       try {
         return await client.challenge.findMany({
+          where: { id: { in: challengeIds } },
           take: limit,
           skip: offset,
         });

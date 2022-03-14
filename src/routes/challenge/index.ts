@@ -1,15 +1,10 @@
 //Import Prisma ORM Types
-import { Challenge } from "@prisma/client";
 import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
 
 //Impor Models
-import {
-  ChallengeInfo,
-  ChallengeInfoMinimal,
-  ChallengeSchema,
-} from "../../models/ChallengeInfo";
+import { ChallengeInfo, ChallengeSchema } from "../../models/ChallengeInfo";
 
 //Import controller functions
 import {
@@ -30,7 +25,6 @@ const challengeRoute: FastifyPluginAsync = async (
 ): Promise<void> => {
   fastify.get<{
     Querystring: { limit?: number; offset?: number };
-    Reply: { message: string; challenges: ChallengeInfoMinimal[] };
   }>(
     "/",
     {
@@ -66,7 +60,6 @@ const challengeRoute: FastifyPluginAsync = async (
   );
   fastify.get<{
     Params: { id: number };
-    Reply: { message: string; challenge: Challenge };
   }>(
     "/:id",
     {
@@ -228,7 +221,7 @@ const challengeRoute: FastifyPluginAsync = async (
 
       const challenge = await getChallenge(fastify, request.query.challengeId);
 
-      if (challenge.creatorId !== userId) {
+      if (challenge.creatorId !== userId && challenge.creator?.id !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
@@ -237,7 +230,7 @@ const challengeRoute: FastifyPluginAsync = async (
         (
           await request.file()
         ).file,
-        challenge
+        challenge.id
       );
 
       reply.status(200).send({ message: "Success" });
@@ -277,14 +270,14 @@ const challengeRoute: FastifyPluginAsync = async (
       await fastify.auth.authenticate(request.headers);
 
       if (request.query.challengeId) {
-        const accomplishment = await getChallenge(
+        const challenge = await getChallenge(
           fastify,
           request.query.challengeId
         );
 
         const { name, challengePicture } = await getChallengePicture(
           fastify,
-          accomplishment
+          challenge.id
         );
 
         const formData = new FormData();
@@ -341,11 +334,11 @@ const challengeRoute: FastifyPluginAsync = async (
 
       const challenge = await getChallenge(fastify, request.query.challengeId);
 
-      if (challenge.creatorId !== userId) {
+      if (challenge.creatorId !== userId && challenge.creator?.id !== userId) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteChallengePicture(fastify, challenge);
+      await deleteChallengePicture(fastify, challenge.id);
 
       reply.status(200).send({ message: "Success" });
     }

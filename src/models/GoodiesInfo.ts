@@ -13,6 +13,8 @@ export interface GoodiesInfoMinimal {
   name: string;
   price: number;
   id: number;
+  stock: number;
+  bought: number;
 }
 
 //Schema used for requests

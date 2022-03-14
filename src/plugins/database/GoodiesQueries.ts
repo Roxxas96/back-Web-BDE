@@ -5,9 +5,14 @@ import { GoodiesInfo } from "../../models/GoodiesInfo";
 export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
   return {
     //Get all goodies in DB
-    getManyGoodies: async function (limit: number, offset?: number) {
+    getManyGoodies: async function (
+      limit: number,
+      offset?: number,
+      goodiesIds?: number[]
+    ) {
       try {
         return await client.goodies.findMany({
+          where: { id: { in: goodiesIds } },
           take: limit,
           skip: offset,
         });

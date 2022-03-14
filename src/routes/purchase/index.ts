@@ -1,6 +1,4 @@
 //Import Prisma ORM Types
-import { Purchase } from "@prisma/client";
-
 import { FastifyPluginAsync } from "fastify";
 
 //Import contoller functions
@@ -17,7 +15,6 @@ const purchaseRoute: FastifyPluginAsync = async (
   opts
 ): Promise<void> => {
   fastify.get<{
-    Reply: { message: string; purchases: Purchase[] };
     Querystring: {
       limit?: number;
       offset?: number;
@@ -85,7 +82,6 @@ const purchaseRoute: FastifyPluginAsync = async (
 
   fastify.get<{
     Params: { id: number };
-    Reply: { message: string; purchase: Purchase };
   }>(
     "/:id",
     {
