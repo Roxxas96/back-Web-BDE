@@ -173,7 +173,8 @@ export async function updateAccomplishment(
   fastify: FastifyInstance,
   accomplishment: Accomplishment,
   comment?: string,
-  validation?: Validation
+  validation?: Validation,
+  refusedComment?: string
 ) {
   //Check for accomplishmendId
   if (!accomplishment.id) {
@@ -212,7 +213,8 @@ export async function updateAccomplishment(
   return await fastify.prisma.accomplishment.updateAccomplishment(
     accomplishment.id,
     comment,
-    validation
+    validation,
+    refusedComment
   );
 }
 

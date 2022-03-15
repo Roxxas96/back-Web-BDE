@@ -74,12 +74,13 @@ export function accomplishmentQueries(
     updateAccomplishment: async function (
       accomplishmentId: number,
       comment?: string,
-      validation?: Validation
+      validation?: Validation,
+      refusedComment?: string
     ) {
       try {
         return await client.accomplishment.update({
           where: { id: accomplishmentId },
-          data: { comment, validation },
+          data: { comment, validation, refusedComment },
         });
       } catch (err) {
         fastify.log.error(err);
