@@ -139,7 +139,13 @@ export async function getManyUser(
   }
 
   return users.map((val) => {
-    return { pseudo: val.pseudo, id: val.id };
+    return {
+      pseudo: val.pseudo,
+      id: val.id,
+      name: val.name,
+      surname: val.surname,
+      totalEarnedPoints: val.totalEarnedPoints,
+    };
   });
 }
 

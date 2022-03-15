@@ -106,6 +106,7 @@ declare module "fastify" {
             surname?: string;
             privilege?: number;
             wallet?: number;
+            totalEarnedPoints?: number;
             recoverToken?: string | null;
             recoverTokenExpiration?: Date | null;
           }

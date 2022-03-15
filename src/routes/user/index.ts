@@ -30,7 +30,7 @@ import {
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{
-    Reply: { message: string; users: UserInfoMinimal[] };
+    Reply: { message: string; users: any };
     Querystring: { limit?: number; offset?: number };
   }>(
     "/",
