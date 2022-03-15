@@ -53,6 +53,7 @@ model Accomplishment {
   challengeId Int?
   createdAt DateTime @default(now())
   comment String @default("")
+  refusedComment String @default("")
   validation Validation @default(PENDING)
   accomplishmentCreator User? @relation(fields: [userId], references: [id], onDelete: SetNull)
   accomplishmentChallenge Challenge? @relation(fields: [challengeId], references: [id], onDelete: SetNull)

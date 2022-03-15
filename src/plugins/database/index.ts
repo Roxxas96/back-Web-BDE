@@ -158,7 +158,8 @@ declare module "fastify" {
         updateAccomplishment: (
           accomplishmentId: number,
           comment?: string,
-          validation?: Validation
+          validation?: Validation,
+          refusedComment?: string
         ) => Promise<Accomplishment>;
         deleteAccomplishment: (
           accomplishmentId: number

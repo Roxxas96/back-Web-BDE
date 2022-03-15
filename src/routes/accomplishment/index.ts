@@ -181,6 +181,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
     Body: {
       comment?: string;
       status?: "ACCEPTED" | "REFUSED";
+      refusedComment?: string;
     };
     Reply: { message: string; accomplishmentId: number };
   }>(
@@ -205,6 +206,11 @@ const accomplishmentRoute: FastifyPluginAsync = async (
             comment: {
               type: "string",
               description: "Optional comment in addition to the proof",
+            },
+            refusedComment: {
+              type: "string",
+              description:
+                "Optional comment for the admin when he refuses the accomplishment",
             },
             status: {
               type: "string",
@@ -245,7 +251,8 @@ const accomplishmentRoute: FastifyPluginAsync = async (
           challengeId: accomplishment.challengeId || null,
         },
         request.body.comment,
-        request.body.status
+        request.body.status,
+        request.body.refusedComment
       );
 
       return reply.status(201).send({
