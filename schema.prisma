@@ -21,6 +21,7 @@ model User {
   recoverTokenExpiration DateTime?
   privilege  Int    @default(0)
   wallet Int @default(0)
+  totalEarnedPoints Int @default(0)
   sessions Session[]
   challenges Challenge[]
   accomplishment Accomplishment[]

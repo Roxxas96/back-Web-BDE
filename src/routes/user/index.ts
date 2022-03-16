@@ -5,7 +5,6 @@ import * as FormData from "form-data";
 //Import Models
 import {
   CreateUserInfo,
-  UserInfoMinimal,
   CreateUserSchema,
   UserWithoutPassword,
   UpdateUserInfo,
@@ -30,7 +29,7 @@ import {
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.get<{
-    Reply: { message: string; users: UserInfoMinimal[] };
+    Reply: { message: string; users: any };
     Querystring: { limit?: number; offset?: number };
   }>(
     "/",

@@ -206,6 +206,7 @@ export async function updateAccomplishment(
     if (user && challenge) {
       await fastify.prisma.user.updateUser(user.id, {
         wallet: user.wallet + challenge.reward,
+        totalEarnedPoints: user.totalEarnedPoints + challenge.reward,
       });
     }
   }

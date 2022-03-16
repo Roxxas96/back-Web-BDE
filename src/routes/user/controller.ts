@@ -45,7 +45,12 @@ export async function modifyUserInfo(
   }
 
   //Update user in DB
-  return await fastify.prisma.user.updateUser(user.id, userInfo);
+  return await fastify.prisma.user.updateUser(user.id, {
+    ...userInfo,
+    totalEarnedPoints: userInfo.wallet
+      ? userInfo.wallet - user.wallet
+      : undefined,
+  });
 }
 
 //Create user with provided info
@@ -139,7 +144,13 @@ export async function getManyUser(
   }
 
   return users.map((val) => {
-    return { pseudo: val.pseudo, id: val.id };
+    return {
+      pseudo: val.pseudo,
+      id: val.id,
+      name: val.name,
+      surname: val.surname,
+      totalEarnedPoints: val.totalEarnedPoints,
+    };
   });
 }
 
