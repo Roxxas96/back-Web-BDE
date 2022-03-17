@@ -260,7 +260,7 @@ export async function updateProof(
   const proofId =
     accomplishmentProofId !== ""
       ? accomplishmentProofId
-      : await generateRandomKey(64);
+      : await generateRandomKey(48);
 
   await fastify.minio.proof.putProof(proof, proofId);
 

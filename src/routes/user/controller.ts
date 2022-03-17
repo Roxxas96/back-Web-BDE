@@ -282,7 +282,7 @@ export async function updateAvatar(
   }
 
   const avatarId =
-    userAvatarId !== "" ? userAvatarId : await generateRandomKey(64);
+    userAvatarId !== "" ? userAvatarId : await generateRandomKey(48);
 
   await fastify.minio.avatar.putAvatar(avatar, avatarId);
 

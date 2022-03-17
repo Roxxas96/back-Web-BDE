@@ -164,7 +164,7 @@ export async function updateGoodiesPicture(
   const goodiesPictureId =
     goodiesGoodiesPictureId !== ""
       ? goodiesGoodiesPictureId
-      : await generateRandomKey(64);
+      : await generateRandomKey(48);
 
   await fastify.minio.goodiesPicture.putGoodiesPicture(goodiesPicture, goodiesPictureId);
 

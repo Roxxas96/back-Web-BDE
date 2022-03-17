@@ -178,7 +178,7 @@ export async function updateChallengePicture(
   const challengePictureId =
     challengeChallengePictureId !== ""
       ? challengeChallengePictureId
-      : await generateRandomKey(64);
+      : await generateRandomKey(48);
 
   await fastify.minio.challengePicture.putChallengePicture(
     challengePicture,
