@@ -1,6 +1,6 @@
 //Import Prisma ORM Types
 import { FastifyPluginAsync } from "fastify";
-import * as FormData from "form-data";
+import internal = require("stream");
 
 //Import Models
 import {
@@ -24,7 +24,6 @@ import {
   updateAvatar,
   getAvatar,
   deleteAvatar,
-  getManyAvatar,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -298,7 +297,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
   fastify.put<{
     Querystring: { userId: number };
-    Reply: { message: string };
+    Reply: { message: string; avatarId: string };
   }>(
     "/avatar",
     {
@@ -308,6 +307,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         consumes: ["multipart/form-data"],
         querystring: {
           type: "object",
+          required: ["userId"],
           properties: {
             userId: {
               type: "number",
@@ -322,76 +322,48 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const user = await getUser(fastify, request.query.userId);
 
-      if (user.id !== userId) {
+      if (request.query.userId !== user.id) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateAvatar(fastify, (await request.file()).file, user);
+      const avatarId = await updateAvatar(
+        fastify,
+        (
+          await request.file()
+        ).file,
+        user.id,
+        user.avatarId
+      );
 
-      reply.status(200).send({ message: "Success" });
+      reply.status(200).send({ message: "Success", avatarId });
     }
   );
 
   fastify.get<{
-    Querystring: { userId?: number; limit?: number; offset?: number };
-    Reply: FormData;
+    Params: { id: string };
+    Reply: internal.Readable;
   }>(
-    "/picture",
+    "/avatar/:id",
     {
       schema: {
         tags: ["user"],
-        description: "Get the user picture of the designated user",
-        produces: ["multipart/form-data"],
-        querystring: {
+        description: "Get the avatar of the designated user",
+        produces: ["application/octet-stream"],
+        params: {
           type: "object",
-          required: ["userId"],
           properties: {
-            userId: {
-              type: "number",
-              description: "Id of the user",
-            },
-            limit: {
-              type: "number",
-              description: "Number of elements to fetch",
-            },
-            offset: {
-              type: "number",
-              description: "Offset in element list from which fetch begins",
+            id: {
+              type: "string",
+              description: "Id of the avatar to fetch",
             },
           },
         },
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const avatar = await getAvatar(fastify, request.params.id);
 
-      if (request.query.userId) {
-        const accomplishment = await getUser(fastify, request.query.userId);
-
-        const { name, avatar } = await getAvatar(fastify, accomplishment);
-
-        const formData = new FormData();
-        formData.append(name, avatar);
-
-        reply
-          .status(200)
-          .headers({ ...formData.getHeaders() })
-          .send(formData);
-      } else {
-        const { avatars, allQueriesSucceded } = await getManyAvatar(
-          fastify,
-          request.query.limit,
-          request.query.offset
-        );
-
-        const formData = new FormData();
-        avatars.forEach((val) => formData.append(`${val.name}`, val.avatar));
-
-        reply
-          .status(allQueriesSucceded ? 200 : 206)
-          .headers({ ...formData.getHeaders() })
-          .send(formData);
-      }
+      reply.status(200).send(avatar);
     }
   );
 
@@ -406,6 +378,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         description: "Delete the avatar of the designated user",
         querystring: {
           type: "object",
+          required: ["userId"],
           properties: {
             userId: {
               type: "number",
@@ -420,11 +393,11 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       const user = await getUser(fastify, request.query.userId);
 
-      if (user.id !== request.query.userId) {
+      if (request.query.userId !== user.id) {
         await fastify.auth.authorize(userId, 2);
       }
 
-      await deleteAvatar(fastify, user);
+      await deleteAvatar(fastify, user.id);
 
       reply.status(200).send({ message: "Success" });
     }

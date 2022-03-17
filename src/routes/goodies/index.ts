@@ -1,6 +1,4 @@
 //Import Prisma ORM Types
-import * as FormData from "form-data";
-
 import { FastifyPluginAsync } from "fastify";
 
 //Import Models
@@ -14,10 +12,10 @@ import {
   getGoodies,
   getGoodiesPicture,
   getManyGoodies,
-  getManyGoodiesPicture,
   updateGoodies,
   updateGoodiesPicture,
 } from "./controller";
+import internal = require("stream");
 
 const goodiesRoute: FastifyPluginAsync = async (
   fastify,
@@ -184,7 +182,7 @@ const goodiesRoute: FastifyPluginAsync = async (
 
   fastify.put<{
     Querystring: { goodiesId: number };
-    Reply: { message: string };
+    Reply: { message: string, goodiesPictureId: string };
   }>(
     "/picture",
     {
@@ -213,83 +211,47 @@ const goodiesRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateGoodiesPicture(
+      const goodiesPictureId = await updateGoodiesPicture(
         fastify,
         (
           await request.file()
         ).file,
-        goodies.id
+        goodies.id,
+        goodies.imageId
       );
 
-      reply.status(200).send({ message: "Success" });
+      reply.status(200).send({ message: "Success", goodiesPictureId });
     }
   );
 
   fastify.get<{
-    Querystring: { goodiesId?: number; limit?: number; offset?: number };
-    Reply: FormData;
+    Params: { id: string };
+    Reply: internal.Readable;
   }>(
-    "/picture",
+    "/picture/:id",
     {
       schema: {
         tags: ["goodies"],
         description: "Get the goodies picture of the designated goodies",
-        produces: ["multipart/form-data"],
-        querystring: {
+        produces: ["application/octet-stream"],
+        params: {
           type: "object",
           properties: {
-            goodiesId: {
-              type: "number",
-              description: "Id of the goodies",
-            },
-            limit: {
-              type: "number",
-              description: "Number of elements to fetch",
-            },
-            offset: {
-              type: "number",
-              description: "Offset in element list from which fetch begins",
+            id: {
+              type: "string",
+              description: "Id of the goodiesPicture to fetch",
             },
           },
         },
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const goodiesPicture = await getGoodiesPicture(
+        fastify,
+        request.params.id
+      );
 
-      if (request.query.goodiesId) {
-        const goodies = await getGoodies(fastify, request.query.goodiesId);
-
-        const { name, goodiesPicture } = await getGoodiesPicture(
-          fastify,
-          goodies.id
-        );
-
-        const formData = new FormData();
-        formData.append(name, goodiesPicture);
-
-        reply
-          .status(200)
-          .headers({ ...formData.getHeaders() })
-          .send(formData);
-      } else {
-        const { goodiesPictures, allQueriesSucceded } =
-          await getManyGoodiesPicture(
-            fastify,
-            request.query.limit,
-            request.query.offset
-          );
-
-        const formData = new FormData();
-        goodiesPictures.forEach((val) =>
-          formData.append(`${val.name}`, val.goodiesPicture)
-        );
-
-        reply
-          .status(allQueriesSucceded ? 200 : 206)
-          .headers({ ...formData.getHeaders() })
-          .send(formData);
-      }
+      reply.status(200).send(goodiesPicture);
     }
   );
 

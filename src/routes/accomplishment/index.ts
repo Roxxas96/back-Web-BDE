@@ -1,6 +1,5 @@
 //Import Prisma ORM types
 import { Validation } from "@prisma/client";
-import * as FormData from "form-data";
 
 import { FastifyPluginAsync } from "fastify";
 
@@ -11,11 +10,11 @@ import {
   deleteProof,
   getAccomplishment,
   getManyAccomplishment,
-  getManyProof,
   getProof,
   updateAccomplishment,
   updateProof,
 } from "./controller";
+import internal = require("stream");
 
 const accomplishmentRoute: FastifyPluginAsync = async (
   fastify,
@@ -314,7 +313,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.put<{
     Querystring: { accomplishmentId: number };
-    Reply: { message: string };
+    Reply: { message: string, proofId: string };
   }>(
     "/proof",
     {
@@ -349,80 +348,44 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         await fastify.auth.authorize(userId, 2);
       }
 
-      await updateProof(
+      const proofId = await updateProof(
         fastify,
         (
           await request.file()
         ).file,
-        accomplishment.id
+        accomplishment.id,
+        accomplishment.proofId
       );
 
-      reply.status(200).send({ message: "Success" });
+      reply.status(200).send({ message: "Success", proofId });
     }
   );
 
   fastify.get<{
-    Querystring: { accomplishmentId?: number; limit?: number; offset?: number };
-    Reply: FormData;
+    Params: { id: string };
+    Reply: internal.Readable;
   }>(
-    "/proof",
+    "/proof/:id",
     {
       schema: {
         tags: ["accomplishment"],
         description: "Get the proof of the designated accomplishment",
-        produces: ["multipart/form-data"],
-        querystring: {
+        produces: ["application/octet-stream"],
+        params: {
           type: "object",
           properties: {
-            accomplishmentId: {
-              type: "number",
-              description: "Id of the accomplishment",
-            },
-            limit: {
-              type: "number",
-              description: "Number of elements to fetch",
-            },
-            offset: {
-              type: "number",
-              description: "Offset in element list from which fetch begins",
+            id: {
+              type: "string",
+              description: "Id of the proof to fetch",
             },
           },
         },
       },
     },
     async function (request, reply) {
-      await fastify.auth.authenticate(request.headers);
+      const proof = await getProof(fastify, request.params.id);
 
-      if (request.query.accomplishmentId) {
-        const accomplishment = await getAccomplishment(
-          fastify,
-          request.query.accomplishmentId
-        );
-
-        const { name, proof } = await getProof(fastify, accomplishment.id);
-
-        const formData = new FormData();
-        formData.append(name, proof);
-
-        reply
-          .status(200)
-          .headers({ ...formData.getHeaders() })
-          .send(formData);
-      } else {
-        const { proofs, allQueriesSucceded } = await getManyProof(
-          fastify,
-          request.query.limit,
-          request.query.offset
-        );
-
-        const formData = new FormData();
-        proofs.forEach((val) => formData.append(`${val.name}`, val.proof));
-
-        reply
-          .status(allQueriesSucceded ? 200 : 206)
-          .headers({ ...formData.getHeaders() })
-          .send(formData);
-      }
+      reply.status(200).send(proof);
     }
   );
 

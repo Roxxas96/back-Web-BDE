@@ -3,6 +3,7 @@ import { FastifyInstance } from "fastify";
 import internal = require("stream");
 import { ChallengeInfoMinimal } from "../../models/ChallengeInfo";
 import { UserInfoMinimal } from "../../models/UserInfo";
+import { generateRandomKey } from "../../utils/crypto";
 
 //Get an accomplishment by Id
 export async function getAccomplishment(
@@ -245,7 +246,8 @@ export async function deleteAccomplishment(
 export async function updateProof(
   fastify: FastifyInstance,
   proof: internal.Readable,
-  accomplishmentId: number
+  accomplishmentId: number,
+  accomplishmentProofId: string
 ) {
   if (!accomplishmentId) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
@@ -255,26 +257,22 @@ export async function updateProof(
     throw fastify.httpErrors.badRequest("Invalid proof");
   }
 
-  return await fastify.minio.proof.putProof(proof, accomplishmentId);
+  const proofId =
+    accomplishmentProofId !== ""
+      ? accomplishmentProofId
+      : await generateRandomKey(64);
+
+  await fastify.minio.proof.putProof(proof, proofId);
+
+  return proofId;
 }
 
-export async function getProof(
-  fastify: FastifyInstance,
-  accomplishmentId: number
-) {
-  if (!accomplishmentId) {
+export async function getProof(fastify: FastifyInstance, proofId: string) {
+  if (!proofId) {
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
   }
 
-  return await fastify.minio.proof.getProof(accomplishmentId);
-}
-
-export async function getManyProof(
-  fastify: FastifyInstance,
-  limit?: number,
-  offset?: number
-) {
-  return await fastify.minio.proof.getManyProof(limit || 100, offset || 0);
+  return await fastify.minio.proof.getProof(proofId);
 }
 
 export async function deleteProof(
@@ -285,7 +283,11 @@ export async function deleteProof(
     throw fastify.httpErrors.badRequest("Invalid accomplishment");
   }
 
-  await fastify.minio.proof.getProof(accomplishmentId);
+  const accomplishment = await fastify.prisma.accomplishment.getAccomplishment(
+    accomplishmentId
+  );
 
-  return await fastify.minio.proof.deleteProof(accomplishmentId);
+  await fastify.minio.proof.getProof(accomplishment.proofId);
+
+  return await fastify.minio.proof.deleteProof(accomplishment.proofId);
 }
