@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import internal = require("stream");
 import { GoodiesInfo } from "../../models/GoodiesInfo";
 import { UserInfoMinimal } from "../../models/UserInfo";
+import { generateRandomKey } from "../../utils/crypto";
 
 //Get Goodies by id
 export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
@@ -149,53 +150,61 @@ export async function deleteGoodies(
 export async function updateGoodiesPicture(
   fastify: FastifyInstance,
   goodiesPicture: internal.Readable,
-  goodiesId: number
+  goodiesId: number,
+  goodiesGoodiesPictureId: string
 ) {
-  if (!goodiesId || !goodiesId) {
+  if (!goodiesId) {
     throw fastify.httpErrors.badRequest("Invalid goodies");
   }
 
   if (!goodiesPicture) {
-    throw fastify.httpErrors.badRequest("Invalid goodies picture");
+    throw fastify.httpErrors.badRequest("Invalid goodiesPicture");
   }
+  
+  const goodiesPictureId =
+  goodiesGoodiesPictureId !== ""
+  ? goodiesGoodiesPictureId
+  : await generateRandomKey(48);
 
-  return await fastify.minio.goodiesPicture.putGoodiesPicture(
+    if (goodiesPictureId !== goodiesGoodiesPictureId) {
+      await fastify.prisma.goodies.updateGoodies(
+        {imageId: goodiesPictureId},
+        goodiesId,
+      );
+    }
+  
+  await fastify.minio.goodiesPicture.putGoodiesPicture(
     goodiesPicture,
-    goodiesId
+    goodiesPictureId
   );
+
+  return goodiesPictureId;
 }
 
 export async function getGoodiesPicture(
   fastify: FastifyInstance,
-  goodiesId: number
+  goodiesPictureId: string
 ) {
-  if (!goodiesId || !goodiesId) {
+  if (!goodiesPictureId) {
     throw fastify.httpErrors.badRequest("Invalid goodies");
   }
 
-  return await fastify.minio.goodiesPicture.getGoodiesPicture(goodiesId);
-}
-
-export async function getManyGoodiesPicture(
-  fastify: FastifyInstance,
-  limit?: number,
-  offset?: number
-) {
-  return await fastify.minio.goodiesPicture.getManyGoodiesPicture(
-    limit || 100,
-    offset || 0
-  );
+  return await fastify.minio.goodiesPicture.getGoodiesPicture(goodiesPictureId);
 }
 
 export async function deleteGoodiesPicture(
   fastify: FastifyInstance,
   goodiesId: number
 ) {
-  if (!goodiesId || !goodiesId) {
+  if (!goodiesId) {
     throw fastify.httpErrors.badRequest("Invalid goodies");
   }
 
-  await fastify.minio.goodiesPicture.getGoodiesPicture(goodiesId);
+  const goodies = await fastify.prisma.goodies.getGoodies(goodiesId);
 
-  return await fastify.minio.goodiesPicture.deleteGoodiesPicture(goodiesId);
+  await fastify.minio.goodiesPicture.getGoodiesPicture(goodies.imageId);
+
+  return await fastify.minio.goodiesPicture.deleteGoodiesPicture(
+    goodies.imageId
+  );
 }

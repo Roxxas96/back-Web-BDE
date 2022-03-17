@@ -6,6 +6,7 @@ export interface GoodiesInfo {
   stock?: number;
   bought?: number;
   price?: number;
+  imageId?: string;
 }
 
 //Minimal format of goodies info

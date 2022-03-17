@@ -1,9 +1,8 @@
 import { FastifyInstance } from "fastify";
 import internal = require("stream");
-import {
-  ChallengeInfo,
-} from "../../models/ChallengeInfo";
+import { ChallengeInfo } from "../../models/ChallengeInfo";
 import { UserInfoMinimal } from "../../models/UserInfo";
+import { generateRandomKey } from "../../utils/crypto";
 
 //Convert UTC time depending on user's timezone
 function convertTime(time: Date) {
@@ -165,9 +164,10 @@ export async function getManyChallenge(
 export async function updateChallengePicture(
   fastify: FastifyInstance,
   challengePicture: internal.Readable,
-  challengeId: number
+  challengeId: number,
+  challengeChallengePictureId: string
 ) {
-  if (!challengeId || !challengeId) {
+  if (!challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge");
   }
 
@@ -175,31 +175,38 @@ export async function updateChallengePicture(
     throw fastify.httpErrors.badRequest("Invalid challengePicture");
   }
 
-  return await fastify.minio.challengePicture.putChallengePicture(
+  const challengePictureId =
+    challengeChallengePictureId !== ""
+      ? challengeChallengePictureId
+      : await generateRandomKey(48);
+
+  if (challengePictureId !== challengeChallengePictureId) {
+    console.log(
+      await fastify.prisma.challenge.updateChallenge(
+        { imageId: challengePictureId },
+        challengeId
+      )
+    );
+  }
+
+  await fastify.minio.challengePicture.putChallengePicture(
     challengePicture,
-    challengeId
+    challengePictureId
   );
+
+  return challengePictureId;
 }
 
 export async function getChallengePicture(
   fastify: FastifyInstance,
-  challengeId: number
+  challengePictureId: string
 ) {
-  if (!challengeId || !challengeId) {
+  if (!challengePictureId) {
     throw fastify.httpErrors.badRequest("Invalid challenge");
   }
 
-  return await fastify.minio.challengePicture.getChallengePicture(challengeId);
-}
-
-export async function getManyChallengePicture(
-  fastify: FastifyInstance,
-  limit?: number,
-  offset?: number
-) {
-  return await fastify.minio.challengePicture.getManyChallengePicture(
-    limit || 100,
-    offset || 0
+  return await fastify.minio.challengePicture.getChallengePicture(
+    challengePictureId
   );
 }
 
@@ -207,13 +214,15 @@ export async function deleteChallengePicture(
   fastify: FastifyInstance,
   challengeId: number
 ) {
-  if (!challengeId || !challengeId) {
+  if (!challengeId) {
     throw fastify.httpErrors.badRequest("Invalid challenge");
   }
 
-  await fastify.minio.challengePicture.getChallengePicture(challengeId);
+  const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
+
+  await fastify.minio.challengePicture.getChallengePicture(challenge.imageId);
 
   return await fastify.minio.challengePicture.deleteChallengePicture(
-    challengeId
+    challenge.imageId
   );
 }

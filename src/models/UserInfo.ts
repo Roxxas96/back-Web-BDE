@@ -33,6 +33,7 @@ export interface UserWithoutPassword {
   email: string;
   wallet: number;
   privilege: number;
+  avatarId: string;
 }
 
 //Schema used for requests

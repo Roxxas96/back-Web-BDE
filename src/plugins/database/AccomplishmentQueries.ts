@@ -75,12 +75,13 @@ export function accomplishmentQueries(
       accomplishmentId: number,
       comment?: string,
       validation?: Validation,
-      refusedComment?: string
+      refusedComment?: string,
+      proofId?: string
     ) {
       try {
         return await client.accomplishment.update({
           where: { id: accomplishmentId },
-          data: { comment, validation, refusedComment },
+          data: { comment, validation, refusedComment, proofId },
         });
       } catch (err) {
         fastify.log.error(err);

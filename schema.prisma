@@ -21,6 +21,7 @@ model User {
   recoverTokenExpiration DateTime?
   privilege  Int    @default(0)
   wallet Int @default(0)
+  avatarId String @default("")
   totalEarnedPoints Int @default(0)
   sessions Session[]
   challenges Challenge[]
@@ -40,6 +41,7 @@ model Challenge {
   id Int @id @default(autoincrement())
   name String @default("Unnamed challenge")
   description String @default("")
+  imageId String @default("")
   reward Int @default(0)
   maxAtempts Int @default(3)
   createdAt DateTime @default(now())
@@ -54,6 +56,7 @@ model Accomplishment {
   challengeId Int?
   createdAt DateTime @default(now())
   comment String @default("")
+  proofId String @default("")
   refusedComment String @default("")
   validation Validation @default(PENDING)
   accomplishmentCreator User? @relation(fields: [userId], references: [id], onDelete: SetNull)
@@ -70,6 +73,7 @@ model Goodies {
   id Int @id @default(autoincrement())
   name String @default("Unnamed Goodies")
   description String @default("")
+  imageId String @default("")
   price Int @default(0)
   buyLimit Int @default(1)
   stock Int @default(3)

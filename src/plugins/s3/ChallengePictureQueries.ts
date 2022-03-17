@@ -9,12 +9,12 @@ export function ChallengePictureQueries(
   return {
     putChallengePicture: async function (
       challengePicture: internal.Readable,
-      challengeId: number
+      id: string
     ) {
       try {
         return await client.putObject(
           "challengepictures",
-          `${challengeId}`,
+          `${id}`,
           challengePicture
         );
       } catch (err) {
@@ -25,9 +25,9 @@ export function ChallengePictureQueries(
         );
       }
     },
-    getChallengePicture: async function (challengeId: number) {
+    getChallengePicture: async function (id: string) {
       try {
-        return {challengePicture: await client.getObject("challengepictures", `${challengeId}`), name: challengeId.toString()};
+        return await client.getObject("challengepictures", `${id}`);
       } catch (err) {
         if (
           err instanceof Error &&
@@ -43,40 +43,9 @@ export function ChallengePictureQueries(
         );
       }
     },
-    getManyChallengePicture: async function (limit: number, offset: number) {
-      let allQueriesSucceded = true;
-      let challengePictures: Array<{
-        challengePicture: internal.Readable;
-        name: string;
-      }> = [];
-      for (let index = offset; index <= limit + offset; index++) {
-        try {
-          const challengePicture = await client.getObject(
-            "challengepictures",
-            `${index}`
-          );
-          challengePictures.push({ challengePicture, name: index.toString() });
-        } catch (err) {
-          if (
-            !(
-              err instanceof Error &&
-              err.message.includes("The specified key does not exist")
-            )
-          ) {
-            fastify.log.error(err);
-
-            throw fastify.httpErrors.internalServerError(
-              "ChallengePicture download failed"
-            );
-          }
-          allQueriesSucceded = false;
-        }
-      }
-      return { challengePictures, allQueriesSucceded };
-    },
-    deleteChallengePicture: async function (challengeId: number) {
+    deleteChallengePicture: async function (id: string) {
       try {
-        return await client.removeObject("challengepictures", `${challengeId}`);
+        return await client.removeObject("challengepictures", `${id}`);
       } catch (err) {
         fastify.log.error(err);
 

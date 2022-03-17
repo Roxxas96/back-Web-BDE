@@ -4,24 +4,18 @@ import internal = require("stream");
 
 export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
   return {
-    putProof: async function (
-      proof: internal.Readable,
-      accomplishmentId: number
-    ) {
+    putProof: async function (proof: internal.Readable, id: string) {
       try {
-        return await client.putObject("proofs", `${accomplishmentId}`, proof);
+        return await client.putObject("proofs", `${id}`, proof);
       } catch (err) {
         fastify.log.error(err);
 
         throw fastify.httpErrors.internalServerError("Proof upload failed");
       }
     },
-    getProof: async function (accomplishmentId: number) {
+    getProof: async function (id: string) {
       try {
-        return {
-          proof: await client.getObject("proofs", `${accomplishmentId}`),
-          name: accomplishmentId.toString(),
-        };
+        return await client.getObject("proofs", `${id}`);
       } catch (err) {
         //TODO repace with a prefetch
         if (
@@ -36,37 +30,9 @@ export function ProofQueries(fastify: FastifyInstance, client: Minio.Client) {
         throw fastify.httpErrors.internalServerError("Proof download failed");
       }
     },
-    getManyProof: async function (limit: number, offset: number) {
-      let allQueriesSucceded = true;
-      let proofs: Array<{
-        proof: internal.Readable;
-        name: string;
-      }> = [];
-      for (let index = offset; index <= limit + offset; index++) {
-        try {
-          const proof = await client.getObject("proofs", `${index}`);
-          proofs.push({ proof, name: index.toString() });
-        } catch (err) {
-          if (
-            !(
-              err instanceof Error &&
-              err.message.includes("The specified key does not exist")
-            )
-          ) {
-            fastify.log.error(err);
-
-            throw fastify.httpErrors.internalServerError(
-              "Proof download failed"
-            );
-          }
-          allQueriesSucceded = false;
-        }
-      }
-      return { proofs, allQueriesSucceded };
-    },
-    deleteProof: async function (accomplishmentId: number) {
+    deleteProof: async function (id: string) {
       try {
-        return await client.removeObject("proofs", `${accomplishmentId})`);
+        return await client.removeObject("proofs", `${id})`);
       } catch (err) {
         fastify.log.error(err);
 

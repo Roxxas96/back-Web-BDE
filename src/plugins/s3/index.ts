@@ -66,86 +66,34 @@ declare module "fastify" {
       proof: {
         putProof: (
           proof: internal.Readable,
-          accomplishmentId: number
+          id: string
         ) => Promise<Minio.UploadedObjectInfo>;
-        getProof: (accomplishmentId: number) => Promise<{
-          proof: internal.Readable;
-          name: string;
-        }>;
-        getManyProof: (
-          limit: number,
-          offset: number
-        ) => Promise<{
-          proofs: Array<{
-            proof: internal.Readable;
-            name: string;
-          }>;
-          allQueriesSucceded: boolean;
-        }>;
-        deleteProof: (accomplishmentId: number) => Promise<void>;
+        getProof: (id: string) => Promise<internal.Readable>;
+        deleteProof: (id: string) => Promise<void>;
       };
       avatar: {
         putAvatar: (
           avatar: internal.Readable,
-          userId: number
+          id: string
         ) => Promise<Minio.UploadedObjectInfo>;
-        getAvatar: (userId: number) => Promise<{
-          avatar: internal.Readable;
-          name: string;
-        }>;
-        getManyAvatar: (
-          limit: number,
-          offset: number
-        ) => Promise<{
-          avatars: Array<{
-            avatar: internal.Readable;
-            name: string;
-          }>;
-          allQueriesSucceded: boolean;
-        }>;
-        deleteAvatar: (userId: number) => Promise<void>;
+        getAvatar: (id: string) => Promise<internal.Readable>;
+        deleteAvatar: (id: string) => Promise<void>;
       };
       challengePicture: {
         putChallengePicture: (
           challengePicture: internal.Readable,
-          challengeId: number
+          id: string
         ) => Promise<Minio.UploadedObjectInfo>;
-        getChallengePicture: (challengeId: number) => Promise<{
-          challengePicture: internal.Readable;
-          name: string;
-        }>;
-        getManyChallengePicture: (
-          limit: number,
-          offset: number
-        ) => Promise<{
-          challengePictures: Array<{
-            challengePicture: internal.Readable;
-            name: string;
-          }>;
-          allQueriesSucceded: boolean;
-        }>;
-        deleteChallengePicture: (challengeId: number) => Promise<void>;
+        getChallengePicture: (id: string) => Promise<internal.Readable>;
+        deleteChallengePicture: (id: string) => Promise<void>;
       };
       goodiesPicture: {
         putGoodiesPicture: (
           goodiesPicture: internal.Readable,
-          goodiesId: number
+          id: string
         ) => Promise<Minio.UploadedObjectInfo>;
-        getGoodiesPicture: (goodiesId: number) => Promise<{
-          goodiesPicture: internal.Readable;
-          name: string;
-        }>;
-        getManyGoodiesPicture: (
-          offset: number,
-          limit: number
-        ) => Promise<{
-          goodiesPictures: Array<{
-            goodiesPicture: internal.Readable;
-            name: string;
-          }>;
-          allQueriesSucceded: boolean;
-        }>;
-        deleteGoodiesPicture: (goodiesId: number) => Promise<void>;
+        getGoodiesPicture: (id: string) => Promise<internal.Readable>;
+        deleteGoodiesPicture: (id: string) => Promise<void>;
       };
     };
   }

@@ -1,10 +1,6 @@
 import { FastifyInstance } from "fastify";
 import internal = require("stream");
-import {
-  CreateUserInfo,
-  UpdateUserInfo,
-  UserWithoutPassword,
-} from "../../models/UserInfo";
+import { CreateUserInfo, UpdateUserInfo } from "../../models/UserInfo";
 import { hashPassword } from "../../utils/bcrypt";
 import { generateRandomKey } from "../../utils/crypto";
 
@@ -112,22 +108,14 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
-  const user = await fastify.prisma.user.getUser(userId);
+  const { password, ...user } = await fastify.prisma.user.getUser(userId);
 
   //Check if user is empty
   if (!user) {
     throw fastify.httpErrors.notFound("User not found");
   }
 
-  return {
-    id: user.id,
-    name: user.name,
-    surname: user.surname,
-    pseudo: user.pseudo,
-    email: user.email,
-    wallet: user.wallet,
-    privilege: user.privilege,
-  };
+  return user;
 }
 
 //Get all user in DB
@@ -161,22 +149,14 @@ export async function getMe(fastify: FastifyInstance, userId: number) {
     throw fastify.httpErrors.badRequest("Invalid user id");
   }
 
-  const user = await fastify.prisma.user.getUser(userId);
+  const { password, ...user } = await fastify.prisma.user.getUser(userId);
 
   //Check if user is empty
   if (!user) {
     throw fastify.httpErrors.notFound("User not found");
   }
 
-  return {
-    id: user.id,
-    name: user.name,
-    surname: user.surname,
-    pseudo: user.pseudo,
-    email: user.email,
-    wallet: user.wallet,
-    privilege: user.privilege,
-  };
+  return user;
 }
 
 //Delete user by id
@@ -290,9 +270,10 @@ export async function modifyUserPasswor(
 export async function updateAvatar(
   fastify: FastifyInstance,
   avatar: internal.Readable,
-  user: UserWithoutPassword
+  userId: number,
+  userAvatarId: string
 ) {
-  if (!user || !user.id) {
+  if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user");
   }
 
@@ -300,37 +281,34 @@ export async function updateAvatar(
     throw fastify.httpErrors.badRequest("Invalid avatar");
   }
 
-  return await fastify.minio.avatar.putAvatar(avatar, user.id);
+  const avatarId =
+    userAvatarId !== "" ? userAvatarId : await generateRandomKey(48);
+
+  if (avatarId !== userAvatarId) {
+    await fastify.prisma.user.updateUser(userId, { avatarId: avatarId });
+  }
+
+  await fastify.minio.avatar.putAvatar(avatar, avatarId);
+
+  return avatarId;
 }
 
-export async function getAvatar(
-  fastify: FastifyInstance,
-  user: UserWithoutPassword
-) {
-  if (!user || !user.id) {
+export async function getAvatar(fastify: FastifyInstance, avatarId: string) {
+  if (!avatarId) {
     throw fastify.httpErrors.badRequest("Invalid user");
   }
 
-  return await fastify.minio.avatar.getAvatar(user.id);
+  return await fastify.minio.avatar.getAvatar(avatarId);
 }
 
-export async function getManyAvatar(
-  fastify: FastifyInstance,
-  limit?: number,
-  offset?: number
-) {
-  return await fastify.minio.avatar.getManyAvatar(limit || 100, offset || 0);
-}
-
-export async function deleteAvatar(
-  fastify: FastifyInstance,
-  user: UserWithoutPassword
-) {
-  if (!user || !user.id) {
+export async function deleteAvatar(fastify: FastifyInstance, userId: number) {
+  if (!userId) {
     throw fastify.httpErrors.badRequest("Invalid user");
   }
 
-  await fastify.minio.avatar.getAvatar(user.id);
+  const user = await fastify.prisma.user.getUser(userId);
 
-  return await fastify.minio.avatar.deleteAvatar(user.id);
+  await fastify.minio.avatar.getAvatar(user.avatarId);
+
+  return await fastify.minio.avatar.deleteAvatar(user.avatarId);
 }

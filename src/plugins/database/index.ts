@@ -109,6 +109,7 @@ declare module "fastify" {
             totalEarnedPoints?: number;
             recoverToken?: string | null;
             recoverTokenExpiration?: Date | null;
+            avatarId?: string;
           }
         ) => Promise<User>;
         createUser: (userInfo: CreateUserInfo) => Promise<User>;
@@ -160,7 +161,8 @@ declare module "fastify" {
           accomplishmentId: number,
           comment?: string,
           validation?: Validation,
-          refusedComment?: string
+          refusedComment?: string,
+          proofId?: string
         ) => Promise<Accomplishment>;
         deleteAccomplishment: (
           accomplishmentId: number

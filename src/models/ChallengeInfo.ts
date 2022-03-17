@@ -4,6 +4,7 @@ export interface ChallengeInfo {
   description?: string;
   reward?: number;
   maxAtempts?: number;
+  imageId?: string
 }
 
 //Minimal format of challenges info

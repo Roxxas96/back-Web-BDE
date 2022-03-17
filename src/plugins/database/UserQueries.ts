@@ -69,6 +69,7 @@ function userQueries(fastify: FastifyInstance, client: PrismaClient) {
         wallet?: number;
         recoverToken?: string | null;
         recoverTokenExpiration?: Date | null;
+        avatarId?: string;
       }
     ) {
       try {
