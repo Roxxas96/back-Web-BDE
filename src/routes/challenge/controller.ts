@@ -107,11 +107,6 @@ export async function getChallenge(
 
   const challenge = await fastify.prisma.challenge.getChallenge(challengeId);
 
-  //Check if challenge not found
-  if (!challenge) {
-    throw fastify.httpErrors.notFound("Challenge not found");
-  }
-
   const creator = challenge.creatorId
     ? await fastify.prisma.user.getUser(challenge.creatorId)
     : undefined;
@@ -136,11 +131,6 @@ export async function getManyChallenge(
     limit || 20,
     offset
   );
-
-  //Check if challenge DB empty
-  if (!challenges || !challenges.length) {
-    throw fastify.httpErrors.notFound("No Challenge in DB");
-  }
 
   //We only return name and reward, other values are not needed
   return await Promise.all(

@@ -90,11 +90,6 @@ export async function getSession(fastify: FastifyInstance, sessionId: number) {
 
   const session = await fastify.prisma.session.getSession(sessionId);
 
-  //Check if session not found
-  if (!session) {
-    throw fastify.httpErrors.notFound("Session not found");
-  }
-
   const user = await fastify.prisma.user.getUser(session.userId);
 
   return {
@@ -117,11 +112,6 @@ export async function getManySession(
     offset,
     userId
   );
-
-  //Check if session DB empty
-  if (!sessions) {
-    throw fastify.httpErrors.notFound("No Session in DB");
-  }
 
   return await Promise.all(
     sessions.map(async (session) => {

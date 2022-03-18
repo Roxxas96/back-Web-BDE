@@ -126,11 +126,6 @@ export async function getManyUser(
 ) {
   const users = await fastify.prisma.user.getManyUser(limit || 20, offset);
 
-  //Check if user is empty
-  if (!users || !users.length) {
-    throw fastify.httpErrors.notFound("No users in DB");
-  }
-
   return users.map((val) => {
     return {
       pseudo: val.pseudo,
@@ -150,11 +145,6 @@ export async function getMe(fastify: FastifyInstance, userId: number) {
   }
 
   const { password, ...user } = await fastify.prisma.user.getUser(userId);
-
-  //Check if user is empty
-  if (!user) {
-    throw fastify.httpErrors.notFound("User not found");
-  }
 
   return user;
 }

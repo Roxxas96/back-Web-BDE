@@ -14,11 +14,6 @@ export async function getPurchase(
 
   const purchase = await fastify.prisma.purchase.getPurchase(purchaseId);
 
-  //Check if purchase is empty
-  if (!purchase) {
-    throw fastify.httpErrors.notFound("Purchase not found");
-  }
-
   const user = purchase.userId
     ? await fastify.prisma.user.getUser(purchase.userId)
     : undefined;
@@ -60,11 +55,6 @@ export async function getManyPurchase(
     goodiesId,
     delivered
   );
-
-  //Check if purchase is empty
-  if (!purchases || !purchases.length) {
-    throw fastify.httpErrors.notFound("No Purchase found");
-  }
 
   return await Promise.all(
     purchases.map(async (purchase) => {
