@@ -13,11 +13,6 @@ export async function getGoodies(fastify: FastifyInstance, goodiesId: number) {
 
   const goodies = await fastify.prisma.goodies.getGoodies(goodiesId);
 
-  //Check if goodies empty
-  if (!goodies) {
-    throw fastify.httpErrors.notFound("Goodies not found");
-  }
-
   const creator = goodies.creatorId
     ? await fastify.prisma.user.getUser(goodies.creatorId)
     : undefined;
@@ -41,11 +36,6 @@ export async function getManyGoodies(
     limit || 20,
     offset
   );
-
-  //Check goodies id
-  if (!goodies || !goodies.length) {
-    throw fastify.httpErrors.notFound("No Goodies in DB");
-  }
 
   return await Promise.all(
     goodies.map(async (goodies) => {

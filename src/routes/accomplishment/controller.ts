@@ -19,11 +19,6 @@ export async function getAccomplishment(
     accomplishmentId
   );
 
-  //Check for empty result
-  if (!accomplishment) {
-    throw fastify.httpErrors.notFound("Accomplishment not found");
-  }
-
   const user = accomplishment.userId
     ? await fastify.prisma.user.getUser(accomplishment.userId)
     : undefined;
@@ -66,11 +61,6 @@ export async function getManyAccomplishment(
       validation,
       challengeId
     );
-
-  //Check for empty result
-  if (!accomplishments || !accomplishments.length) {
-    throw fastify.httpErrors.notFound("No Accomplishment found");
-  }
 
   return await Promise.all(
     accomplishments.map(async (accomplishment) => {
