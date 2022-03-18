@@ -54,11 +54,7 @@ export async function getManyGoodies(
         : undefined;
 
       return {
-        id: goodies.id,
-        name: goodies.name,
-        price: goodies.price,
-        stock: goodies.stock,
-        bought: goodies.bought,
+        ...goodies,
         creator: creator
           ? ({ id: creator.id, pseudo: creator.pseudo } as UserInfoMinimal)
           : undefined,
@@ -160,19 +156,19 @@ export async function updateGoodiesPicture(
   if (!goodiesPicture) {
     throw fastify.httpErrors.badRequest("Invalid goodiesPicture");
   }
-  
-  const goodiesPictureId =
-  goodiesGoodiesPictureId !== ""
-  ? goodiesGoodiesPictureId
-  : await generateRandomKey(48);
 
-    if (goodiesPictureId !== goodiesGoodiesPictureId) {
-      await fastify.prisma.goodies.updateGoodies(
-        {imageId: goodiesPictureId},
-        goodiesId,
-      );
-    }
-  
+  const goodiesPictureId =
+    goodiesGoodiesPictureId !== ""
+      ? goodiesGoodiesPictureId
+      : await generateRandomKey(48);
+
+  if (goodiesPictureId !== goodiesGoodiesPictureId) {
+    await fastify.prisma.goodies.updateGoodies(
+      { imageId: goodiesPictureId },
+      goodiesId
+    );
+  }
+
   await fastify.minio.goodiesPicture.putGoodiesPicture(
     goodiesPicture,
     goodiesPictureId
