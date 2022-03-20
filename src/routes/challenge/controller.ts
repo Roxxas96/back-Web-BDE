@@ -216,3 +216,9 @@ export async function deleteChallengePicture(
     challenge.imageId
   );
 }
+
+export async function getChallengeCount(
+  fastify: FastifyInstance,
+) {
+  return await fastify.prisma.challenge.getChallengeCount();
+}

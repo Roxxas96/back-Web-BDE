@@ -87,6 +87,18 @@ export function challengeQueries(
         );
       }
     },
+
+    //Get number of challenges in db
+    getChallengeCount: async function () {
+      try {
+        return await client.challenge.count();
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
   };
 }
 

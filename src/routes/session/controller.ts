@@ -127,3 +127,10 @@ export async function getManySession(
     })
   );
 }
+
+export async function getSessionCount(
+  fastify: FastifyInstance,
+  userId?: number,
+) {
+  return await fastify.prisma.session.getSessionCount(userId);
+}

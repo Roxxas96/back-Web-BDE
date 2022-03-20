@@ -10,6 +10,7 @@ import {
   deleteGoodies,
   deleteGoodiesPicture,
   getGoodies,
+  getGoodiesCount,
   getGoodiesPicture,
   getManyGoodies,
   updateGoodies,
@@ -288,6 +289,20 @@ const goodiesRoute: FastifyPluginAsync = async (
       await deleteGoodiesPicture(fastify, goodies.id);
 
       reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get(
+    "/count",
+    {
+      schema: {
+        tags: ["goodies"],
+        description: "Get the number of goodies",
+      },
+    },
+    async function (request, reply) {
+      const goodiesCount = await getGoodiesCount(fastify);
+      return reply.status(200).send({ message: "Success", count: goodiesCount });
     }
   );
 };

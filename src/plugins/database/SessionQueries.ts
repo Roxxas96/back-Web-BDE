@@ -63,6 +63,22 @@ function sessionQueries(fastify: FastifyInstance, client: PrismaClient) {
         );
       }
     },
+
+    //Get number of sessions in db
+    getSessionCount: async function (
+      userId?: number,
+    ) {
+      try {
+        return await client.session.count({
+          where: { userId, },
+        });
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
   };
 }
 

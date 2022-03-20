@@ -10,6 +10,7 @@ import {
   deleteChallenge,
   deleteChallengePicture,
   getChallenge,
+  getChallengeCount,
   getChallengePicture,
   getManyChallenge,
   updateChallenge,
@@ -300,6 +301,20 @@ const challengeRoute: FastifyPluginAsync = async (
       await deleteChallengePicture(fastify, challenge.id);
 
       reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get(
+    "/count",
+    {
+      schema: {
+        tags: ["challenge"],
+        description: "Get the number of challenges",
+      },
+    },
+    async function (request, reply) {
+      const challengesCount = await getChallengeCount(fastify);
+      return reply.status(200).send({ message: "Success", count: challengesCount });
     }
   );
 };

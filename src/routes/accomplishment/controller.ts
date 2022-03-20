@@ -34,10 +34,10 @@ export async function getAccomplishment(
       : undefined,
     challenge: challenge
       ? ({
-          id: challenge.id,
-          name: challenge.name,
-          reward: challenge.reward,
-        } as ChallengeInfoMinimal)
+        id: challenge.id,
+        name: challenge.name,
+        reward: challenge.reward,
+      } as ChallengeInfoMinimal)
       : undefined,
     userId: user ? undefined : accomplishment.userId,
     challengeId: challenge ? undefined : accomplishment.challengeId,
@@ -70,8 +70,8 @@ export async function getManyAccomplishment(
 
       const challenge = accomplishment.challengeId
         ? await fastify.prisma.challenge.getChallenge(
-            accomplishment.challengeId
-          )
+          accomplishment.challengeId
+        )
         : undefined;
 
       return {
@@ -81,10 +81,10 @@ export async function getManyAccomplishment(
           : undefined,
         challenge: challenge
           ? ({
-              id: challenge.id,
-              name: challenge.name,
-              reward: challenge.reward,
-            } as ChallengeInfoMinimal)
+            id: challenge.id,
+            name: challenge.name,
+            reward: challenge.reward,
+          } as ChallengeInfoMinimal)
           : undefined,
         userId: user ? undefined : accomplishment.userId,
         challengeId: challenge ? undefined : accomplishment.challengeId,
@@ -290,4 +290,17 @@ export async function deleteProof(
   await fastify.minio.proof.getProof(accomplishment.proofId);
 
   return await fastify.minio.proof.deleteProof(accomplishment.proofId);
+}
+
+export async function getAccomplishmentCount(
+  fastify: FastifyInstance,
+  userId?: number,
+  challengeId?: number,
+  validation?: Validation,
+) {
+  return await fastify.prisma.accomplishment.getAccomplishmentCount(
+    userId,
+    validation,
+    challengeId
+  );
 }

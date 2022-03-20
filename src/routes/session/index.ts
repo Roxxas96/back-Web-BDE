@@ -7,6 +7,7 @@ import {
   deleteSession,
   getSession,
   getManySession,
+  getSessionCount,
 } from "./controller";
 
 const sessionRoute: FastifyPluginAsync = async (
@@ -134,6 +135,38 @@ const sessionRoute: FastifyPluginAsync = async (
       await deleteSession(fastify, request.headers);
 
       return reply.status(200).send({ message: "Session deleted" });
+    }
+  );
+
+  fastify.get<{
+    Querystring: {
+      userId?: number;
+    };
+  }>(
+    "/count",
+    {
+      schema: {
+        tags: ["session"],
+        description: "Get the number of sessions",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      //Only admins can fetch other's purchases or all purchases
+      if (
+        (request.query.userId && request.query.userId !== userId) ||
+        !request.query.userId
+      ) {
+        await fastify.auth.authorize(userId, 1);
+      }
+
+      const sessionsCount = await getSessionCount(
+        fastify,
+        request.query.userId,
+      );
+
+      return reply.status(200).send({ message: "Success", count: sessionsCount });
     }
   );
 };

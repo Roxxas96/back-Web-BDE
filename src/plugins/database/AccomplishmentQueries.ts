@@ -104,6 +104,27 @@ export function accomplishmentQueries(
         );
       }
     },
+
+    getAccomplishmentCount: async function (
+      userId?: number,
+      validation?: Validation,
+      challengeId?: number,
+    ) {
+      try {
+        return await client.accomplishment.count({
+          where: {
+            userId,
+            validation,
+            challengeId,
+          },
+        });
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
   };
 }
 

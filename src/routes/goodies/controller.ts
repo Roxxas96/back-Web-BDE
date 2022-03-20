@@ -194,3 +194,9 @@ export async function deleteGoodiesPicture(
     goodies.imageId
   );
 }
+
+export async function getGoodiesCount(
+  fastify: FastifyInstance,
+) {
+  return await fastify.prisma.goodies.getGoodiesCount();
+}

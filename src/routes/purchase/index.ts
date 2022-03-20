@@ -7,6 +7,7 @@ import {
   deletePurchase,
   getManyPurchase,
   getPurchase,
+  getPurchaseCount,
   updatePurchase,
 } from "./controller";
 
@@ -219,6 +220,42 @@ const purchaseRoute: FastifyPluginAsync = async (
       return reply
         .status(200)
         .send({ message: "Purchase deleted", purchaseId: deletedPurchase.id });
+    }
+  );
+
+  fastify.get<{
+    Querystring: {
+      goodiesId?: number;
+      userId?: number;
+      delivered?: boolean;
+    };
+  }>(
+    "/count",
+    {
+      schema: {
+        tags: ["purchase"],
+        description: "Get the number of purchases",
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      //Only admins can fetch other's purchases or all purchases
+      if (
+        (request.query.userId && request.query.userId !== userId) ||
+        !request.query.userId
+      ) {
+        await fastify.auth.authorize(userId, 1);
+      }
+
+      const purchasesCount = await getPurchaseCount(
+        fastify,
+        request.query.goodiesId,
+        request.query.userId,
+        request.query.delivered,
+      );
+
+      return reply.status(200).send({ message: "Success", count: purchasesCount });
     }
   );
 };

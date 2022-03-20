@@ -82,6 +82,24 @@ export function purchaseQueries(
         );
       }
     },
+
+    //Get number of purchase in db
+    getPurchaseCount: async function (
+      userId?: number,
+      goodiesId?: number,
+      delivered?: boolean,
+    ) {
+      try {
+        return await client.purchase.count({
+          where: { userId, goodiesId, delivered, },
+        });
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
   };
 }
 
