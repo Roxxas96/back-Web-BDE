@@ -115,7 +115,12 @@ export async function getUser(fastify: FastifyInstance, userId: number) {
     throw fastify.httpErrors.notFound("User not found");
   }
 
-  return user;
+  return {
+    ...user,
+    recoverToken: undefined,
+    password: undefined,
+    recoverTokenExpiration: undefined,
+  };
 }
 
 //Get all user in DB
@@ -146,7 +151,12 @@ export async function getMe(fastify: FastifyInstance, userId: number) {
 
   const { password, ...user } = await fastify.prisma.user.getUser(userId);
 
-  return user;
+  return {
+    ...user,
+    recoverToken: undefined,
+    password: undefined,
+    recoverTokenExpiration: undefined,
+  };
 }
 
 //Delete user by id
