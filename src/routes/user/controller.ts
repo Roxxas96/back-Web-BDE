@@ -36,6 +36,8 @@ export async function modifyUserInfo(
 
   const user = await fastify.prisma.user.getUser(userId);
 
+  console.log(user);
+
   if (!user) {
     throw fastify.httpErrors.notFound("User not found");
   }
@@ -84,6 +86,14 @@ export async function createUser(
   //Check password length
   if (userInfo.password.length < 8) {
     throw fastify.httpErrors.badRequest("User password is too small");
+  }
+
+  const user = await fastify.prisma.user.getUser(undefined, userInfo.email);
+
+  if (user) {
+    throw fastify.httpErrors.badRequest(
+      "A user already exists with this email"
+    );
   }
 
   //Hash password
