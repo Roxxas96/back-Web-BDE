@@ -184,7 +184,6 @@ export async function updateAccomplishment(
       "Can't modify a validated accomplishment"
     );
   }
-
   //For validation update we need to check for wallet update
   //If accomplishment is referencing existing user & challenge then increase user wallet by reward
   if (validation && accomplishment.userId && accomplishment.challengeId) {
