@@ -45,9 +45,10 @@ export async function modifyUserInfo(
   //Update user in DB
   return await fastify.prisma.user.updateUser(user.id, {
     ...userInfo,
-    totalEarnedPoints: userInfo.wallet
-      ? userInfo.wallet - user.wallet
-      : undefined,
+    totalEarnedPoints:
+      userInfo.wallet || userInfo.wallet === 0
+        ? user.totalEarnedPoints + (userInfo.wallet - user.wallet)
+        : undefined,
   });
 }
 
