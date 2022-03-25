@@ -9,6 +9,7 @@ import {
   deleteAccomplishment,
   deleteProof,
   getAccomplishment,
+  getAccomplishmentCount,
   getManyAccomplishment,
   getProof,
   updateAccomplishment,
@@ -428,6 +429,60 @@ const accomplishmentRoute: FastifyPluginAsync = async (
       await deleteProof(fastify, accomplishment.id);
 
       reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get<{
+    Querystring: {
+      challengeId?: number;
+      userId?: number;
+      status?: Validation;
+    };
+  }>(
+    "/count",
+    {
+      schema: {
+        tags: ["accomplishment"],
+        description: "Get the number of accomplishments",
+        querystring: {
+          type: "object",
+          properties: {
+            challengeId: {
+              type: "number",
+              description: "Filter by challenge id",
+            },
+            userId: {
+              type: "number",
+              description: "Filter by user id",
+            },
+            status: {
+              type: "string",
+              enum: ["ACCEPTED", "PENDING", "REFUSED"],
+              description: "Filter by status",
+            },
+          },
+        },
+      },
+    },
+    async function (request, reply) {
+      const userId = await fastify.auth.authenticate(request.headers);
+
+      //Only admins can fetch other's accomplishments or all accomplishments
+      if (
+        (request.query.userId && request.query.userId !== userId) ||
+        !request.query.userId
+      ) {
+        await fastify.auth.authorize(userId, 1);
+      }
+
+      const accomplishmentsCount = await getAccomplishmentCount(
+        fastify,
+        request.query.userId,
+        request.query.challengeId,
+        request.query.status,
+      );
+
+      return reply.status(200).send({ message: "Success", count: accomplishmentsCount });
     }
   );
 };

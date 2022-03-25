@@ -26,10 +26,10 @@ export async function getPurchase(
     ...purchase,
     goodies: goodies
       ? ({
-          id: goodies.id,
-          name: goodies.name,
-          price: goodies.price,
-        } as GoodiesInfoMinimal)
+        id: goodies.id,
+        name: goodies.name,
+        price: goodies.price,
+      } as GoodiesInfoMinimal)
       : undefined,
     user: user
       ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
@@ -70,10 +70,10 @@ export async function getManyPurchase(
         ...purchase,
         goodies: goodies
           ? ({
-              id: goodies.id,
-              name: goodies.name,
-              price: goodies.price,
-            } as GoodiesInfoMinimal)
+            id: goodies.id,
+            name: goodies.name,
+            price: goodies.price,
+          } as GoodiesInfoMinimal)
           : undefined,
         user: user
           ? ({ id: user.id, pseudo: user.pseudo } as UserInfoMinimal)
@@ -198,4 +198,17 @@ export async function deletePurchase(
   }
 
   return await fastify.prisma.purchase.deletePurchase(purchaseId);
+}
+
+export async function getPurchaseCount(
+  fastify: FastifyInstance,
+  goodiesId?: number,
+  userId?: number,
+  delivered?: boolean,
+) {
+  return await fastify.prisma.purchase.getPurchaseCount(
+    goodiesId,
+    userId,
+    delivered,
+  );
 }

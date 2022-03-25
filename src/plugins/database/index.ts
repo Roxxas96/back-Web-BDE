@@ -124,6 +124,7 @@ declare module "fastify" {
           offset?: number,
           userIds?: number[]
         ) => Promise<User[]>;
+        getUserCount: () => Promise<number>;
       };
 
       session: {
@@ -136,6 +137,7 @@ declare module "fastify" {
           userId?: number,
           sessionIds?: number[]
         ) => Promise<Session[]>;
+        getSessionCount: (userId?: number) => Promise<number>;
       };
 
       challenge: {
@@ -154,6 +156,7 @@ declare module "fastify" {
           offset?: number,
           challengeIds?: number[]
         ) => Promise<Challenge[]>;
+        getChallengeCount: () => Promise<number>;
       };
 
       accomplishment: {
@@ -183,6 +186,11 @@ declare module "fastify" {
           challengeId?: number,
           accomplishmentIds?: number[]
         ) => Promise<Accomplishment[]>;
+        getAccomplishmentCount: (
+          userId?: number,
+          validation?: Validation,
+          challengeId?: number,
+        ) => Promise<number>;
       };
 
       goodies: {
@@ -201,6 +209,7 @@ declare module "fastify" {
           goodiesId: number
         ) => Promise<Goodies>;
         deleteGoodies: (goodiesId: number) => Promise<Goodies>;
+        getGoodiesCount: () => Promise<number>;
       };
 
       purchase: {
@@ -222,6 +231,11 @@ declare module "fastify" {
           goodiesId: number
         ) => Promise<Purchase>;
         deletePurchase: (purchaseId: number) => Promise<Purchase>;
+        getPurchaseCount: (
+          goodiesId?: number,
+          userId?: number,
+          delivered?: boolean,
+        ) => Promise<number>;
       };
     };
   }

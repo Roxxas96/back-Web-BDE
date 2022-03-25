@@ -20,10 +20,11 @@ import {
   modifyUserInfo,
   getMe,
   recoverPassword,
-  modifyUserPasswor,
+  modifyUserPassword,
   updateAvatar,
   getAvatar,
   deleteAvatar,
+  getUserCount,
 } from "./controller";
 
 const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
@@ -169,7 +170,7 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       let modifiedUser;
 
       if (request.query.recoverToken && userInfo.password) {
-        modifiedUser = await modifyUserPasswor(
+        modifiedUser = await modifyUserPassword(
           fastify,
           userInfo.password,
           request.query.recoverToken
@@ -400,6 +401,20 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       await deleteAvatar(fastify, user.id);
 
       reply.status(200).send({ message: "Success" });
+    }
+  );
+
+  fastify.get(
+    "/count",
+    {
+      schema: {
+        tags: ["user"],
+        description: "Get the number of users",
+      },
+    },
+    async function (request, reply) {
+      const userCount = await getUserCount(fastify);
+      return reply.status(200).send({ message: "Success", count: userCount });
     }
   );
 

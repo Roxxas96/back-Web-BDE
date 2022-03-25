@@ -84,6 +84,18 @@ export function goodiesQueries(fastify: FastifyInstance, client: PrismaClient) {
         );
       }
     },
+
+    //Get number of challenges in db
+    getGoodiesCount: async function () {
+      try {
+        return await client.goodies.count();
+      } catch (err) {
+        fastify.log.error(err);
+        throw fastify.httpErrors.internalServerError(
+          "There was an error with the Database, please try again"
+        );
+      }
+    },
   };
 }
 

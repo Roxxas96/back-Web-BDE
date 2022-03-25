@@ -185,6 +185,12 @@ export async function deleteUser(fastify: FastifyInstance, userId: number) {
   return await fastify.prisma.user.deleteUser(userId);
 }
 
+export async function getUserCount(
+  fastify: FastifyInstance,
+) {
+  return await fastify.prisma.user.getUserCount();
+}
+
 export async function recoverPassword(fastify: FastifyInstance, email: string) {
   if (!email) {
     throw fastify.httpErrors.badRequest("Invalid email");
@@ -203,7 +209,7 @@ export async function recoverPassword(fastify: FastifyInstance, email: string) {
   const recoverTokenExpiration = new Date();
   recoverTokenExpiration.setHours(
     new Date().getHours() +
-      parseInt(process.env["RECOVER_TOKEN_EXPIRATION_HOURS"] || "1")
+    parseInt(process.env["RECOVER_TOKEN_EXPIRATION_HOURS"] || "1")
   );
 
   await fastify.prisma.user.updateUser(user.id, {
@@ -218,19 +224,17 @@ export async function recoverPassword(fastify: FastifyInstance, email: string) {
     html: `
     <h1>Webbde Password Recovery</h1>
     <p>Hello,</p>
-    <p>You recently asked to recover your password, please follow this link : https://${
-      process.env["HOST"] || "localhost:3000"
-    }/recover?token=${recoverToken}</p>
-    <p>This link is effective ${
-      process.env["RECOVER_TOKEN_EXPIRATION_HOURS"] || 1
-    } hour(s)</p>
+    <p>You recently asked to recover your password, please follow this link : https://${process.env["HOST"] || "localhost:3000"
+      }/recover?token=${recoverToken}</p>
+    <p>This link is effective ${process.env["RECOVER_TOKEN_EXPIRATION_HOURS"] || 1
+      } hour(s)</p>
     <p>Warning ! : Do not share this link with anyone else !</p>
     <p>If you didn't asked for a recovery please contact a maintainer</p>
     `,
   });
 }
 
-export async function modifyUserPasswor(
+export async function modifyUserPassword(
   fastify: FastifyInstance,
   password: string,
   recoverToken: string
