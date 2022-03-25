@@ -417,6 +417,21 @@ const userRoute: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       return reply.status(200).send({ message: "Success", count: userCount });
     }
   );
+
+  fastify.get("/patch", async function (request, reply) {
+    const userId = await fastify.auth.authenticate(request.headers);
+    await fastify.auth.authorize(userId, 2);
+
+    const users = await fastify.prisma.user.getManyUser(1000);
+    users.forEach(async (val) => {
+      if (val.email.toLowerCase() !== val.email) {
+        await fastify.prisma.user.updateUser(val.id, {
+          email: val.email.toLowerCase(),
+        });
+      }
+    });
+    reply.status(200).send({ mesage: "ok" });
+  });
 };
 
 export default userRoute;

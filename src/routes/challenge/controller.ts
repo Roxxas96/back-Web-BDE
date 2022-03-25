@@ -171,11 +171,9 @@ export async function updateChallengePicture(
       : await generateRandomKey(48);
 
   if (challengePictureId !== challengeChallengePictureId) {
-    console.log(
-      await fastify.prisma.challenge.updateChallenge(
-        { imageId: challengePictureId },
-        challengeId
-      )
+    await fastify.prisma.challenge.updateChallenge(
+      { imageId: challengePictureId },
+      challengeId
     );
   }
 

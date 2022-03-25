@@ -248,7 +248,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
         {
           ...accomplishment,
           userId: accomplishment.userId || user?.id || null,
-          challengeId: accomplishment.challengeId || null,
+          challengeId: accomplishment.challengeId || challenge?.id || null,
         },
         request.body.comment,
         request.body.status,
@@ -314,7 +314,7 @@ const accomplishmentRoute: FastifyPluginAsync = async (
 
   fastify.put<{
     Querystring: { accomplishmentId: number };
-    Reply: { message: string, proofId: string };
+    Reply: { message: string; proofId: string };
   }>(
     "/proof",
     {
