@@ -24,7 +24,7 @@ export default fp<SwaggerPluginOptions>(async (fastify, opts) => {
         description: "Find more info here",
       },
       host: process.env["API_HOST"] || "localhost:4000",
-      schemes: ["http"],
+      schemes: [process.env["API_PROTOCOL"] || "https"],
       consumes: ["application/json"],
       produces: ["application/json"],
       tags: [
